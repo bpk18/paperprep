@@ -1,0 +1,6 @@
+Flask
+PyPDF2
+fpdf
+Pillow
+python-docx
+werkzeug

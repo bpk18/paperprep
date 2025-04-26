@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PaperPrep - File Converter Tools</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container">
+    <a class="navbar-brand" href="/">PaperPrep</a>
+    <div>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="/contact">Contact</a></li>
+        <li class="nav-item"><a class="nav-link" href="/privacy">Privacy</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container text-center my-5">
+    <h1 class="mb-4">File Converter Tools</h1>
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <img src="{{ url_for('static', filename='images/pdf_to_word.png') }}" class="card-img-top p-3" alt="PDF to Word">
+                <div class="card-body">
+                    <h5 class="card-title">PDF to Word</h5>
+                    <a href="/pdf-to-word" class="btn btn-primary">Convert</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <img src="{{ url_for('static', filename='images/jpg_to_pdf.png') }}" class="card-img-top p-3" alt="JPG to PDF">
+                <div class="card-body">
+                    <h5 class="card-title">JPG to PDF</h5>
+                    <a href="/jpg-to-pdf" class="btn btn-primary">Convert</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <img src="{{ url_for('static', filename='images/merge_pdfs.png') }}" class="card-img-top p-3" alt="Merge PDFs">
+                <div class="card-body">
+                    <h5 class="card-title">Merge PDFs</h5>
+                    <a href="/merge-pdfs" class="btn btn-primary">Convert</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm h-100">
+                <img src="{{ url_for('static', filename='images/compress_pdf.png') }}" class="card-img-top p-3" alt="Compress PDF">
+                <div class="card-body">
+                    <h5 class="card-title">Compress PDF</h5>
+                    <a href="/compress-pdf" class="btn btn-primary">Convert</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="text-center py-4 bg-light mt-5">
+    <p class="mb-0">&copy; 2025 PaperPrep. All Rights Reserved.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
