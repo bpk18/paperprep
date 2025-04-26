@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero-section text-center py-5 bg-light rounded-3 mb-5">
+    <div class="container">
+        <h1 class="display-4 fw-bold">
+            <i class="bi bi-{{ brand_icon }} text-primary"></i> {{ brand_name }}
+        </h1>
+        <p class="lead">{{ brand_tagline }}</p>
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <form method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="fileInput" class="form-label">Upload your document:</label>
+                                <div class="input-group">
+                                    <input class="form-control" type="file" id="fileInput" name="file" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="formatSelect" class="form-label">Convert to:</label>
+                                <select class="form-select" id="formatSelect" name="output_format" required>
+                                    <option value="" selected disabled>Select output format</option>
+                                    <!-- Document-focused options first -->
+                                    <option value="pdf">PDF (Portable Document Format)</option>
+                                    <option value="docx">DOCX (Microsoft Word)</option>
+                                    <option value="txt">TXT (Plain Text)</option>
+                                    <option value="odt">ODT (OpenDocument Text)</option>
+                                </select>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-magic"></i> Prepare My Document
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-4">
+        <div class="card h-100 border-primary">
+            <div class="card-body text-center">
+                <i class="bi bi-file-earmark-pdf fs-1 text-primary mb-3"></i>
+                <h3>Document Conversion</h3>
+                <p>Convert between PDF, Word, and other document formats with perfect formatting.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-primary">
+            <div class="card-body text-center">
+                <i class="bi bi-file-earmark-text fs-1 text-primary mb-3"></i>
+                <h3>OCR Processing</h3>
+                <p>Extract text from scanned documents and images with our advanced OCR technology.</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 border-primary">
+            <div class="card-body text-center">
+                <i class="bi bi-file-earmark-spreadsheet fs-1 text-primary mb-3"></i>
+                <h3>Table Extraction</h3>
+                <p>Convert tables from PDFs to Excel while preserving structure and data.</p>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Add this inside your form div -->
+<div class="progress-container" id="progressContainer">
+    <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <small class="text-muted" id="progressText">Preparing your document...</small>
+</div>
+{% endblock %}
