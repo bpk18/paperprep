@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>File Converter</title>
+    <style>
+        #status {
+            display: none;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div style="max-width: 500px; margin: 50px auto; padding: 20px;">
+        <h2>File Converter</h2>
+        <form id="converterForm">
+            <div>
+                <input type="file" id="fileInput" required>
+            </div>
+            <button type="submit" style="margin-top: 10px;">Convert File</button>
+        </form>
+        <div id="status"></div>
+    </div>
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
