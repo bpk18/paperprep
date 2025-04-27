@@ -114,4 +114,5 @@ def privacy():
     return render_template('privacy.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5001)  # Change port to 5001 (or any other free port)
+
