@@ -3,72 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Convert PDF to Word - PaperPrep</title>
-    <!-- Bootstrap CSS for responsive design -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <style>
-        body {
-            background-color: #f4f4f9;
-            padding-top: 50px;
-        }
-        .container {
-            max-width: 600px;
-        }
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-        .btn-submit {
-            width: 100%;
-            background-color: #007bff;
-            color: white;
-            font-size: 1.2em;
-            padding: 15px;
-        }
-        .btn-submit:hover {
-            background-color: #0056b3;
-        }
-        .icon {
-            font-size: 4em;
-            color: #007bff;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        /* Ensure responsiveness on smaller screens */
-        @media (max-width: 576px) {
-            .container {
-                padding-left: 15px;
-                padding-right: 15px;
-            }
-            h2 {
-                font-size: 1.5rem;
-            }
-        }
-    </style>
+    <title>PDF to Word Converter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-
-<div class="container">
-    <div class="icon">
-        <i class="fas fa-file-pdf"></i>
+    <div class="container mt-5">
+        <h1>Convert PDF to Word</h1>
+        <form action="/pdf-to-word" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="file" class="form-label">Upload PDF</label>
+                <input type="file" name="file" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Convert to Word</button>
+        </form>
+        <a href="/" class="btn btn-link mt-3">Go back</a>
     </div>
-
-    <h2>Convert PDF to Word</h2>
-
-    <form action="/pdf-to-word" method="POST" enctype="multipart/form-data">
-        <div class="form-group">
-            <label for="file" class="form-label">Upload PDF File</label>
-            <input type="file" name="file" class="form-control" required>
-        </div>
-        <button type="submit" class="btn-submit">Convert to Word</button>
-    </form>
-</div>
-
-<!-- Bootstrap and FontAwesome JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
