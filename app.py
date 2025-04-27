@@ -54,6 +54,27 @@ def jpg_to_pdf():
             return send_file(output_path, as_attachment=True)
     return render_template('jpg_to_pdf.html')
 
+from pdf2image import convert_from_path  # Make sure to install this package
+
+# PDF to PNG
+@app.route('/pdf-to-png', methods=['GET', 'POST'])
+def pdf_to_png():
+    if request.method == 'POST':
+        uploaded_file = request.files['file']
+        if uploaded_file.filename.endswith('.pdf'):
+            filename = secure_filename(uploaded_file.filename)
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            uploaded_file.save(file_path)
+
+            # Convert PDF to PNG
+            images = convert_from_path(file_path)
+            output_path = os.path.join(app.config['CONVERTED_FOLDER'], filename.replace('.pdf', '.png'))
+            images[0].save(output_path, 'PNG')
+
+            return send_file(output_path, as_attachment=True)
+    return render_template('pdf_to_png.html')  # New HTML page for this tool
+
+
 # Merge PDFs
 @app.route('/merge-pdfs', methods=['GET', 'POST'])
 def merge_pdfs():
