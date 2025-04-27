@@ -50,21 +50,21 @@
 <div class="container">
     <!-- PDF to Word -->
     <div class="tool">
-        <img src="pdf_to_word_icon.png" alt="PDF to Word Icon">
+        <img src="{{ url_for('static', filename='pdf_to_word_icon.png') }}" alt="PDF to Word Icon">
         <h3>PDF to Word</h3>
         <a href="/pdf-to-word" class="btn btn-primary">Convert</a>
     </div>
 
     <!-- JPG to PDF -->
     <div class="tool">
-        <img src="jpg_to_pdf_icon.png" alt="JPG to PDF Icon">
+        <img src="{{ url_for('static', filename='jpg_to_pdf_icon.png') }}" alt="JPG to PDF Icon">
         <h3>JPG to PDF</h3>
         <a href="/jpg-to-pdf" class="btn btn-primary">Convert</a>
     </div>
 
     <!-- Excel to PDF -->
     <div class="tool">
-        <img src="excel_to_pdf_icon.png" alt="Excel to PDF Icon">
+        <img src="{{ url_for('static', filename='excel_to_pdf_icon.png') }}" alt="Excel to PDF Icon">
         <h3>Excel to PDF</h3>
         <a href="/excel-to-pdf" class="btn btn-primary">Convert</a>
     </div>
