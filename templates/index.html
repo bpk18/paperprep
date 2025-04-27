@@ -3,90 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PaperPrep - File Conversion Tools</title>
-    <!-- Bootstrap CSS for responsive design -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <title>File Conversion Tools</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            background-color: #f4f4f9;
-            padding-top: 50px;
+        .tool-icon {
+            font-size: 30px;
+            margin-right: 10px;
         }
-        .container {
-            max-width: 900px;
+        .tool-box {
+            margin: 20px;
         }
-        h1, h2 {
-            text-align: center;
-            color: #333;
+        .tool-box h2 {
+            margin-bottom: 10px;
         }
-        .btn-submit {
+        .tool-box button {
+            font-size: 18px;
+            padding: 10px;
             width: 100%;
-            background-color: #007bff;
-            color: white;
-            font-size: 1.2em;
-            padding: 15px;
-        }
-        .btn-submit:hover {
-            background-color: #0056b3;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
-        .icon {
-            font-size: 4em;
-            color: #007bff;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        /* Ensure responsiveness on smaller screens */
-        @media (max-width: 576px) {
-            .container {
-                padding-left: 15px;
-                padding-right: 15px;
-            }
-            h1, h2 {
-                font-size: 1.5rem;
-            }
         }
     </style>
 </head>
 <body>
+    <div class="container mt-5">
+        <h1 class="text-center">File Conversion Tools</h1>
+        
+        <div class="row">
+            <!-- PDF to Word Tool -->
+            <div class="col-md-3 tool-box text-center">
+                <i class="fas fa-file-pdf tool-icon"></i>
+                <h2>PDF to Word</h2>
+                <a href="/pdf-to-word" class="btn btn-primary">Convert</a>
+            </div>
 
-<div class="container">
-    <h1>Welcome to PaperPrep</h1>
-    <p class="lead text-center">The Ultimate File Conversion Tool</p>
+            <!-- JPG to PDF Tool -->
+            <div class="col-md-3 tool-box text-center">
+                <i class="fas fa-image tool-icon"></i>
+                <h2>JPG to PDF</h2>
+                <a href="/jpg-to-pdf" class="btn btn-primary">Convert</a>
+            </div>
 
-    <!-- Tool links -->
-    <div class="row">
-        <div class="col-md-4 col-sm-6 mb-4">
-            <a href="/pdf-to-word" class="text-decoration-none">
-                <div class="card shadow">
-                    <div class="card-body text-center">
-                        <div class="icon">
-                            <i class="fas fa-file-pdf"></i>
-                        </div>
-                        <h3>PDF to Word</h3>
-                    </div>
-                </div>
-            </a>
+            <!-- Word to PDF Tool -->
+            <div class="col-md-3 tool-box text-center">
+                <i class="fas fa-file-word tool-icon"></i>
+                <h2>Word to PDF</h2>
+                <a href="/word-to-pdf" class="btn btn-primary">Convert</a>
+            </div>
+
+            <!-- Excel to PDF Tool -->
+            <div class="col-md-3 tool-box text-center">
+                <i class="fas fa-file-excel tool-icon"></i>
+                <h2>Excel to PDF</h2>
+                <a href="/excel-to-pdf" class="btn btn-primary">Convert</a>
+            </div>
         </div>
-        <div class="col-md-4 col-sm-6 mb-4">
-            <a href="/jpg-to-pdf" class="text-decoration-none">
-                <div class="card shadow">
-                    <div class="card-body text-center">
-                        <div class="icon">
-                            <i class="fas fa-file-image"></i>
-                        </div>
-                        <h3>JPG to PDF</h3>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <!-- Add other tools in a similar way -->
     </div>
-</div>
-
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
