@@ -1,66 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PaperPrep - File Conversion Tools</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-    <meta name="google-site-verification" content="iJu5gvhIhq9DegW8B1oRYLvhuhuIOHmgVW_Hh_t4MSc" />
+    <title>PaperPrep - Online File Conversion Tools</title>
+
+    <!-- Meta Tags for SEO -->
+    <meta name="description" content="PaperPrep offers a variety of online tools for file conversion. Convert PDFs, Word documents, images, and more easily with PaperPrep.">
+    <meta name="keywords" content="file conversion, PDF to Word, JPG to PDF, PDF compressor, Word to PDF, file converter">
+    <meta name="robots" content="index, follow">
+    <meta name="author" content="PaperPrep">
+    <link rel="canonical" href="https://yourdomain.com/">
+
+    <!-- Open Graph for Social Media -->
+    <meta property="og:title" content="PaperPrep - Online File Conversion Tools">
+    <meta property="og:description" content="Convert files quickly and easily with PaperPrep. Free online tools for PDF, Word, images, and more.">
+    <meta property="og:image" content="https://yourdomain.com/path-to-your-image.jpg">
+    <meta property="og:url" content="https://yourdomain.com/">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:title" content="PaperPrep - Online File Conversion Tools">
+    <meta name="twitter:description" content="Convert files easily with PaperPrep. PDF to Word, JPG to PDF, and more.">
+    <meta name="twitter:image" content="https://yourdomain.com/path-to-your-image.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom Styles for your website -->
+    <link rel="stylesheet" href="styles.css">
+
+    <!-- Icons for tools (optional) -->
+    <link rel="icon" href="static/images/logo-icon.png" type="image/png">
 </head>
+
 <body>
 
-<!-- Header Section -->
-<header class="bg-primary text-white text-center py-4">
-    <h1>PaperPrep</h1>
-    <p>Effortless File Conversion for Your Documents</p>
-</header>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">PaperPrep</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/about">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/contact">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/privacy">Privacy</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
 
-<!-- Tools Section -->
-<div class="container my-5">
-    <div class="row">
-        <!-- PDF to Word Tool -->
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h5 class="card-title">PDF to Word</h5>
-                    <p>Convert your PDF files to Word documents easily.</p>
-                    <a href="{{ url_for('pdf_to_word') }}" class="btn btn-primary">Convert</a>
+    <!-- Main Content -->
+    <div class="container text-center my-5">
+        <h1>Welcome to PaperPrep</h1>
+        <p>Convert your files quickly and easily with our online tools. Try our PDF, Word, Image, and more file
+            conversion services.</p>
+
+        <!-- Conversion Tools -->
+        <div class="row justify-content-center">
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card">
+                    <img src="static/images/pdf-to-word-icon.png" class="card-img-top" alt="PDF to Word">
+                    <div class="card-body">
+                        <h5 class="card-title">PDF to Word</h5>
+                        <a href="/pdf-to-word" class="btn btn-primary">Convert</a>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- JPG to PDF Tool -->
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h5 class="card-title">JPG to PDF</h5>
-                    <p>Convert your image files (JPG/PNG) into a PDF.</p>
-                    <a href="{{ url_for('jpg_to_pdf') }}" class="btn btn-primary">Convert</a>
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card">
+                    <img src="static/images/jpg-to-pdf-icon.png" class="card-img-top" alt="JPG to PDF">
+                    <div class="card-body">
+                        <h5 class="card-title">JPG to PDF</h5>
+                        <a href="/jpg-to-pdf" class="btn btn-primary">Convert</a>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Excel to PDF Tool -->
-        <div class="col-md-4 mb-4">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h5 class="card-title">Excel to PDF</h5>
-                    <p>Convert your Excel files into PDFs.</p>
-                    <a href="{{ url_for('excel_to_pdf') }}" class="btn btn-primary">Convert</a>
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card">
+                    <img src="static/images/word-to-pdf-icon.png" class="card-img-top" alt="Word to PDF">
+                    <div class="card-body">
+                        <h5 class="card-title">Word to PDF</h5>
+                        <a href="/word-to-pdf" class="btn btn-primary">Convert</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card">
+                    <img src="static/images/excel-to-pdf-icon.png" class="card-img-top" alt="Excel to PDF">
+                    <div class="card-body">
+                        <h5 class="card-title">Excel to PDF</h5>
+                        <a href="/excel-to-pdf" class="btn btn-primary">Convert</a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Footer Section -->
-<footer class="bg-dark text-white text-center py-4">
-    <p>&copy; 2025 PaperPrep. All Rights Reserved.</p>
-</footer>
+    <!-- Footer -->
+    <footer class="bg-light text-center py-3">
+        <p>&copy; 2025 PaperPrep | All Rights Reserved</p>
+    </footer>
 
-<!-- Bootstrap JS (Optional) -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>
