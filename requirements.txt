@@ -1,7 +1,7 @@
-pip install flask
-pip install werkzeug
-pip install PyPDF2
-pip install fpdf
-pip install pillow
-pip install pdf2image
-pip install python-docx
+ flask
+ werkzeug
+ PyPDF2
+ fpdf
+ pillow
+ pdf2image
+ python-docx
