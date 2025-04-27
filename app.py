@@ -1,8 +1,11 @@
 from flask import Flask, render_template, request, send_file
 import os
 from werkzeug.utils import secure_filename
-from fpdf import FPDF
+from PyPDF2 import PdfReader
+from docx import Document
 from PIL import Image
+import openpyxl
+from fpdf import FPDF
 
 app = Flask(__name__)
 
@@ -27,10 +30,18 @@ def pdf_to_word():
             filename = secure_filename(uploaded_file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             uploaded_file.save(file_path)
-            output_path = os.path.join(app.config['CONVERTED_FOLDER'], filename.replace('.pdf', '.docx'))
-            # Placeholder: simulate conversion
+
+            # Extract text from PDF
+            with open(file_path, 'rb') as f:
+                pdf_reader = PdfReader(f)
+                text = ""
+                for page in pdf_reader.pages:
+                    text += page.extract_text()
+
+            # Save text into a Word document
             doc = Document()
-            doc.add_paragraph("[Simulated] Content extracted from PDF.")
+            doc.add_paragraph(text)
+            output_path = os.path.join(app.config['CONVERTED_FOLDER'], filename.replace('.pdf', '.docx'))
             doc.save(output_path)
             return send_file(output_path, as_attachment=True)
     return render_template('pdf_to_word.html')
@@ -44,6 +55,8 @@ def jpg_to_pdf():
             filename = secure_filename(uploaded_file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             uploaded_file.save(file_path)
+
+            # Convert JPG to PDF
             image = Image.open(file_path).convert('RGB')
             output_path = os.path.join(app.config['CONVERTED_FOLDER'], filename.rsplit('.', 1)[0] + '.pdf')
             image.save(output_path)
@@ -59,11 +72,29 @@ def excel_to_pdf():
             filename = secure_filename(uploaded_file.filename)
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             uploaded_file.save(file_path)
-            # Placeholder: simulate conversion
+
+            # Read Excel file
+            wb = openpyxl.load_workbook(file_path)
+            sheet = wb.active
+
+            # Create PDF
+            pdf = FPDF()
+            pdf.add_page()
+            pdf.set_auto_page_break(auto=True, margin=15)
+            pdf.set_font("Arial", size=12)
+
+            # Write Excel data to PDF
+            for row in sheet.iter_rows(values_only=True):
+                pdf.cell(200, 10, txt="  ".join(str(cell) for cell in row), ln=True)
+
+            # Save PDF
             output_path = os.path.join(app.config['CONVERTED_FOLDER'], filename.replace('.xlsx', '.pdf').replace('.xls', '.pdf'))
-            # Actual conversion logic for Excel to PDF should go here
+            pdf.output(output_path)
+
             return send_file(output_path, as_attachment=True)
+
     return render_template('excel_to_pdf.html')
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5001)  # Run on port 5001 instead of the default 5000
+
