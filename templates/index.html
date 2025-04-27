@@ -3,60 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Conversion Tools</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <title>PaperPrep</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .tool-icon {
-            font-size: 30px;
-            margin-right: 10px;
+        body {
+            font-family: Arial, sans-serif;
         }
-        .tool-box {
-            margin: 20px;
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 20px;
         }
-        .tool-box h2 {
+        .tool {
+            width: 48%; /* Adjust as needed for desktop */
+            margin-bottom: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            text-align: center;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .tool img {
+            width: 50px;
+            height: 50px;
             margin-bottom: 10px;
         }
-        .tool-box button {
+        .tool h3 {
             font-size: 18px;
-            padding: 10px;
-            width: 100%;
+            color: #333;
+        }
+        @media screen and (max-width: 768px) {
+            .tool {
+                width: 100%; /* Stacks vertically on mobile */
+                margin-bottom: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1 class="text-center">File Conversion Tools</h1>
-        
-        <div class="row">
-            <!-- PDF to Word Tool -->
-            <div class="col-md-3 tool-box text-center">
-                <i class="fas fa-file-pdf tool-icon"></i>
-                <h2>PDF to Word</h2>
-                <a href="/pdf-to-word" class="btn btn-primary">Convert</a>
-            </div>
 
-            <!-- JPG to PDF Tool -->
-            <div class="col-md-3 tool-box text-center">
-                <i class="fas fa-image tool-icon"></i>
-                <h2>JPG to PDF</h2>
-                <a href="/jpg-to-pdf" class="btn btn-primary">Convert</a>
-            </div>
+<header class="text-center my-4">
+    <h1><a href="/" style="text-decoration: none; color: #000;">PaperPrep</a></h1>
+</header>
 
-            <!-- Word to PDF Tool -->
-            <div class="col-md-3 tool-box text-center">
-                <i class="fas fa-file-word tool-icon"></i>
-                <h2>Word to PDF</h2>
-                <a href="/word-to-pdf" class="btn btn-primary">Convert</a>
-            </div>
-
-            <!-- Excel to PDF Tool -->
-            <div class="col-md-3 tool-box text-center">
-                <i class="fas fa-file-excel tool-icon"></i>
-                <h2>Excel to PDF</h2>
-                <a href="/excel-to-pdf" class="btn btn-primary">Convert</a>
-            </div>
-        </div>
+<div class="container">
+    <!-- PDF to Word -->
+    <div class="tool">
+        <img src="pdf_to_word_icon.png" alt="PDF to Word Icon">
+        <h3>PDF to Word</h3>
+        <a href="/pdf-to-word" class="btn btn-primary">Convert</a>
     </div>
+
+    <!-- JPG to PDF -->
+    <div class="tool">
+        <img src="jpg_to_pdf_icon.png" alt="JPG to PDF Icon">
+        <h3>JPG to PDF</h3>
+        <a href="/jpg-to-pdf" class="btn btn-primary">Convert</a>
+    </div>
+
+    <!-- Excel to PDF -->
+    <div class="tool">
+        <img src="excel_to_pdf_icon.png" alt="Excel to PDF Icon">
+        <h3>Excel to PDF</h3>
+        <a href="/excel-to-pdf" class="btn btn-primary">Convert</a>
+    </div>
+</div>
+
+<footer class="text-center my-4">
+    <p>&copy; 2025 PaperPrep. All rights reserved.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
