@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ tool|capitalize }} - PAPERPREP</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-gray-700 text-white min-h-screen">
+  <div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6 text-center capitalize">{{ tool.replace('-', ' ') }}</h1>
+    <form method="POST" enctype="multipart/form-data" class="bg-gray-800 p-6 rounded-xl shadow-lg text-center">
+      <input type="file" name="file" multiple required class="mb-4 block w-full text-gray-300 bg-gray-900 p-2 rounded-lg border border-gray-600" />
+      <button type="submit" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-all duration-300">
+        Upload & Convert
+      </button>
+    </form>
+    <div class="text-center mt-6">
+      <a href="/" class="text-blue-300 hover:underline">← Back to Home</a>
+    </div>
+  </div>
+</body>
+</html>
