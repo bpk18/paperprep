@@ -1,31 +1,10 @@
 body {
-    background-color: #f8f9fa;
+  background-color: #f9f9f9;
+  font-family: 'Segoe UI', sans-serif;
 }
-
-.container {
-    margin-top: 30px;
+.tool-box h5 img {
+  margin-right: 5px;
 }
-
-.btn-primary {
-    background-color: #007bff;
-    border: none;
-}
-
-.btn-success {
-    background-color: #28a745;
-    border: none;
-}
-
-footer {
-    background: #e9ecef;
-    padding: 20px 0;
-    margin-top: 50px;
-}
-
-h2 {
-    font-weight: bold;
-}
-
-.navbar-brand {
-    font-weight: bold;
+.btn {
+  border-radius: 6px;
 }
