@@ -1,125 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>PaperPrep – File Converter Tools</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PAPERPREP</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 </head>
-<body>
-    <header>
-        <div class="logo">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="PaperPrep Logo" height="50">
-            <h1>PaperPrep</h1>
-        </div>
-    </header>
-
-    <main class="container">
-        <h2>Quick Tools</h2>
-        <div class="tool-grid">
-
-            <!-- Unique Tools -->
-            <a href="/pdf-compressor" class="tool">
-                <img src="{{ url_for('static', filename='icons/pdf-compressor.png') }}" alt="PDF Compressor">
-                <span>PDF Compressor</span>
-            </a>
-
-            <a href="/cover-letter-generator" class="tool">
-                <img src="{{ url_for('static', filename='icons/cover-letter.png') }}" alt="Cover Letter Generator">
-                <span>Cover Letter Generator</span>
-            </a>
-
-            <a href="/resume-tailoring" class="tool">
-                <img src="{{ url_for('static', filename='icons/resume.png') }}" alt="Resume Tailoring Tool">
-                <span>Resume Tailoring Tool</span>
-            </a>
-
-            <a href="/password-remover" class="tool">
-                <img src="{{ url_for('static', filename='icons/unlock.png') }}" alt="PDF Password Remover">
-                <span>Password Remover</span>
-            </a>
-
-            <a href="/image-to-text" class="tool">
-                <img src="{{ url_for('static', filename='icons/ocr.png') }}" alt="OCR">
-                <span>Image to Text</span>
-            </a>
-
-            <a href="/merge-pdf" class="tool">
-                <img src="{{ url_for('static', filename='icons/merge.png') }}" alt="Merge PDFs">
-                <span>Merge PDFs</span>
-            </a>
-
-            <a href="/split-pdf" class="tool">
-                <img src="{{ url_for('static', filename='icons/split.png') }}" alt="Split PDF">
-                <span>Split PDF</span>
-            </a>
-
-            <a href="/linkedin-to-resume" class="tool">
-                <img src="{{ url_for('static', filename='icons/linkedin.png') }}" alt="LinkedIn to Resume">
-                <span>LinkedIn to Resume</span>
-            </a>
-
-            <a href="/pdf-to-png" class="tool">
-                <img src="{{ url_for('static', filename='icons/pdf-to-png.png') }}" alt="PDF to PNG">
-                <span>PDF to PNG</span>
-            </a>
-
-            <a href="/portfolio-builder" class="tool">
-                <img src="{{ url_for('static', filename='icons/portfolio.png') }}" alt="Portfolio PDF Builder">
-                <span>Portfolio Builder</span>
-            </a>
-
-            <a href="/certificate-combiner" class="tool">
-                <img src="{{ url_for('static', filename='icons/certificates.png') }}" alt="Certificate Combiner">
-                <span>Certificate Combiner</span>
-            </a>
-
-            <!-- Common File Tools -->
-            <a href="/word-to-pdf" class="tool">
-                <img src="{{ url_for('static', filename='icons/word-to-pdf.png') }}" alt="Word to PDF">
-                <span>Word to PDF</span>
-            </a>
-
-            <a href="/excel-to-pdf" class="tool">
-                <img src="{{ url_for('static', filename='icons/excel-to-pdf.png') }}" alt="Excel to PDF">
-                <span>Excel to PDF</span>
-            </a>
-
-            <a href="/image-to-pdf" class="tool">
-                <img src="{{ url_for('static', filename='icons/image-to-pdf.png') }}" alt="Image to PDF">
-                <span>Image to PDF</span>
-            </a>
-
-            <a href="/ppt-to-pdf" class="tool">
-                <img src="{{ url_for('static', filename='icons/ppt-to-pdf.png') }}" alt="PPT to PDF">
-                <span>PPT to PDF</span>
-            </a>
-
-            <a href="/pdf-to-ppt" class="tool">
-                <img src="{{ url_for('static', filename='icons/pdf-to-ppt.png') }}" alt="PDF to PPT">
-                <span>PDF to PPT</span>
-            </a>
-
-            <a href="/image-compressor" class="tool">
-                <img src="{{ url_for('static', filename='icons/image-compressor.png') }}" alt="Image Compressor">
-                <span>Image Compressor</span>
-            </a>
-
-            <a href="/photo-resizer" class="tool">
-                <img src="{{ url_for('static', filename='icons/photo-resizer.png') }}" alt="Photo Resizer">
-                <span>Photo Resizer</span>
-            </a>
-
-            <a href="/multi-image-to-pdf" class="tool">
-                <img src="{{ url_for('static', filename='icons/multi-image-pdf.png') }}" alt="Multiple Images to PDF">
-                <span>Images to PDF</span>
-            </a>
-
-        </div>
-    </main>
-
-    <footer>
-        <p>© 2025 PaperPrep. All rights reserved.</p>
-    </footer>
+<body class="bg-gradient-to-br from-gray-900 to-gray-700 text-white min-h-screen">
+  <div class="container mx-auto p-6">
+    <h1 class="text-4xl font-bold text-center mb-8">PAPERPREP</h1>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {% for tool in [
+        'pdf-to-word', 'jpg-to-word', 'ppt-to-pdf', 'pdf-to-ppt',
+        'images-to-pdf', 'merge-pdf', 'compress-image', 'compress-pdf'
+      ] %}
+        <a href="{{ url_for('tool', tool_name=tool) }}" class="p-6 rounded-xl shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white text-center hover:scale-105 transform transition duration-300">
+          <h2 class="text-xl font-semibold capitalize">{{ tool.replace('-', ' ') }}</h2>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
 </body>
 </html>
