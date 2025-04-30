@@ -3,161 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="PaperPrep - Your all-in-one file converter and resume tools platform">
-    <meta name="keywords" content="PDF to Word, JPG to PDF, Excel to PDF, Resume Tools, PDF Compressor, Cover Letter Generator">
-    <meta name="author" content="PaperPrep">
-    <title>PaperPrep - Smart Tools for Job Seekers</title>
+    <title>PaperPrep - File Converter Tools</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+            padding-top: 60px;
         }
         .tool-card {
-            border: none;
-            border-radius: 16px;
-            transition: transform 0.2s ease;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
         }
-        .tool-card:hover {
-            transform: scale(1.03);
+        .btn-custom {
+            background: #007BFF;
+            color: white;
         }
-        .tool-icon {
-            height: 60px;
-            margin-bottom: 10px;
+        .btn-custom:hover {
+            background: #0056b3;
         }
-        .hero {
-            background-color: #ffffff;
-            padding: 50px 20px;
+        .tool-header {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .form-section {
+            margin-bottom: 30px;
+        }
+        footer {
             text-align: center;
-            border-radius: 0 0 30px 30px;
-        }
-        .hero h1 {
-            font-size: 2.5rem;
-        }
-        .section-title {
-            margin: 30px 0 20px;
+            margin-top: 50px;
+            color: #777;
         }
     </style>
 </head>
 <body>
-<div class="hero">
-    <h1>PaperPrep</h1>
-    <p>Smart PDF & Job Tools to Save You Time</p>
-</div>
-<div class="container mt-4">
-    <h3 class="section-title">🧠 Unique Tools</h3>
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-        <div class="col">
-            <a href="/resume-tailor" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">Resume Tailoring Tool</h5>
-                    <p class="card-text">Match resume with job descriptions.</p>
+    <div class="container">
+        <h1 class="text-center mb-4">📄 PaperPrep - Smart Document Tools</h1>
+
+        <!-- Unique Tools -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="tool-card">
+                    <div class="tool-header">Resume Tailoring Tool</div>
+                    <form id="resume-tailoring-form" enctype="multipart/form-data">
+                        <input type="file" name="resume_file" class="form-control mb-2" required>
+                        <textarea name="job_description" class="form-control mb-2" placeholder="Paste job description..." required></textarea>
+                        <button class="btn btn-custom" type="submit">Tailor Resume</button>
+                        <div id="resume-tailoring-result"></div>
+                    </form>
                 </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="/linkedin-resume" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">LinkedIn to Resume</h5>
-                    <p class="card-text">Generate resume from LinkedIn profile.</p>
+            </div>
+
+            <div class="col-md-6">
+                <div class="tool-card">
+                    <div class="tool-header">Cover Letter Generator</div>
+                    <form id="cover-letter-form" enctype="multipart/form-data">
+                        <input type="text" name="job_title" class="form-control mb-2" placeholder="Job Title" required>
+                        <textarea name="experience" class="form-control mb-2" placeholder="Your experience..." required></textarea>
+                        <button class="btn btn-custom" type="submit">Generate Cover Letter</button>
+                        <div id="cover-letter-result"></div>
+                    </form>
                 </div>
-            </a>
+            </div>
         </div>
-        <div class="col">
-            <a href="/portfolio-builder" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">Portfolio PDF Builder</h5>
-                    <p class="card-text">Turn images & descriptions into a PDF.</p>
+
+        <!-- Standard Tools (Example: PDF to Word, JPG to PDF) -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="tool-card">
+                    <div class="tool-header">PDF to Word</div>
+                    <form id="pdf-to-word-form" enctype="multipart/form-data">
+                        <input type="file" name="pdf_file" class="form-control mb-2" required>
+                        <button class="btn btn-custom" type="submit">Convert</button>
+                        <div id="pdf-to-word-result"></div>
+                    </form>
                 </div>
-            </a>
+            </div>
+
+            <div class="col-md-6">
+                <div class="tool-card">
+                    <div class="tool-header">JPG to PDF</div>
+                    <form id="jpg-to-pdf-form" enctype="multipart/form-data">
+                        <input type="file" name="jpg_file" class="form-control mb-2" accept="image/*" required>
+                        <button class="btn btn-custom" type="submit">Convert</button>
+                        <div id="jpg-to-pdf-result"></div>
+                    </form>
+                </div>
+            </div>
         </div>
+
+        <!-- Add more tool cards similarly -->
+
+        <footer>
+            &copy; 2025 PaperPrep. All rights reserved.
+        </footer>
     </div>
 
-    <h3 class="section-title">🛠️ Conversion Tools</h3>
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-        <div class="col">
-            <a href="/pdf-to-word" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">PDF to Word</h5>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="/word-to-pdf" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">Word to PDF</h5>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="/excel-to-pdf" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">Excel to PDF</h5>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="/jpg-to-pdf" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">JPG to PDF</h5>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="/pdf-to-png" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">PDF to PNG</h5>
-                </div>
-            </a>
-        </div>
-    </div>
+    <!-- Bootstrap & AJAX -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $('#resume-tailoring-form').on('submit', function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+            $.ajax({
+                url: '/resume-tailor',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: res => $('#resume-tailoring-result').html('<a href="' + res.file + '" class="btn btn-success mt-2">Download Result</a>')
+            });
+        });
 
-    <h3 class="section-title">📎 PDF Utilities</h3>
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-        <div class="col">
-            <a href="/compress-pdf" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">PDF Compressor</h5>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="/remove-password" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">PDF Password Remover</h5>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="/merge-pdf" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">PDF Merger</h5>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="/split-pdf" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">PDF Splitter</h5>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="/certificate-combiner" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">Certificate Combiner</h5>
-                </div>
-            </a>
-        </div>
-        <div class="col">
-            <a href="/image-to-text" class="text-decoration-none">
-                <div class="card tool-card p-3 text-center bg-white">
-                    <h5 class="card-title">Image to Text (OCR)</h5>
-                </div>
-            </a>
-        </div>
-    </div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        $('#cover-letter-form').on('submit', function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+            $.ajax({
+                url: '/generate-cover-letter',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: res => $('#cover-letter-result').html('<a href="' + res.file + '" class="btn btn-success mt-2">Download Cover Letter</a>')
+            });
+        });
+
+        $('#pdf-to-word-form').on('submit', function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+            $.ajax({
+                url: '/convert-pdf-to-word',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: res => $('#pdf-to-word-result').html('<a href="' + res.file + '" class="btn btn-success mt-2">Download Word</a>')
+            });
+        });
+
+        $('#jpg-to-pdf-form').on('submit', function(e) {
+            e.preventDefault();
+            let formData = new FormData(this);
+            $.ajax({
+                url: '/convert-jpg-to-pdf',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: res => $('#jpg-to-pdf-result').html('<a href="' + res.file + '" class="btn btn-success mt-2">Download PDF</a>')
+            });
+        });
+    </script>
 </body>
 </html>
