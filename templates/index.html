@@ -1,113 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PaperPrep - Online File Conversion Tools</title>
-
-    <!-- Meta Tags for SEO -->
-    <meta name="description" content="PaperPrep offers a variety of online tools for file conversion. Convert PDFs, Word documents, images, and more easily with PaperPrep.">
-    <meta name="keywords" content="file conversion, PDF to Word, JPG to PDF, PDF compressor, Word to PDF, file converter">
-    <meta name="robots" content="index, follow">
+    <meta name="description" content="PaperPrep - The ultimate PDF tools for job seekers and professionals.">
+    <meta name="keywords" content="PDF to Word, JPG to PDF, Excel to PDF, PDF Merger, Resume Tailoring, Cover Letter Generator">
     <meta name="author" content="PaperPrep">
-    <link rel="canonical" href="https://yourdomain.com/">
-
-    <!-- Open Graph for Social Media -->
-    <meta property="og:title" content="PaperPrep - Online File Conversion Tools">
-    <meta property="og:description" content="Convert files quickly and easily with PaperPrep. Free online tools for PDF, Word, images, and more.">
-    <meta property="og:image" content="https://yourdomain.com/path-to-your-image.jpg">
-    <meta property="og:url" content="https://yourdomain.com/">
-    <meta property="og:type" content="website">
-
-    <!-- Twitter Card -->
-    <meta name="twitter:title" content="PaperPrep - Online File Conversion Tools">
-    <meta name="twitter:description" content="Convert files easily with PaperPrep. PDF to Word, JPG to PDF, and more.">
-    <meta name="twitter:image" content="https://yourdomain.com/path-to-your-image.jpg">
-    <meta name="twitter:card" content="summary_large_image">
-
-    <!-- Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Custom Styles for your website -->
-    <link rel="stylesheet" href="styles.css">
-
-    <!-- Icons for tools (optional) -->
-    <link rel="icon" href="static/images/logo-icon.png" type="image/png">
+    <title>PaperPrep - PDF Tools for Professionals</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+        }
+        .container {
+            margin-top: 50px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .tools-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-evenly;
+        }
+        .tool-card {
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 250px;
+            margin-bottom: 20px;
+            text-align: center;
+            padding: 20px;
+        }
+        .tool-card h5 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        .tool-card a {
+            text-decoration: none;
+            color: white;
+            background-color: #007bff;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .tool-card a:hover {
+            background-color: #0056b3;
+        }
+        @media (max-width: 768px) {
+            .tools-container {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
 </head>
-
 <body>
-
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="#">PaperPrep</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-                <li class="nav-item active">
-                    <a class="nav-link" href="/">Home</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/about">About</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/contact">Contact</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/privacy">Privacy</a>
-                </li>
-            </ul>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to PaperPrep</h1>
+            <p>Your one-stop solution for all your PDF and document conversion needs.</p>
         </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="container text-center my-5">
-        <h1>Welcome to PaperPrep</h1>
-        <p>Convert your files quickly and easily with our online tools. Try our PDF, Word, Image, and more file
-            conversion services.</p>
-
-        <!-- Conversion Tools -->
-        <div class="row justify-content-center">
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">PDF to Word</h5>
-                        <a href="/pdf-to-word" class="btn btn-primary">Convert</a>
-                    </div>
-                </div>
+        
+        <div class="tools-container">
+            <!-- PDF Tools -->
+            <div class="tool-card">
+                <h5>PDF to Word</h5>
+                <a href="/pdf-to-word">Convert PDF to Word</a>
             </div>
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">JPG to PDF</h5>
-                        <a href="/jpg-to-pdf" class="btn btn-primary">Convert</a>
-                    </div>
-                </div>
+            <div class="tool-card">
+                <h5>JPG to PDF</h5>
+                <a href="/jpg-to-pdf">Convert JPG to PDF</a>
             </div>
-       
-            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Excel to PDF</h5>
-                        <a href="/excel-to-pdf" class="btn btn-primary">Convert</a>
-                    </div>
-                </div>
+            <div class="tool-card">
+                <h5>Excel to PDF</h5>
+                <a href="/excel-to-pdf">Convert Excel to PDF</a>
+            </div>
+
+            <!-- Unique Tools -->
+            <div class="tool-card">
+                <h5>PDF Merger</h5>
+                <a href="/pdf-merger">Merge PDFs</a>
+            </div>
+            <div class="tool-card">
+                <h5>Resume Tailoring</h5>
+                <a href="/resume-tailor">Tailor Resume</a>
+            </div>
+            <div class="tool-card">
+                <h5>LinkedIn to Resume</h5>
+                <a href="/linkedin-to-resume">Convert LinkedIn to Resume</a>
+            </div>
+            <div class="tool-card">
+                <h5>Portfolio PDF Builder</h5>
+                <a href="/portfolio-builder">Create Portfolio</a>
+            </div>
+
+            <!-- Other Tools -->
+            <div class="tool-card">
+                <h5>Cover Letter Generator</h5>
+                <a href="/cover-letter-generator">Generate Cover Letter</a>
+            </div>
+            <div class="tool-card">
+                <h5>Image to Text (OCR)</h5>
+                <a href="/image-to-text">Convert Image to Text</a>
+            </div>
+            <div class="tool-card">
+                <h5>PDF Password Remover</h5>
+                <a href="/pdf-password-remover">Remove PDF Password</a>
+            </div>
+            <div class="tool-card">
+                <h5>PDF Splitter</h5>
+                <a href="/pdf-splitter">Split PDF</a>
+            </div>
+            <div class="tool-card">
+                <h5>PDF to PNG</h5>
+                <a href="/pdf-to-png">Convert PDF to PNG</a>
+            </div>
+            <div class="tool-card">
+                <h5>Certificate Combiner</h5>
+                <a href="/certificate-combiner">Combine Certificates</a>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-light text-center py-3">
-        <p>&copy; 2025 PaperPrep | All Rights Reserved</p>
-    </footer>
-
-    <!-- Bootstrap JS and dependencies -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.0/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
