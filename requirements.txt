@@ -1,11 +1,11 @@
 Flask
+Werkzeug
 PyPDF2
-pdf2image
-pytesseract
-fpdf
 Pillow
-python-docx
-scikit-learn
-nltk
-pdfminer.six
-openpyxl
+img2pdf
+pytesseract
+docx
+pdf2docx
+python-pptx
+comtypes; sys_platform == 'win32'
+PyMuPDF
