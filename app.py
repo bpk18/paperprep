@@ -17,6 +17,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['OUTPUT_FOLDER'] = 'output'
 app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'jpg', 'jpeg', 'png', 'ppt', 'pptx', 'doc', 'docx'}
 
+# Create folders if not exist
 for folder in [app.config['UPLOAD_FOLDER'], app.config['OUTPUT_FOLDER']]:
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -62,7 +63,7 @@ def tool(tool_name):
                 output_path = os.path.join(app.config['OUTPUT_FOLDER'], 'output.docx')
                 doc.save(output_path)
 
-            elif tool_name == 'pdf-splitter':  # New Tool: PDF Splitter
+            elif tool_name == 'pdf-splitter':
                 input_pdf = PdfReader(saved_files[0])
                 writer = PdfWriter()
                 output_dir = os.path.join(app.config['OUTPUT_FOLDER'], 'split_pdfs')
@@ -74,7 +75,7 @@ def tool(tool_name):
                     with open(output_filename, 'wb') as output_file:
                         writer.write(output_file)
 
-                output_path = output_dir  # Return the directory containing the split PDFs
+                output_path = output_dir
 
             elif tool_name == 'images-to-pdf':
                 image_list = [Image.open(img).convert("RGB") for img in saved_files]
@@ -105,6 +106,11 @@ def tool(tool_name):
             return f"Error processing file: {str(e)}"
 
     return render_template('tool.html', tool=tool_name)
+
+# === robots.txt route ===
+@app.route('/robots.txt')
+def robots():
+    return send_file(os.path.join(app.static_folder, 'robots.txt'))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
