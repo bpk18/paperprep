@@ -11,7 +11,6 @@ import fitz  # PyMuPDF
 import tempfile
 import shutil
 import platform
-import pythoncom
 import comtypes.client
 from pptx import Presentation
 
