@@ -11,7 +11,7 @@
     <h1 class="text-4xl font-bold text-center mb-8">PAPERPREP</h1>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       {% for tool in [
-        'pdf-to-word', 'jpg-to-word', 'ppt-to-pdf', 'pdf-to-ppt',
+        'pdf-to-word', 'jpg-to-word', 'pdf-splitter', 'pdf-to-ppt',
         'images-to-pdf', 'merge-pdf', 'compress-image', 'compress-pdf'
       ] %}
         <a href="{{ url_for('tool', tool_name=tool) }}" class="p-6 rounded-xl shadow-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white text-center hover:scale-105 transform transition duration-300">
