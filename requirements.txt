@@ -1,8 +1,11 @@
- flask
- werkzeug
- PyPDF2
- fpdf
- pillow
- pdf2image
- python-docx
+Flask
+PyPDF2
+pdf2image
+pytesseract
+fpdf
+Pillow
+python-docx
+scikit-learn
+nltk
+pdfminer.six
 openpyxl
