@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, send_file
 import os
 from werkzeug.utils import secure_filename
-from PyPDF2 import PdfMerger
+from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 from PIL import Image
 import img2pdf
 import pytesseract
@@ -10,6 +10,7 @@ from pdf2docx import Converter
 import fitz  # PyMuPDF
 import tempfile
 import shutil
+import platform
 import pythoncom
 import comtypes.client
 from pptx import Presentation
@@ -64,14 +65,19 @@ def tool(tool_name):
                 output_path = os.path.join(app.config['OUTPUT_FOLDER'], 'output.docx')
                 doc.save(output_path)
 
-            elif tool_name == 'ppt-to-pdf':
-                pythoncom.CoInitialize()
-                powerpoint = comtypes.client.CreateObject("Powerpoint.Application")
-                ppt = powerpoint.Presentations.Open(saved_files[0], WithWindow=False)
-                output_path = os.path.join(app.config['OUTPUT_FOLDER'], 'output.pdf')
-                ppt.SaveAs(output_path, 32)  # 32 = PDF format
-                ppt.Close()
-                powerpoint.Quit()
+            elif tool_name == 'pdf-splitter':  # New Tool: PDF Splitter
+                input_pdf = PdfReader(saved_files[0])
+                writer = PdfWriter()
+                output_dir = os.path.join(app.config['OUTPUT_FOLDER'], 'split_pdfs')
+                os.makedirs(output_dir, exist_ok=True)
+
+                for page_num in range(len(input_pdf.pages)):
+                    writer.add_page(input_pdf.pages[page_num])
+                    output_filename = os.path.join(output_dir, f"split_page_{page_num + 1}.pdf")
+                    with open(output_filename, 'wb') as output_file:
+                        writer.write(output_file)
+
+                output_path = output_dir  # Return the directory containing the split PDFs
 
             elif tool_name == 'pdf-to-ppt':
                 doc = fitz.open(saved_files[0])
