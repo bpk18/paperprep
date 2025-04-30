@@ -1,107 +1,77 @@
-
 from flask import Flask, render_template, request, send_file, jsonify
-import os
-import uuid
+import os, uuid
 from werkzeug.utils import secure_filename
-from fpdf import FPDF
 from docx import Document
-from PyPDF2 import PdfReader, PdfWriter
-import pytesseract
+from PyPDF2 import PdfReader
 from PIL import Image
-import fitz  # PyMuPDF
-import shutil
+import pytesseract
 
 app = Flask(__name__)
-UPLOAD_FOLDER = 'uploads'
-RESULT_FOLDER = 'results'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(RESULT_FOLDER, exist_ok=True)
+UPLOAD = 'uploads'
+RESULT = 'results'
+os.makedirs(UPLOAD, exist_ok=True)
+os.makedirs(RESULT, exist_ok=True)
 
-# Route: Home page
+def save_and_get_path(file, folder=UPLOAD):
+    fn = secure_filename(file.filename)
+    path = os.path.join(folder, fn)
+    file.save(path)
+    return path
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# Tool 1: Resume Tailoring Tool
 @app.route('/resume-tailor', methods=['POST'])
 def resume_tailor():
-    resume_file = request.files['resume_file']
-    job_desc = request.form['job_description']
-    resume_path = os.path.join(UPLOAD_FOLDER, secure_filename(resume_file.filename))
-    resume_file.save(resume_path)
+    in_path = save_and_get_path(request.files['resume_file'])
+    jd = request.form['job_description'].lower().split()
+    with open(in_path, 'r', errors='ignore') as f:
+        text = f.read().lower()
+    missing = [w for w in jd if w not in text]
+    out_path = os.path.join(RESULT, f"resume_{uuid.uuid4().hex}.txt")
+    with open(out_path, 'w') as f:
+        f.write("Missing Keywords:\\n" + "\\n".join(missing))
+    return jsonify({'file': '/' + out_path})
 
-    # Basic keyword matching (simulation)
-    with open(resume_path, 'r', encoding='utf-8', errors='ignore') as f:
-        resume_text = f.read()
-
-    keywords = job_desc.lower().split()
-    missing_keywords = [kw for kw in keywords if kw not in resume_text.lower()]
-
-    result_path = os.path.join(RESULT_FOLDER, f"tailored_resume_{uuid.uuid4().hex}.txt")
-    with open(result_path, 'w') as f:
-        f.write("Missing Keywords in Resume:\n")
-        f.write("\n".join(missing_keywords))
-
-    return jsonify({'file': '/' + result_path})
-
-# Tool 2: Cover Letter Generator
 @app.route('/generate-cover-letter', methods=['POST'])
 def generate_cover_letter():
-    job_title = request.form['job_title']
-    experience = request.form['experience']
-
+    title = request.form['job_title']
+    exp = request.form['experience']
     doc = Document()
-    doc.add_heading('Cover Letter', 0)
-    doc.add_paragraph(f"Dear Hiring Manager,")
-    doc.add_paragraph(f"I am writing to apply for the position of {job_title}.")
-    doc.add_paragraph(f"My experience includes: {experience}")
-    doc.add_paragraph("Thank you for considering my application.")
-    filename = f"cover_letter_{uuid.uuid4().hex}.docx"
-    path = os.path.join(RESULT_FOLDER, filename)
-    doc.save(path)
-    return jsonify({'file': '/' + path})
+    doc.add_paragraph(f"Cover Letter for {title}")
+    doc.add_paragraph(exp)
+    out_fn = f"cover_{uuid.uuid4().hex}.docx"
+    out_path = os.path.join(RESULT, out_fn)
+    doc.save(out_path)
+    return jsonify({'file': '/' + out_path})
 
-# Tool 3: PDF to Word
 @app.route('/convert-pdf-to-word', methods=['POST'])
 def convert_pdf_to_word():
-    pdf_file = request.files['pdf_file']
-    path = os.path.join(UPLOAD_FOLDER, secure_filename(pdf_file.filename))
-    pdf_file.save(path)
-
+    path = save_and_get_path(request.files['pdf_file'])
     reader = PdfReader(path)
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text() or ""
-
+    text = "".join(page.extract_text() or "" for page in reader.pages)
     doc = Document()
     doc.add_paragraph(text)
-    word_path = os.path.join(RESULT_FOLDER, f"converted_{uuid.uuid4().hex}.docx")
-    doc.save(word_path)
-    return jsonify({'file': '/' + word_path})
+    out_fn = f"word_{uuid.uuid4().hex}.docx"
+    out_path = os.path.join(RESULT, out_fn)
+    doc.save(out_path)
+    return jsonify({'file': '/' + out_path})
 
-# Tool 4: JPG to PDF
 @app.route('/convert-jpg-to-pdf', methods=['POST'])
 def convert_jpg_to_pdf():
-    jpg_file = request.files['jpg_file']
-    img_path = os.path.join(UPLOAD_FOLDER, secure_filename(jpg_file.filename))
-    jpg_file.save(img_path)
+    path = save_and_get_path(request.files['jpg_file'])
+    img = Image.open(path).convert('RGB')
+    out_fn = f"jpg2pdf_{uuid.uuid4().hex}.pdf"
+    out_path = os.path.join(RESULT, out_fn)
+    img.save(out_path)
+    return jsonify({'file': '/' + out_path})
 
-    image = Image.open(img_path)
-    rgb_im = image.convert('RGB')
-    pdf_path = os.path.join(RESULT_FOLDER, f"image_{uuid.uuid4().hex}.pdf")
-    rgb_im.save(pdf_path)
-    return jsonify({'file': '/' + pdf_path})
+# Static serving
+@app.route('/uploads/<path:p>')
+def serve_upload(p): return send_file(os.path.join(UPLOAD, p))
+@app.route('/results/<path:p>')
+def serve_result(p): return send_file(os.path.join(RESULT, p))
 
-# Static file serving
-@app.route('/uploads/<path:filename>')
-def uploaded_files(filename):
-    return send_file(os.path.join(UPLOAD_FOLDER, filename))
-
-@app.route('/results/<path:filename>')
-def result_files(filename):
-    return send_file(os.path.join(RESULT_FOLDER, filename))
-
-# Start the Flask server
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
-
+    app.run(host='0.0.0.0', port=5000, debug=True)
