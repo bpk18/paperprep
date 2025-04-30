@@ -22,15 +22,16 @@
   <!-- FontAwesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
 
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
+
   <!-- Favicon -->
   <link rel="icon" href="/static/favicon.ico" />
 
-  <!-- Style -->
   <style>
     :root {
       --primary-dark: #1e293b;
       --primary-light: #f1f5f9;
-      --accent: #6366f1;
     }
 
     body {
@@ -68,7 +69,15 @@
   </button>
 
   <main class="container mx-auto p-6">
-    <h1 class="text-4xl md:text-5xl text-center font-bold header-text mb-12">🚀 Welcome to PAPERPREP</h1>
+    <div class="flex flex-col items-center mb-12">
+      <img src="/static/logo.png" alt="PAPERPREP Logo" class="w-20 h-20 mb-4" />
+      <h1 class="text-4xl md:text-5xl font-bold header-text" style="font-family: 'Orbitron', sans-serif;">
+        PAPERPREP
+      </h1>
+      <p class="text-center text-sm mt-2 text-gray-400 max-w-md">
+        Your all-in-one futuristic file converter suite
+      </p>
+    </div>
 
     <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
       {% for tool in [
@@ -93,7 +102,6 @@
     &copy; 2025 PAPERPREP | Designed for Academic Use
   </footer>
 
-  <!-- Toggle Theme Script -->
   <script>
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = document.getElementById('theme-icon');
@@ -118,7 +126,7 @@
       applyTheme();
     });
 
-    applyTheme(); // Set initial
+    applyTheme();
   </script>
 </body>
 </html>
