@@ -1,156 +1,151 @@
-from flask import Flask, render_template, request, send_file, redirect, url_for, flash
+from flask import Flask, render_template, request, send_file, redirect, url_for
 import os
 from werkzeug.utils import secure_filename
-import fitz  # PyMuPDF
+from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 import pytesseract
 from PIL import Image
-import PyPDF2
 from fpdf import FPDF
-import io
+import pdf2image
+import docx
+import tempfile
 import difflib
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'outputs'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+for folder in [UPLOAD_FOLDER, OUTPUT_FOLDER]:
+    os.makedirs(folder, exist_ok=True)
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/pdf_compressor', methods=['GET', 'POST'])
-def pdf_compressor():
+# --- PDF Compressor ---
+@app.route('/compress', methods=['GET', 'POST'])
+def compress_pdf():
     if request.method == 'POST':
-        file = request.files['file']
-        filename = secure_filename(file.filename)
-        input_path = os.path.join(UPLOAD_FOLDER, filename)
-        output_path = os.path.join(OUTPUT_FOLDER, f"compressed_{filename}")
+        file = request.files['pdf_file']
+        input_path = os.path.join(UPLOAD_FOLDER, secure_filename(file.filename))
         file.save(input_path)
-        doc = fitz.open(input_path)
-        for page in doc:
-            for img in page.get_images(full=True):
-                xref = img[0]
-                pix = fitz.Pixmap(doc, xref)
-                if pix.n > 4:
-                    pix = fitz.Pixmap(fitz.csRGB, pix)
-                pix = fitz.Pixmap(pix, 100, 100)  # Resize to compress
-                doc._deleteObject(xref)
-                new_xref = doc._addImage(pix.tobytes(), compress=True)
-                page.insert_image(page.rect, xref=new_xref)
-        doc.save(output_path)
-        return send_file(output_path, as_attachment=True)
-    return render_template('pdf_compressor.html')
-
-@app.route('/ocr_image_to_text', methods=['GET', 'POST'])
-def ocr_image_to_text():
-    if request.method == 'POST':
-        file = request.files['image']
-        img_path = os.path.join(UPLOAD_FOLDER, secure_filename(file.filename))
-        file.save(img_path)
-        text = pytesseract.image_to_string(Image.open(img_path))
-        return render_template('ocr_image_to_text.html', extracted_text=text)
-    return render_template('ocr_image_to_text.html')
-
-@app.route('/pdf_merger', methods=['GET', 'POST'])
-def pdf_merger():
-    if request.method == 'POST':
-        files = request.files.getlist('files')
-        merger = PyPDF2.PdfMerger()
-        paths = []
-        for file in files:
-            filename = secure_filename(file.filename)
-            path = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(path)
-            paths.append(path)
-            merger.append(path)
-        output_path = os.path.join(OUTPUT_FOLDER, 'merged.pdf')
-        merger.write(output_path)
-        merger.close()
-        return send_file(output_path, as_attachment=True)
-    return render_template('pdf_merger.html')
-
-@app.route('/pdf_splitter', methods=['GET', 'POST'])
-def pdf_splitter():
-    if request.method == 'POST':
-        file = request.files['file']
-        page_range = request.form['range']
-        filename = secure_filename(file.filename)
-        path = os.path.join(UPLOAD_FOLDER, filename)
-        file.save(path)
-        reader = PyPDF2.PdfReader(path)
-        writer = PyPDF2.PdfWriter()
-        start, end = map(int, page_range.split('-'))
-        for i in range(start-1, end):
-            writer.add_page(reader.pages[i])
-        output_path = os.path.join(OUTPUT_FOLDER, 'split.pdf')
-        with open(output_path, 'wb') as f:
-            writer.write(f)
-        return send_file(output_path, as_attachment=True)
-    return render_template('pdf_splitter.html')
-
-@app.route('/password_remover', methods=['GET', 'POST'])
-def password_remover():
-    if request.method == 'POST':
-        file = request.files['file']
-        password = request.form['password']
-        path = os.path.join(UPLOAD_FOLDER, secure_filename(file.filename))
-        file.save(path)
-        reader = PyPDF2.PdfReader(path)
-        if reader.is_encrypted:
-            reader.decrypt(password)
-        writer = PyPDF2.PdfWriter()
+        reader = PdfReader(input_path)
+        writer = PdfWriter()
         for page in reader.pages:
             writer.add_page(page)
-        output_path = os.path.join(OUTPUT_FOLDER, 'unlocked.pdf')
+        writer.remove_metadata()
+        output_path = os.path.join(OUTPUT_FOLDER, 'compressed_' + file.filename)
         with open(output_path, 'wb') as f:
             writer.write(f)
         return send_file(output_path, as_attachment=True)
-    return render_template('password_remover.html')
+    return render_template('compress.html')
 
-@app.route('/resume_tailoring', methods=['GET', 'POST'])
-def resume_tailoring():
+# --- Cover Letter Generator ---
+@app.route('/cover-letter', methods=['GET', 'POST'])
+def cover_letter():
     if request.method == 'POST':
-        resume_text = request.form['resume']
-        job_desc = request.form['job']
-        resume_words = set(resume_text.lower().split())
-        job_words = set(job_desc.lower().split())
-        missing = job_words - resume_words
-        return render_template('resume_tailoring.html', missing_keywords=missing)
-    return render_template('resume_tailoring.html')
-
-@app.route('/linkedin_to_resume', methods=['GET', 'POST'])
-def linkedin_to_resume():
-    if request.method == 'POST':
-        profile_text = request.form['linkedin']
+        name = request.form['name']
+        job = request.form['job']
+        experience = request.form['experience']
+        letter = f"Dear Hiring Manager,\n\nMy name is {name} and I am excited to apply for the {job} position. I bring {experience} years of experience...\n\nSincerely,\n{name}"
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
-        for line in profile_text.split('\n'):
+        for line in letter.split('\n'):
             pdf.cell(200, 10, txt=line, ln=True)
-        output_path = os.path.join(OUTPUT_FOLDER, 'resume.pdf')
-        pdf.output(output_path)
-        return send_file(output_path, as_attachment=True)
-    return render_template('linkedin_to_resume.html')
+        path = os.path.join(OUTPUT_FOLDER, f"cover_letter_{name}.pdf")
+        pdf.output(path)
+        return send_file(path, as_attachment=True)
+    return render_template('cover_letter.html')
 
-@app.route('/portfolio_builder', methods=['GET', 'POST'])
+# --- Resume Tailoring Tool ---
+@app.route('/resume-tailor', methods=['GET', 'POST'])
+def resume_tailor():
+    if request.method == 'POST':
+        resume = request.form['resume']
+        job_desc = request.form['job_desc']
+        resume_words = set(resume.lower().split())
+        job_words = set(job_desc.lower().split())
+        missing_keywords = job_words - resume_words
+        return render_template('resume_result.html', missing=', '.join(missing_keywords))
+    return render_template('resume_tailor.html')
+
+# --- PDF Merger ---
+@app.route('/merge', methods=['GET', 'POST'])
+def merge_pdfs():
+    if request.method == 'POST':
+        files = request.files.getlist('pdf_files')
+        merger = PdfMerger()
+        for file in files:
+            merger.append(file)
+        path = os.path.join(OUTPUT_FOLDER, 'merged.pdf')
+        with open(path, 'wb') as f:
+            merger.write(f)
+        return send_file(path, as_attachment=True)
+    return render_template('merge.html')
+
+# --- Image to Text (OCR) ---
+@app.route('/ocr', methods=['GET', 'POST'])
+def ocr():
+    if request.method == 'POST':
+        file = request.files['image']
+        path = os.path.join(UPLOAD_FOLDER, secure_filename(file.filename))
+        file.save(path)
+        img = Image.open(path)
+        text = pytesseract.image_to_string(img)
+        return render_template('ocr_result.html', text=text)
+    return render_template('ocr.html')
+
+# --- Excel to PDF ---
+@app.route('/excel-to-pdf', methods=['GET', 'POST'])
+def excel_to_pdf():
+    if request.method == 'POST':
+        return "Coming Soon"
+    return render_template('excel_to_pdf.html')
+
+# --- PDF to PNG ---
+@app.route('/pdf-to-png', methods=['GET', 'POST'])
+def pdf_to_png():
+    if request.method == 'POST':
+        file = request.files['pdf_file']
+        path = os.path.join(UPLOAD_FOLDER, secure_filename(file.filename))
+        file.save(path)
+        images = pdf2image.convert_from_path(path)
+        img_paths = []
+        for i, img in enumerate(images):
+            out_path = os.path.join(OUTPUT_FOLDER, f"page_{i+1}.png")
+            img.save(out_path)
+            img_paths.append(out_path)
+        return render_template('pdf_to_png_result.html', images=img_paths)
+    return render_template('pdf_to_png.html')
+
+# --- Portfolio PDF Builder ---
+@app.route('/portfolio-builder', methods=['GET', 'POST'])
 def portfolio_builder():
     if request.method == 'POST':
-        title = request.form['title']
-        desc = request.form['desc']
+        images = request.files.getlist('images')
         pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", size=14)
-        pdf.cell(200, 10, txt=title, ln=True)
-        pdf.set_font("Arial", size=12)
-        pdf.multi_cell(0, 10, desc)
-        output_path = os.path.join(OUTPUT_FOLDER, 'portfolio.pdf')
-        pdf.output(output_path)
-        return send_file(output_path, as_attachment=True)
-    return render_template('portfolio_builder.html')
+        for img_file in images:
+            path = os.path.join(UPLOAD_FOLDER, secure_filename(img_file.filename))
+            img_file.save(path)
+            pdf.add_page()
+            pdf.image(path, x=10, y=10, w=180)
+        out = os.path.join(OUTPUT_FOLDER, 'portfolio.pdf')
+        pdf.output(out)
+        return send_file(out, as_attachment=True)
+    return render_template('portfolio.html')
+
+# --- Certificate Combiner ---
+@app.route('/cert-combine', methods=['GET', 'POST'])
+def cert_combine():
+    if request.method == 'POST':
+        files = request.files.getlist('pdf_files')
+        merger = PdfMerger()
+        for file in files:
+            merger.append(file)
+        path = os.path.join(OUTPUT_FOLDER, 'certificates_combined.pdf')
+        merger.write(path)
+        return send_file(path, as_attachment=True)
+    return render_template('cert_combine.html')
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
