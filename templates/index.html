@@ -2,129 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <title>PaperPrep - File Tools</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PaperPrep – Smart Document Tools</title>
-  <meta name="description" content="PaperPrep – All-in-one AJAX document tools: Resume Tailor, Cover Letter, PDF→Word, JPG→PDF, and more.">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" rel="stylesheet">
-  <style>
-    body { background: #f9f9f9; padding-top: 60px; }
-    .tool-card { background: #fff; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 20px; padding: 20px; }
-    .tool-header { font-weight: 600; margin-bottom: 15px; display: flex; align-items: center; }
-    .tool-header i { margin-right: 10px; font-size: 1.5rem; color: #007BFF; }
-    .btn-custom { background: #007BFF; color: #fff; }
-    .btn-custom:hover { background: #0056b3; }
-    .result-link { margin-top: 10px; display: block; }
-  </style>
+  <link rel="icon" href="/static/logo.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1 class="text-center mb-4">📄 PaperPrep – Smart Document Tools</h1>
-
-    <!-- Resume Tailor -->
-    <div class="tool-card">
-      <div class="tool-header">
-        <i class="fas fa-user-edit"></i>
-        Resume Tailoring Tool
-      </div>
-      <form id="resume-tailor-form">
-        <input type="file" name="resume_file" class="form-control mb-2" required>
-        <textarea name="job_description" class="form-control mb-2" placeholder="Paste job description..." required></textarea>
-        <button class="btn btn-custom">Tailor Resume</button>
-      </form>
-      <div id="resume-tailor-result"></div>
+  <div class="container py-5">
+    <div class="text-center mb-4">
+      <img src="/static/logo.png" width="60">
+      <h1 class="mt-2">PaperPrep</h1>
+      <p class="text-muted">Your All-in-One Document Toolkit</p>
     </div>
 
-    <!-- Cover Letter Generator -->
-    <div class="tool-card">
-      <div class="tool-header">
-        <i class="fas fa-file-signature"></i>
-        Cover Letter Generator
+    <div class="row g-3">
+      <!-- Image to PDF (3rd spot) -->
+      <div class="col-md-6">
+        <div class="tool-box p-3 border rounded">
+          <h5><img src="/static/icons/image-to-pdf.png" width="24"> Image to PDF</h5>
+          <form id="imageToPDFForm">
+            <input type="file" name="images[]" multiple required class="form-control mb-2">
+            <button type="submit" class="btn btn-primary">Convert</button>
+            <div id="imageToPDFResult" class="mt-2"></div>
+          </form>
+        </div>
       </div>
-      <form id="cover-letter-form">
-        <input type="text" name="job_title" class="form-control mb-2" placeholder="Job Title" required>
-        <textarea name="experience" class="form-control mb-2" placeholder="Your experience..." required></textarea>
-        <button class="btn btn-custom">Generate Cover Letter</button>
-      </form>
-      <div id="cover-letter-result"></div>
-    </div>
 
-    <!-- PDF to Word -->
-    <div class="tool-card">
-      <div class="tool-header">
-        <i class="fas fa-file-word"></i>
-        PDF to Word
+      <!-- Merge PDF -->
+      <div class="col-md-6">
+        <div class="tool-box p-3 border rounded">
+          <h5><img src="/static/icons/merge-pdf.png" width="24"> Merge PDF</h5>
+          <form id="mergePDFForm">
+            <input type="file" name="pdfs[]" multiple required class="form-control mb-2">
+            <button type="submit" class="btn btn-primary">Merge</button>
+            <div id="mergePDFResult" class="mt-2"></div>
+          </form>
+        </div>
       </div>
-      <form id="pdf-to-word-form">
-        <input type="file" name="pdf_file" class="form-control mb-2" accept=".pdf" required>
-        <button class="btn btn-custom">Convert to Word</button>
-      </form>
-      <div id="pdf-to-word-result"></div>
-    </div>
 
-    <!-- JPG to PDF -->
-    <div class="tool-card">
-      <div class="tool-header">
-        <i class="fas fa-file-image"></i>
-        JPG to PDF
+      <!-- Add more tools here as needed -->
+      <!-- Word to PDF, Excel to PDF, PPT to PDF, PDF Compressor, Image Compressor, Photo Resizer -->
+
+      <!-- Unique tools at bottom -->
+      <div class="col-md-12">
+        <h4 class="mt-4">Advanced Tools</h4>
+        <ul>
+          <li>Resume Tailoring Tool</li>
+          <li>Cover Letter Generator</li>
+          <li>LinkedIn to Resume</li>
+        </ul>
       </div>
-      <form id="jpg-to-pdf-form">
-        <input type="file" name="jpg_file" class="form-control mb-2" accept="image/*" required>
-        <button class="btn btn-custom">Convert to PDF</button>
-      </form>
-      <div id="jpg-to-pdf-result"></div>
     </div>
-
-    <!-- Add more tool-cards here following the same pattern -->
-    <!-- Example: PDF Merger -->
-    <div class="tool-card">
-      <div class="tool-header">
-        <i class="fas fa-file-pdf"></i>
-        PDF Merger
-      </div>
-      <form id="pdf-merger-form" enctype="multipart/form-data">
-        <input type="file" name="files" class="form-control mb-2" multiple accept=".pdf" required>
-        <button class="btn btn-custom">Merge PDFs</button>
-      </form>
-      <div id="pdf-merger-result"></div>
-    </div>
-
-    <footer class="text-center mt-5 text-muted">© 2025 PaperPrep</footer>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
   <script>
-    function bindAjax(formId, url, resultId, downloadName) {
-      $(formId).on('submit', function(e) {
-        e.preventDefault();
-        let data = new FormData(this);
-        $.ajax({
-          url: url,
-          type: 'POST',
-          data: data,
-          contentType: false,
-          processData: false,
-          success: function(res) {
-            $(resultId).html(
-              '<a href="' + res.file + '" download class="btn btn-success result-link">Download ' + (downloadName||'Result') + '</a>'
-            );
-          },
-          error: function() {
-            $(resultId).text('An error occurred.');
-          }
-        });
-      });
-    }
+    document.getElementById("mergePDFForm").onsubmit = async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = new FormData(form);
+      const res = await fetch('/merge_pdf', { method: 'POST', body: data });
+      const result = await res.json();
+      document.getElementById("mergePDFResult").innerHTML = `<a href="${result.download_url}" class="btn btn-success mt-2">Download Merged PDF</a>`;
+    };
 
-    $(function(){
-      bindAjax('#resume-tailor-form', '/resume-tailor', '#resume-tailor-result', 'Tailored_Resume.txt');
-      bindAjax('#cover-letter-form', '/generate-cover-letter', '#cover-letter-result', 'Cover_Letter.docx');
-      bindAjax('#pdf-to-word-form', '/convert-pdf-to-word', '#pdf-to-word-result', 'Converted.docx');
-      bindAjax('#jpg-to-pdf-form', '/convert-jpg-to-pdf', '#jpg-to-pdf-result', 'Converted.pdf');
-      bindAjax('#pdf-merger-form', '/pdf-merger', '#pdf-merger-result', 'Merged.pdf');
-      // repeat for other forms...
-    });
+    document.getElementById("imageToPDFForm").onsubmit = async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = new FormData(form);
+      const res = await fetch('/image_to_pdf', { method: 'POST', body: data });
+      const result = await res.json();
+      document.getElementById("imageToPDFResult").innerHTML = `<a href="${result.download_url}" class="btn btn-success mt-2">Download PDF</a>`;
+    };
   </script>
 </body>
 </html>
