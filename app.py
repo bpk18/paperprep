@@ -11,8 +11,6 @@ import fitz  # PyMuPDF
 import tempfile
 import shutil
 import platform
-import comtypes.client
-from pptx import Presentation
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
@@ -77,19 +75,6 @@ def tool(tool_name):
                         writer.write(output_file)
 
                 output_path = output_dir  # Return the directory containing the split PDFs
-
-            elif tool_name == 'pdf-to-ppt':
-                doc = fitz.open(saved_files[0])
-                prs = Presentation()
-                blank_slide_layout = prs.slide_layouts[6]
-                for page in doc:
-                    pix = page.get_pixmap()
-                    img_path = os.path.join(app.config['OUTPUT_FOLDER'], f"page_{page.number}.png")
-                    pix.save(img_path)
-                    slide = prs.slides.add_slide(blank_slide_layout)
-                    slide.shapes.add_picture(img_path, 0, 0, width=prs.slide_width)
-                output_path = os.path.join(app.config['OUTPUT_FOLDER'], 'converted.pptx')
-                prs.save(output_path)
 
             elif tool_name == 'images-to-pdf':
                 image_list = [Image.open(img).convert("RGB") for img in saved_files]
