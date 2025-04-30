@@ -14,7 +14,7 @@
   <meta property="og:description" content="PAPERPREP is your all-in-one solution to convert and compress files online. Easy, fast and free!" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://yourdomain.com/" />
-  <meta property="og:image" content="https://yourdomain.com/preview.jpg" />
+  <meta property="og:image" content="https://yourdomain.com/static/logo.jpg" />
 
   <!-- TailwindCSS -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
 
   <!-- Favicon -->
-  <link rel="icon" href="/static/favicon.ico" />
+  <link rel="icon" href="{{ url_for('static', filename='logo.jpg') }}" />
 
   <style>
     :root {
@@ -61,16 +61,47 @@
     body.light .card {
       background-color: rgba(0, 0, 0, 0.05);
     }
+
+    #splash-screen {
+      background-color: #0f172a;
+      color: white;
+      position: fixed;
+      z-index: 50;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #splash-screen img {
+      width: 120px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
   </style>
 </head>
 <body>
+  <!-- Splash Screen -->
+  <div id="splash-screen">
+    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="PAPERPREP Logo" />
+    <p class="mt-4 text-xl font-bold tracking-wide">PAPERPREP is loading...</p>
+  </div>
+
+  <!-- Theme Toggle Button -->
   <button id="theme-toggle" class="absolute top-5 right-5 p-2 rounded-full bg-gray-700 text-white">
     <i id="theme-icon" class="fas fa-moon"></i>
   </button>
 
+  <!-- Main Content -->
   <main class="container mx-auto p-6">
     <div class="flex flex-col items-center mb-12">
-      <img src="/static/logo.png" alt="PAPERPREP Logo" class="w-20 h-20 mb-4" />
+      <img src="{{ url_for('static', filename='logo.jpg') }}" alt="PAPERPREP Logo" class="w-24 h-auto mx-auto mb-4" />
       <h1 class="text-4xl md:text-5xl font-bold header-text" style="font-family: 'Orbitron', sans-serif;">
         PAPERPREP
       </h1>
@@ -102,6 +133,7 @@
     &copy; 2025 PAPERPREP | Designed for Academic Use
   </footer>
 
+  <!-- Theme and Splash Script -->
   <script>
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = document.getElementById('theme-icon');
@@ -126,7 +158,10 @@
       applyTheme();
     });
 
-    applyTheme();
+    window.addEventListener('load', () => {
+      applyTheme();
+      document.getElementById('splash-screen').style.display = 'none';
+    });
   </script>
 </body>
 </html>
