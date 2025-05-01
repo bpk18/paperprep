@@ -8,3 +8,4 @@ docx
 pdf2docx
 python-pptx
 PyMuPDF
+fpdf
