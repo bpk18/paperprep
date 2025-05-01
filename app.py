@@ -17,6 +17,7 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['OUTPUT_FOLDER'] = 'output'
 app.config['ALLOWED_EXTENSIONS'] = {'pdf', 'jpg', 'jpeg', 'png', 'ppt', 'pptx', 'doc', 'docx'}
 
+# Ensure the upload and output folders exist
 for folder in [app.config['UPLOAD_FOLDER'], app.config['OUTPUT_FOLDER']]:
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -38,12 +39,18 @@ def tool(tool_name):
         clear_output_folder()
         files = request.files.getlist('file')
         saved_files = []
+
+        if not files:
+            return f"No files were uploaded. Please upload a file."
+
         for file in files:
             if file and allowed_file(file.filename):
                 filename = secure_filename(file.filename)
                 path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
                 file.save(path)
                 saved_files.append(path)
+            else:
+                return f"Invalid file type: {file.filename}. Only PDF, JPG, PNG, PPT, DOC, DOCX are allowed."
 
         output_path = os.path.join(app.config['OUTPUT_FOLDER'], f"output_{tool_name}.pdf")
 
@@ -62,7 +69,7 @@ def tool(tool_name):
                 output_path = os.path.join(app.config['OUTPUT_FOLDER'], 'output.docx')
                 doc.save(output_path)
 
-            elif tool_name == 'pdf-splitter':  # New Tool: PDF Splitter
+            elif tool_name == 'pdf-splitter':
                 input_pdf = PdfReader(saved_files[0])
                 writer = PdfWriter()
                 output_dir = os.path.join(app.config['OUTPUT_FOLDER'], 'split_pdfs')
@@ -74,7 +81,7 @@ def tool(tool_name):
                     with open(output_filename, 'wb') as output_file:
                         writer.write(output_file)
 
-                output_path = output_dir  # Return the directory containing the split PDFs
+                output_path = output_dir
 
             elif tool_name == 'images-to-pdf':
                 image_list = [Image.open(img).convert("RGB") for img in saved_files]
@@ -103,7 +110,6 @@ def tool(tool_name):
 
         except Exception as e:
             return f"Error processing file: {str(e)}"
-
     return render_template('tool.html', tool=tool_name)
 
 if __name__ == '__main__':
