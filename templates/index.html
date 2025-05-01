@@ -84,13 +84,32 @@
       50% { transform: scale(1.1); opacity: 0.8; }
       100% { transform: scale(1); opacity: 1; }
     }
+
+    .navbar {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.875rem;
+    }
+
+    .navbar a {
+      color: #ffffff;
+      transition: color 0.2s ease-in-out;
+    }
+
+    body.dark .navbar a {
+      color: #f8fafc;
+    }
+
+    .navbar a:hover {
+      color: #6366f1;
+    }
+
   </style>
 </head>
 <body>
   <!-- Splash Screen -->
   <div id="splash-screen">
-    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="PAPERPREP Logo" />
-    <p  class="text-4xl md:text-5xl font-bold header-text" style="font-family: 'Orbitron', sans-serif;">PAPERPREP is loading...</p>
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="PAPERPREP Logo" />
+    <p class="mt-4 text-xl font-bold tracking-wide">PAPERPREP is loading...</p>
   </div>
 
   <!-- Theme Toggle Button -->
@@ -101,8 +120,8 @@
   <!-- Navbar -->
   <nav class="bg-gray-800 text-white p-4">
     <div class="max-w-7xl mx-auto flex justify-between items-center">
-      <a href="/"  class="text-4xl md:text-5xl font-bold header-text" style="font-family: 'Orbitron', sans-serif;">PAPERPREP</a>
-      <ul class="flex space-x-6">
+      <a href="/" class="text-2xl font-bold">PAPERPREP</a>
+      <ul class="flex space-x-6 navbar">
         <li><a href="/" class="hover:text-indigo-500">Home</a></li>
         <li><a href="/about" class="hover:text-indigo-500">About</a></li>
         <li><a href="/privacy" class="hover:text-indigo-500">Privacy</a></li>
@@ -144,7 +163,7 @@
   </main>
 
   <footer class="mt-12 text-center text-sm text-gray-500">
-    &copy; 2025 PAPERPREP
+    &copy; 2025 PAPERPREP | Designed for Academic Use
   </footer>
 
   <!-- Theme and Splash Script -->
