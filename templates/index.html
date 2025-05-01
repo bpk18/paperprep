@@ -13,8 +13,8 @@
   <meta property="og:title" content="PAPERPREP - Convert PDFs, Images & More" />
   <meta property="og:description" content="Convert and manage your documents easily using PAPERPREP. A professional all-in-one file converter for students and professionals." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://yourdomain.com/" />
-  <meta property="og:image" content="https://yourdomain.com/static/logo.png" />
+  <meta property="og:url" content="https://www.paperprep.space/" />
+  <meta property="og:image" content="https://www.paperprep.space/static/logo.png" />
 
   <!-- TailwindCSS -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
@@ -56,10 +56,16 @@
     .card {
       background-color: rgba(0, 0, 0, 0.05);
       backdrop-filter: blur(6px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     body.dark .card {
       background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
     }
 
     #splash-screen {
@@ -87,28 +93,41 @@
   </style>
 </head>
 <body>
-  <!-- Splash Screen -->
+  <!-- Splash Screen (shows once per session) -->
   <div id="splash-screen">
     <img src="{{ url_for('static', filename='logo.png') }}" alt="PAPERPREP Logo" />
     <p class="mt-4 text-xl font-bold tracking-wide">PAPERPREP is loading...</p>
   </div>
 
-  <!-- Theme Toggle Button -->
-  <button id="theme-toggle" class="absolute top-5 right-5 p-2 rounded-full bg-gray-200 text-gray-800 shadow">
+  <!-- Header -->
+  <header class="flex justify-between items-center px-6 py-4 bg-white shadow-md sticky top-0 z-40">
+    <h1 class="text-2xl font-bold text-indigo-600" style="font-family: 'Orbitron', sans-serif;">
+      PAPERPREP
+    </h1>
+    <nav class="space-x-4 text-sm md:text-base text-gray-700">
+      <a href="/" class="hover:underline">Home</a>
+      <a href="/about" class="hover:underline">About</a>
+      <a href="/contact" class="hover:underline">Contact</a>
+      <a href="/privacy" class="hover:underline">Privacy</a>
+      <a href="/terms" class="hover:underline">Terms</a>
+    </nav>
+  </header>
+
+  <!-- Theme Toggle -->
+  <button id="theme-toggle" class="fixed bottom-5 right-5 p-3 rounded-full bg-gray-200 text-gray-800 shadow-md">
     <i id="theme-icon" class="fas fa-sun"></i>
   </button>
 
   <!-- Main Content -->
-  <main class="container mx-auto p-6">
-    <div class="flex flex-col items-center mb-12">
-      <h1 class="text-4xl md:text-5xl font-bold header-text" style="font-family: 'Orbitron', sans-serif;">
+  <main class="container mx-auto px-6 py-10">
+    <section class="text-center mb-12">
+      <h2 class="text-4xl md:text-5xl font-bold header-text mb-2" style="font-family: 'Orbitron', sans-serif;">
         PAPERPREP
-      </h1>
-      <p class="text-center text-sm mt-2 text-gray-600 max-w-md">
-        Your all-in-one futuristic file converter suite
-      </p>
-    </div>
+      </h2>
+      <p class="text-gray-600 max-w-xl mx-auto">Your all-in-one futuristic file converter suite</p>
+    </section>
 
+    <!-- Tools Grid -->
     <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
       {% for tool in [
         ('pdf-to-word', 'fa-file-word', 'Convert PDF files to editable Word documents'),
@@ -120,20 +139,31 @@
         ('compress-image', 'fa-compress', 'Reduce image size without losing quality'),
         ('compress-pdf', 'fa-file-archive', 'Shrink PDF file size for easy sharing')
       ] %}
-      <a href="{{ url_for('tool', tool_name=tool[0]) }}" class="card p-6 rounded-2xl shadow-lg text-center transition-transform hover:scale-105">
-        <i class="fas {{ tool[1] }} text-4xl text-indigo-500 mb-4" aria-hidden="true"></i>
-        <h2 class="text-xl font-semibold capitalize mb-1">{{ tool[0].replace('-', ' ') }}</h2>
+      <a href="{{ url_for('tool', tool_name=tool[0]) }}" class="card p-6 rounded-2xl shadow text-center hover:shadow-lg">
+        <i class="fas {{ tool[1] }} text-4xl text-indigo-500 mb-4"></i>
+        <h3 class="text-xl font-semibold capitalize mb-1">{{ tool[0].replace('-', ' ') }}</h3>
         <p class="text-sm opacity-80">{{ tool[2] }}</p>
       </a>
       {% endfor %}
     </section>
+
+    <!-- Blog Section Placeholder -->
+    <section class="mt-16 text-center">
+      <h2 class="text-2xl font-bold mb-4">Tips & Guides</h2>
+      <p class="text-gray-600 max-w-lg mx-auto mb-4">Coming soon: Learn how to manage documents, compress files, and convert smarter with PAPERPREP.</p>
+      <a href="/blog" class="inline-block px-4 py-2 mt-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700">Visit Blog</a>
+    </section>
   </main>
 
-  <footer class="mt-12 text-center text-sm text-gray-500">
-    &copy; 2025 PAPERPREP | Designed for Academic Use
+  <!-- Footer -->
+  <footer class="mt-16 py-6 text-center text-sm text-gray-500 border-t">
+    &copy; 2025 PAPERPREP | 
+    <a href="/privacy" class="hover:underline">Privacy Policy</a> • 
+    <a href="/terms" class="hover:underline">Terms</a> • 
+    <a href="/contact" class="hover:underline">Contact</a>
   </footer>
 
-  <!-- Theme and Splash Script -->
+  <!-- Theme & Splash Script -->
   <script>
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = document.getElementById('theme-icon');
@@ -160,7 +190,14 @@
 
     window.addEventListener('load', () => {
       applyTheme();
-      document.getElementById('splash-screen').style.display = 'none';
+      if (!sessionStorage.getItem('splashShown')) {
+        setTimeout(() => {
+          document.getElementById('splash-screen').style.display = 'none';
+          sessionStorage.setItem('splashShown', 'true');
+        }, 1500);
+      } else {
+        document.getElementById('splash-screen').style.display = 'none';
+      }
     });
   </script>
 </body>
