@@ -26,7 +26,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
 
   <!-- Favicon -->
-  <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
+  <link rel="icon" href="{{ url_for('static', filename='logo.jpg') }}" />
 
   <style>
     :root {
@@ -139,11 +139,6 @@
     const themeIcon = document.getElementById('theme-icon');
     const body = document.body;
 
-    // Set light mode if not already saved
-    if (!localStorage.getItem('theme')) {
-      localStorage.setItem('theme', 'light');
-    }
-
     function applyTheme() {
       const theme = localStorage.getItem('theme') || 'light';
       if (theme === 'dark') {
@@ -159,8 +154,7 @@
 
     themeToggle.addEventListener('click', () => {
       const isDark = body.classList.contains('dark');
-      const newTheme = isDark ? 'light' : 'dark';
-      localStorage.setItem('theme', newTheme);
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
       applyTheme();
     });
 
