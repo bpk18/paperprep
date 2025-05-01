@@ -1,23 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{{ tool|capitalize }} - PAPERPREP</title>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-</head>
-<body class="bg-gradient-to-br from-gray-900 to-gray-700 text-white min-h-screen">
-  <div class="container mx-auto p-6">
-    <h1 class="text-3xl font-bold mb-6 text-center capitalize">{{ tool.replace('-', ' ') }}</h1>
-    <form method="POST" enctype="multipart/form-data" class="bg-gray-800 p-6 rounded-xl shadow-lg text-center">
-      <input type="file" name="file" multiple required class="mb-4 block w-full text-gray-300 bg-gray-900 p-2 rounded-lg border border-gray-600" />
-      <button type="submit" class="px-6 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full transition-all duration-300">
-        Upload & Convert
-      </button>
-    </form>
-    <div class="text-center mt-6">
-      <a href="/" class="text-blue-300 hover:underline">← Back to Home</a>
+{% extends "base.html" %}
+
+{% block title %}{{ tool.replace('-', ' ').title() }} - PAPERPREP{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
+  <h2 class="text-2xl font-semibold mb-4 text-center header-text capitalize">
+    {{ tool.replace('-', ' ') }}
+  </h2>
+  <form method="POST" enctype="multipart/form-data" class="space-y-4">
+    <div>
+      <label for="file" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+        Upload your file{{ tool != 'merge-pdf' and tool != 'images-to-pdf' and tool != 'pdf-splitter' and tool != 'compress-image' and tool != 'compress-pdf' and tool != 'jpg-to-word' and tool != 'pdf-to-word' and 's' or 's' }}:
+      </label>
+      <input type="file" name="file" id="file" multiple class="w-full text-sm file:bg-indigo-500 file:text-white file:rounded-md file:border-0 file:px-4 file:py-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" required />
     </div>
-  </div>
-</body>
-</html>
+    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded w-full transition">
+      Convert
+    </button>
+  </form>
+</div>
+{% endblock %}
