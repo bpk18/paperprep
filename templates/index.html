@@ -1,54 +1,124 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="PAPERPREP is a modern, mobile-responsive file conversion toolkit offering PDF, image, and presentation utilities.">
-    <meta name="keywords" content="PAPERPREP, PDF to Word, Image to PDF, PPT to PDF, PDF tools, file conversion">
-    <meta name="author" content="Your Name">
-    <title>PAPERPREP - Smart File Conversion Tools</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css">
-    <script>
-      // Set default theme to light
-      if (!localStorage.getItem('theme')) {
-          localStorage.setItem('theme', 'light');
-          document.documentElement.setAttribute('data-theme', 'light');
-      } else {
-          document.documentElement.setAttribute('data-theme', localStorage.getItem('theme'));
-      }
-    </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PAPERPREP - All-in-One File Converter</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Convert PDF, Word, JPG, PPT, and more instantly with PAPERPREP. Free, fast, and professional file tools online." />
+  <meta name="keywords" content="PAPERPREP, file converter, PDF to Word, JPG to Word, PPT to PDF, PDF splitter, compress PDF, merge PDF" />
+  <meta name="author" content="Your Name" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="PAPERPREP - Convert PDF, Word, Images & More" />
+  <meta property="og:description" content="PAPERPREP is your all-in-one solution to convert and compress files online. Easy, fast and free!" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/" />
+  <meta property="og:image" content="https://yourdomain.com/preview.jpg" />
+
+  <!-- TailwindCSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="/static/favicon.ico" />
+
+  <!-- Style -->
+  <style>
+    :root {
+      --primary-dark: #1e293b;
+      --primary-light: #f1f5f9;
+      --accent: #6366f1;
+    }
+
+    body {
+      background-color: var(--primary-dark);
+      color: #f8fafc;
+      transition: all 0.3s ease;
+    }
+
+    body.light {
+      background-color: var(--primary-light);
+      color: #1f2937;
+    }
+
+    .header-text {
+      color: #f8fafc;
+    }
+
+    body.light .header-text {
+      color: #1e293b;
+    }
+
+    .card {
+      background-color: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(6px);
+    }
+
+    body.light .card {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1 class="site-title">PAPERPREP</h1>
-        <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
-    </header>
-    <main>
-        <section class="tool-grid">
-            <a href="/tool/pdf-to-word" class="tool-card">PDF to Word</a>
-            <a href="/tool/images-to-pdf" class="tool-card">Image to PDF</a>
-            <a href="/tool/ppt-to-pdf" class="tool-card">PPT to PDF</a>
-            <a href="/tool/pdf-to-ppt" class="tool-card">PDF to PPT</a>
-            <a href="/tool/merge-pdf" class="tool-card">Merge PDFs</a>
-            <a href="/tool/pdf-splitter" class="tool-card">Split PDF</a>
-            <a href="/tool/compress-image" class="tool-card">Compress Image</a>
-            <a href="/tool/compress-pdf" class="tool-card">Compress PDF</a>
-        </section>
-    </main>
-    <footer>
-        <p>&copy; 2025 PAPERPREP. All rights reserved.</p>
-    </footer>
+  <button id="theme-toggle" class="absolute top-5 right-5 p-2 rounded-full bg-gray-700 text-white">
+    <i id="theme-icon" class="fas fa-moon"></i>
+  </button>
 
-    <script>
-        function toggleTheme() {
-            const currentTheme = localStorage.getItem("theme");
-            const newTheme = currentTheme === "dark" ? "light" : "dark";
-            document.documentElement.setAttribute("data-theme", newTheme);
-            localStorage.setItem("theme", newTheme);
-        }
-    </script>
+  <main class="container mx-auto p-6">
+    <h1 class="text-4xl md:text-5xl text-center font-bold header-text mb-12">🚀 Welcome to PAPERPREP</h1>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {% for tool in [
+        ('pdf-to-word', 'fa-file-word', 'Convert PDF files to editable Word documents'),
+        ('jpg-to-word', 'fa-image', 'Extract text from JPG and convert to Word'),
+        ('pdf-splitter', 'fa-scissors', 'Split large PDFs into individual pages'),
+        ('images-to-pdf', 'fa-file-image', 'Merge multiple images into a single PDF'),
+        ('merge-pdf', 'fa-compress-alt', 'Combine several PDF files into one'),
+        ('compress-image', 'fa-compress', 'Reduce image size without losing quality'),
+        ('compress-pdf', 'fa-file-archive', 'Shrink PDF file size for easy sharing')
+      ] %}
+      <a href="{{ url_for('tool', tool_name=tool[0]) }}" class="card p-6 rounded-2xl shadow-lg text-center transition-transform hover:scale-105">
+        <i class="fas {{ tool[1] }} text-4xl text-indigo-400 mb-4" aria-hidden="true"></i>
+        <h2 class="text-xl font-semibold capitalize mb-1">{{ tool[0].replace('-', ' ') }}</h2>
+        <p class="text-sm opacity-80">{{ tool[2] }}</p>
+      </a>
+      {% endfor %}
+    </section>
+  </main>
+
+  <footer class="mt-12 text-center text-sm text-gray-400">
+    &copy; 2025 PAPERPREP | Designed for Academic Use
+  </footer>
+
+  <!-- Toggle Theme Script -->
+  <script>
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const body = document.body;
+
+    function applyTheme() {
+      const theme = localStorage.getItem('theme') || 'dark';
+      if (theme === 'light') {
+        body.classList.add('light');
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+      } else {
+        body.classList.remove('light');
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+      }
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isLight = body.classList.contains('light');
+      localStorage.setItem('theme', isLight ? 'dark' : 'light');
+      applyTheme();
+    });
+
+    applyTheme(); // Set initial
+  </script>
 </body>
 </html>
