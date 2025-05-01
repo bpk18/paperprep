@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PAPERPREP - All-in-One File Converter</title>
+  <title>PAPERPREP - Professional Document Conversion Tools</title>
 
-  <!-- SEO Meta Tags -->
-  <meta name="description" content="PAPERPREP offers a suite of professional tools to convert and manage files like PDFs, Word documents, PowerPoints, and images. Fast, secure, and easy-to-use." />
-  <meta name="keywords" content="file converter, pdf tools, image to pdf, ppt to pdf, compress pdf, merge pdf, paperprep" />
-  <meta name="author" content="PAPERPREP Team" />
+  <!-- SEO -->
+  <meta name="description" content="PAPERPREP offers efficient and reliable tools for converting PDFs, Word documents, images, and presentations. Simplify your workflow with our intuitive and professional suite of converters." />
+  <meta name="keywords" content="file converter, PDF to Word, image to PDF, compress PDF, merge PDFs, PPT to PDF, document tools, file utilities" />
+  <meta name="author" content="Your Name" />
   <meta name="robots" content="index, follow" />
-  <meta property="og:title" content="PAPERPREP - Convert PDFs, Images & More" />
-  <meta property="og:description" content="A professional all-in-one file converter to help you manage documents effortlessly. Free and reliable for students and professionals alike." />
+  <meta property="og:title" content="PAPERPREP - Professional File Conversion Suite" />
+  <meta property="og:description" content="Convert, compress, merge, and manage your documents with ease using PAPERPREP." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.paperprep.space/" />
-  <meta property="og:image" content="https://www.paperprep.space/static/logo.png" />
+  <meta property="og:url" content="https://yourdomain.com/" />
+  <meta property="og:image" content="https://yourdomain.com/static/logo.png" />
 
-  <!-- Tailwind CSS -->
+  <!-- TailwindCSS -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 
-  <!-- Font Awesome -->
+  <!-- FontAwesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
 
   <!-- Favicon -->
   <link rel="icon" href="{{ url_for('static', filename='logo.jpg') }}" />
@@ -35,7 +35,6 @@
     }
 
     body {
-      font-family: 'Inter', sans-serif;
       background-color: var(--primary-light);
       color: #1f2937;
       transition: all 0.3s ease;
@@ -43,6 +42,14 @@
 
     body.dark {
       background-color: var(--primary-dark);
+      color: #f8fafc;
+    }
+
+    .header-text {
+      color: #1e293b;
+    }
+
+    body.dark .header-text {
       color: #f8fafc;
     }
 
@@ -77,66 +84,94 @@
       50% { transform: scale(1.1); opacity: 0.8; }
       100% { transform: scale(1); opacity: 1; }
     }
+
+    .navbar {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.875rem;
+    }
+
+    .navbar a {
+      color: #ffffff;
+      transition: color 0.2s ease-in-out;
+    }
+
+    body.dark .navbar a {
+      color: #f8fafc;
+    }
+
+    .navbar a:hover {
+      color: #6366f1;
+    }
+
+    .navbar-brand {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+    }
+
   </style>
 </head>
 <body>
   <!-- Splash Screen -->
   <div id="splash-screen">
     <img src="{{ url_for('static', filename='logo.png') }}" alt="PAPERPREP Logo" />
-    <p class="mt-4 text-xl font-semibold tracking-wide">Loading PAPERPREP...</p>
+    <p class="mt-4 text-xl font-bold tracking-wide">Initializing PAPERPREP...</p>
   </div>
 
+  <!-- Theme Toggle Button -->
+  <button id="theme-toggle" class="absolute top-5 right-5 p-2 rounded-full bg-gray-200 text-gray-800 shadow">
+    <i id="theme-icon" class="fas fa-sun"></i>
+  </button>
+
   <!-- Navbar -->
-  <nav class="bg-white dark:bg-gray-900 shadow py-4 px-6 flex items-center justify-between relative z-40">
-    <a href="/" class="text-xl font-bold tracking-wide text-gray-900 dark:text-white" style="font-family: 'Inter', sans-serif;">PAPERPREP</a>
-    <div class="space-x-6 text-sm font-medium">
-      <a href="/about" class="text-gray-700 dark:text-gray-300 hover:text-indigo-500">About</a>
-      <a href="/privacy" class="text-gray-700 dark:text-gray-300 hover:text-indigo-500">Privacy Policy</a>
-      <a href="/terms" class="text-gray-700 dark:text-gray-300 hover:text-indigo-500">Terms of Use</a>
-      <a href="/contact" class="text-gray-700 dark:text-gray-300 hover:text-indigo-500">Contact</a>
+  <nav class="bg-gray-800 text-white p-4">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <a href="/" class="navbar-brand">PAPERPREP</a>
+      <ul class="flex space-x-6 navbar">
+        <li><a href="/">Home</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/privacy">Privacy Policy</a></li>
+        <li><a href="/terms">Terms of Service</a></li>
+        <li><a href="/contact">Contact</a></li>
+      </ul>
     </div>
-    <!-- Theme Toggle Button -->
-    <button id="theme-toggle" class="ml-4 p-2 rounded-full bg-gray-200 text-gray-800 shadow dark:bg-gray-700 dark:text-white">
-      <i id="theme-icon" class="fas fa-sun"></i>
-    </button>
   </nav>
 
   <!-- Main Content -->
-  <main class="container mx-auto p-6 mt-8">
+  <main class="container mx-auto p-6">
     <div class="flex flex-col items-center mb-12">
-      <h1 class="text-4xl md:text-5xl font-bold tracking-wide text-center" style="font-family: 'Inter', sans-serif;">
+      <h1 class="text-4xl md:text-5xl font-bold header-text" style="font-family: 'Orbitron', sans-serif;">
         PAPERPREP
       </h1>
-      <p class="text-center text-base mt-2 text-gray-600 dark:text-gray-300 max-w-lg">
-        A powerful and user-friendly toolkit to convert, compress, and manage your files with ease.
+      <p class="text-center text-sm mt-2 text-gray-600 max-w-md">
+        Your One-Stop Platform for Seamless File Conversion
       </p>
     </div>
 
     <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
       {% for tool in [
-        ('pdf-to-word', 'fa-file-word', 'Convert PDF files to editable Word documents.'),
-        ('images-to-pdf', 'fa-file-image', 'Combine multiple images into a single PDF document.'),
-        ('pdf-splitter', 'fa-scissors', 'Split PDFs into individual pages quickly.'),
-        ('ppt-to-pdf', 'fa-file-powerpoint', 'Convert PowerPoint presentations to PDF format.'),
-        ('pdf-to-ppt', 'fa-file-pdf', 'Turn PDF files into editable PowerPoint slides.'),
-        ('merge-pdf', 'fa-compress-alt', 'Merge several PDF files into one compact document.'),
-        ('compress-image', 'fa-compress', 'Compress images while maintaining quality.'),
-        ('compress-pdf', 'fa-file-archive', 'Reduce PDF file sizes for easy sharing.')
+        ('pdf-to-word', 'fa-file-word', 'Easily convert PDFs to editable Word documents.'),
+        ('images-to-pdf', 'fa-file-image', 'Merge multiple images into a single PDF file.'),
+        ('pdf-splitter', 'fa-scissors', 'Split large PDF files into individual pages.'),
+        ('ppt-to-pdf', 'fa-file-powerpoint', 'Convert PowerPoint slides to shareable PDF format.'),
+        ('pdf-to-ppt', 'fa-file-pdf', 'Convert PDF files back to editable PowerPoint slides.'),
+        ('merge-pdf', 'fa-compress-alt', 'Combine multiple PDFs into a single, organized document.'),
+        ('compress-image', 'fa-compress', 'Reduce image size while retaining quality.'),
+        ('compress-pdf', 'fa-file-archive', 'Compress PDF files without losing quality.')
       ] %}
       <a href="{{ url_for('tool', tool_name=tool[0]) }}" class="card p-6 rounded-2xl shadow-lg text-center transition-transform hover:scale-105">
         <i class="fas {{ tool[1] }} text-4xl text-indigo-500 mb-4" aria-hidden="true"></i>
-        <h2 class="text-lg font-semibold capitalize mb-1">{{ tool[0].replace('-', ' ') }}</h2>
+        <h2 class="text-xl font-semibold capitalize mb-1">{{ tool[0].replace('-', ' ') }}</h2>
         <p class="text-sm opacity-80">{{ tool[2] }}</p>
       </a>
       {% endfor %}
     </section>
   </main>
 
-  <footer class="mt-16 text-center text-sm text-gray-500 dark:text-gray-400">
-    &copy; 2025 PAPERPREP. Designed for academic and professional document processing.
+  <footer class="mt-12 text-center text-sm text-gray-500">
+    &copy; 2025 PAPERPREP | All rights reserved.
   </footer>
 
-  <!-- Scripts -->
+  <!-- Theme and Splash Script -->
   <script>
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = document.getElementById('theme-icon');
