@@ -3,31 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PAPERPREP - All-in-One File Converter</title>
+  <title>PAPERPREP - Advanced File Conversion Toolkit</title>
 
-  <!-- SEO -->
-  <meta name="description" content="Convert PDF, Word, Images, PPT, and more with PAPERPREP – the all-in-one file conversion toolkit. Fast, free, and easy to use." />
-  <meta name="keywords" content="file converter, PAPERPREP, PDF tools, PDF to Word, Image to PDF, PPT to PDF, compress PDF, merge PDF" />
-  <meta name="author" content="Your Name" />
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="PAPERPREP offers seamless conversion of PDF, Word, PPT, Images, and more. Experience a professional, all-in-one file conversion toolkit designed for students and professionals." />
+  <meta name="keywords" content="PAPERPREP, file converter, PDF tools, document converter, convert PDF, image to PDF, PDF to Word, compress PDF, merge PDF, split PDF, PPT to PDF" />
+  <meta name="author" content="PAPERPREP Team" />
   <meta name="robots" content="index, follow" />
-  <meta property="og:title" content="PAPERPREP - Convert PDFs, Images & More" />
-  <meta property="og:description" content="Convert and manage your documents easily using PAPERPREP. A professional all-in-one file converter for students and professionals." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://yourdomain.com/" />
-  <meta property="og:image" content="https://yourdomain.com/static/logo.png" />
 
-  <!-- TailwindCSS -->
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="PAPERPREP - Convert PDF, Word, PPT, and More" />
+  <meta property="og:description" content="PAPERPREP is your go-to solution for reliable and efficient document conversion. Fast, secure, and user-friendly." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.paperprep.space/" />
+  <meta property="og:image" content="https://www.paperprep.space/static/logo.png" />
+
+  <!-- Tailwind CSS -->
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
 
   <!-- FontAwesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
 
-  <!-- Google Font -->
+  <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
 
   <!-- Favicon -->
   <link rel="icon" href="{{ url_for('static', filename='logo.jpg') }}" />
-  
+
   <style>
     :root {
       --primary-dark: #1e293b;
@@ -45,11 +47,17 @@
       color: #f8fafc;
     }
 
-    .header-text {
-      color: #1e293b;
+    nav {
+      font-family: 'Orbitron', sans-serif;
     }
 
-    body.dark .header-text {
+    .header-text {
+      color: #1e293b;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    body.dark .header-text,
+    body.dark nav {
       color: #f8fafc;
     }
 
@@ -84,31 +92,6 @@
       50% { transform: scale(1.1); opacity: 0.8; }
       100% { transform: scale(1); opacity: 1; }
     }
-
-    .navbar {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.875rem;
-    }
-
-    .navbar a {
-      color: #ffffff;
-      transition: color 0.2s ease-in-out;
-    }
-
-    body.dark .navbar a {
-      color: #f8fafc;
-    }
-
-    .navbar a:hover {
-      color: #6366f1;
-    }
-
-    /* Navbar brand font style */
-    .navbar-brand {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.5rem; /* Adjust the size as needed */
-    }
-
   </style>
 </head>
 <body>
@@ -123,41 +106,38 @@
     <i id="theme-icon" class="fas fa-sun"></i>
   </button>
 
-  <!-- Navbar -->
-  <nav class="bg-gray-800 text-white p-4">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-      <a href="/" class="navbar-brand">PAPERPREP</a>
-      <ul class="flex space-x-6 navbar">
-        <li><a href="/" class="hover:text-indigo-500">Home</a></li>
-        <li><a href="/about" class="hover:text-indigo-500">About</a></li>
-        <li><a href="/privacy" class="hover:text-indigo-500">Privacy</a></li>
-        <li><a href="/terms" class="hover:text-indigo-500">Terms</a></li>
-        <li><a href="/contact" class="hover:text-indigo-500">Contact</a></li>
-      </ul>
-    </div>
+  <!-- Navigation Bar -->
+  <nav class="w-full px-6 py-4 flex justify-between items-center text-sm md:text-base">
+    <div class="text-lg font-bold header-text">PAPERPREP</div>
+    <ul class="flex gap-4 text-sm">
+      <li><a href="/about" class="hover:underline">About</a></li>
+      <li><a href="/privacy" class="hover:underline">Privacy Policy</a></li>
+      <li><a href="/terms" class="hover:underline">Terms</a></li>
+      <li><a href="/contact" class="hover:underline">Contact</a></li>
+    </ul>
   </nav>
 
   <!-- Main Content -->
   <main class="container mx-auto p-6">
     <div class="flex flex-col items-center mb-12">
-      <h1 class="text-4xl md:text-5xl font-bold header-text" style="font-family: 'Orbitron', sans-serif;">
+      <h1 class="text-4xl md:text-5xl font-bold header-text">
         PAPERPREP
       </h1>
       <p class="text-center text-sm mt-2 text-gray-600 max-w-md">
-        Your all-in-one futuristic file converter suite
+        Streamline your document management with our all-in-one file converter suite.
       </p>
     </div>
 
     <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
       {% for tool in [
-        ('pdf-to-word', 'fa-file-word', 'Convert PDF files to editable Word documents'),
-        ('images-to-pdf', 'fa-file-image', 'Merge multiple images into a single PDF'),
-        ('pdf-splitter', 'fa-scissors', 'Split large PDFs into individual pages'),
-        ('ppt-to-pdf', 'fa-file-powerpoint', 'Convert PowerPoint slides into PDFs'),
-        ('pdf-to-ppt', 'fa-file-pdf', 'Transform PDFs into PowerPoint presentations'),
-        ('merge-pdf', 'fa-compress-alt', 'Combine several PDF files into one'),
-        ('compress-image', 'fa-compress', 'Reduce image size without losing quality'),
-        ('compress-pdf', 'fa-file-archive', 'Shrink PDF file size for easy sharing')
+        ('pdf-to-word', 'fa-file-word', 'Convert PDF documents to editable Word format.'),
+        ('images-to-pdf', 'fa-file-image', 'Merge images into a single PDF document.'),
+        ('pdf-splitter', 'fa-scissors', 'Split a PDF file into individual pages.'),
+        ('ppt-to-pdf', 'fa-file-powerpoint', 'Convert PowerPoint presentations to PDF.'),
+        ('pdf-to-ppt', 'fa-file-pdf', 'Convert PDF files into PowerPoint format.'),
+        ('merge-pdf', 'fa-compress-alt', 'Combine multiple PDFs into a single document.'),
+        ('compress-image', 'fa-compress', 'Reduce the size of image files efficiently.'),
+        ('compress-pdf', 'fa-file-archive', 'Compress PDF files for faster sharing.')
       ] %}
       <a href="{{ url_for('tool', tool_name=tool[0]) }}" class="card p-6 rounded-2xl shadow-lg text-center transition-transform hover:scale-105">
         <i class="fas {{ tool[1] }} text-4xl text-indigo-500 mb-4" aria-hidden="true"></i>
@@ -169,7 +149,7 @@
   </main>
 
   <footer class="mt-12 text-center text-sm text-gray-500">
-    &copy; 2025 PAPERPREP | Designed for Academic Use
+    &copy; 2025 PAPERPREP | Designed for Modern Digital Workflows
   </footer>
 
   <!-- Theme and Splash Script -->
