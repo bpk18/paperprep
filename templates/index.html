@@ -27,7 +27,7 @@
 
   <!-- Favicon -->
   <link rel="icon" href="{{ url_for('static', filename='logo.jpg') }}" />
-
+  
   <style>
     :root {
       --primary-dark: #1e293b;
@@ -89,7 +89,7 @@
 <body>
   <!-- Splash Screen -->
   <div id="splash-screen">
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="PAPERPREP Logo" />
+    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="PAPERPREP Logo" />
     <p class="mt-4 text-xl font-bold tracking-wide">PAPERPREP is loading...</p>
   </div>
 
@@ -97,6 +97,20 @@
   <button id="theme-toggle" class="absolute top-5 right-5 p-2 rounded-full bg-gray-200 text-gray-800 shadow">
     <i id="theme-icon" class="fas fa-sun"></i>
   </button>
+
+  <!-- Navbar -->
+  <nav class="bg-gray-800 text-white p-4">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+      <a href="/" class="text-2xl font-bold">PAPERPREP</a>
+      <ul class="flex space-x-6">
+        <li><a href="/" class="hover:text-indigo-500">Home</a></li>
+        <li><a href="/about" class="hover:text-indigo-500">About</a></li>
+        <li><a href="/privacy" class="hover:text-indigo-500">Privacy</a></li>
+        <li><a href="/terms" class="hover:text-indigo-500">Terms</a></li>
+        <li><a href="/contact" class="hover:text-indigo-500">Contact</a></li>
+      </ul>
+    </div>
+  </nav>
 
   <!-- Main Content -->
   <main class="container mx-auto p-6">
@@ -133,22 +147,34 @@
     &copy; 2025 PAPERPREP | Designed for Academic Use
   </footer>
 
-  <!-- Theme and Splash Screen Script -->
+  <!-- Theme and Splash Script -->
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const splashScreen = document.getElementById('splash-screen');
-      setTimeout(() => splashScreen.style.display = 'none', 5000);
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const body = document.body;
 
-      // Theme toggle functionality
-      const themeToggleBtn = document.getElementById('theme-toggle');
-      const body = document.body;
+    function applyTheme() {
+      const theme = localStorage.getItem('theme') || 'light';
+      if (theme === 'dark') {
+        body.classList.add('dark');
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+      } else {
+        body.classList.remove('dark');
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+      }
+    }
 
-      themeToggleBtn.addEventListener('click', () => {
-        body.classList.toggle('dark');
-        const themeIcon = document.getElementById('theme-icon');
-        themeIcon.classList.toggle('fa-sun');
-        themeIcon.classList.toggle('fa-moon');
-      });
+    themeToggle.addEventListener('click', () => {
+      const isDark = body.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      applyTheme();
+    });
+
+    window.addEventListener('load', () => {
+      applyTheme();
+      document.getElementById('splash-screen').style.display = 'none';
     });
   </script>
 </body>
