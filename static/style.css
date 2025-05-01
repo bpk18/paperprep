@@ -1,0 +1,97 @@
+body {
+    margin: 0;
+    font-family: 'Outfit', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s, color 0.3s;
+}
+
+:root[data-theme='light'] {
+    --bg-color: #f9f9f9;
+    --text-color: #1a1a1a;
+    --card-bg: #ffffff;
+    --card-shadow: rgba(0, 0, 0, 0.1);
+    --button-bg: #1a73e8;
+    --button-color: #fff;
+}
+
+:root[data-theme='dark'] {
+    --bg-color: #1e1e1e;
+    --text-color: #f0f0f0;
+    --card-bg: #2c2c2c;
+    --card-shadow: rgba(255, 255, 255, 0.05);
+    --button-bg: #3a86ff;
+    --button-color: #fff;
+}
+
+header {
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--card-bg);
+    box-shadow: 0 2px 10px var(--card-shadow);
+}
+
+.site-title {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    background: linear-gradient(90deg, #3a86ff, #8338ec);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.theme-toggle {
+    background: var(--button-bg);
+    color: var(--button-color);
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s ease;
+}
+
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem;
+}
+
+.tool-card {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 15px var(--card-shadow);
+    text-align: center;
+    font-size: 1.1rem;
+    text-decoration: none;
+    color: var(--text-color);
+    transition: transform 0.2s, box-shadow 0.3s;
+}
+
+.tool-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 20px var(--card-shadow);
+}
+
+footer {
+    text-align: center;
+    padding: 1rem;
+    font-size: 0.85rem;
+    background-color: var(--card-bg);
+    color: var(--text-color);
+    box-shadow: 0 -2px 10px var(--card-shadow);
+}
+
+@media (max-width: 600px) {
+    .site-title {
+        font-size: 1.5rem;
+    }
+    .tool-card {
+        font-size: 1rem;
+        padding: 1rem;
+    }
+}
