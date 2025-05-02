@@ -1,22 +1,142 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PAPERPREP - Your go-to toolset for PDF, Image & Document conversions">
+  <meta name="keywords" content="PAPERPREP, PDF tools, file converter, image to PDF, PPT to PDF">
+  <title>{{ tool_name }}</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fdfdfd;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      padding: 10px 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .nav-left {
+      font-size: 1.5rem;
+      font-weight: bold;
+      font-family: 'Orbitron', sans-serif;
+    }
+    .hero {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(to right, #f1f1f1, #fafafa);
+    }
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .tool-form {
+      max-width: 600px;
+      margin: 3rem auto;
+      padding: 2rem;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+    }
+    .tool-form input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    .tool-form button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+    .tool-form button:hover {
+      background-color: #45a049;
+    }
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      background: #f8f8f8;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-left">PAPERPREP</div>
+  </nav>
 
-{% block title %}{{ tool.replace('-', ' ').title() }} - PAPERPREP{% endblock %}
+  <header class="hero">
+    <h1>{{ tool_name }}</h1>
+    <p>Use the tool below to {{ tool_name|lower }}</p>
+  </header>
 
-{% block content %}
-<div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 shadow-md rounded-lg p-6">
-  <h2 class="text-2xl font-semibold mb-4 text-center header-text capitalize">
-    {{ tool.replace('-', ' ') }}
-  </h2>
-  <form method="POST" enctype="multipart/form-data" class="space-y-4">
-    <div>
-      <label for="file" class="block mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-        Upload your file{{ tool != 'merge-pdf' and tool != 'images-to-pdf' and tool != 'pdf-splitter' and tool != 'compress-image' and tool != 'compress-pdf' and tool != 'jpg-to-word' and tool != 'pdf-to-word' and 's' or 's' }}:
-      </label>
-      <input type="file" name="file" id="file" multiple class="w-full text-sm file:bg-indigo-500 file:text-white file:rounded-md file:border-0 file:px-4 file:py-2 border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white" required />
-    </div>
-    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded w-full transition">
-      Convert
-    </button>
-  </form>
-</div>
-{% endblock %}
+  <section class="tool-form">
+    <form method="POST" enctype="multipart/form-data">
+      {% if tool_name == "PDF to Word" %}
+        <label for="file">Select a PDF file:</label>
+        <input type="file" name="file" id="file" required>
+        <button type="submit">Convert PDF to Word</button>
+
+      {% elif tool_name == "Image to PDF" %}
+        <label for="files">Select image files:</label>
+        <input type="file" name="files" id="files" multiple required>
+        <button type="submit">Convert Image(s) to PDF</button>
+
+      {% elif tool_name == "PPT to PDF" %}
+        <label for="file">Select a PPT file:</label>
+        <input type="file" name="file" id="file" required>
+        <button type="submit">Convert PPT to PDF</button>
+
+      {% elif tool_name == "PDF to PPT" %}
+        <label for="file">Select a PDF file:</label>
+        <input type="file" name="file" id="file" required>
+        <button type="submit">Convert PDF to PPT</button>
+
+      {% elif tool_name == "Merge PDFs" %}
+        <label for="files">Select PDF files to merge:</label>
+        <input type="file" name="files" id="files" multiple required>
+        <button type="submit">Merge PDFs</button>
+
+      {% elif tool_name == "Split PDF" %}
+        <label for="file">Select a PDF file:</label>
+        <input type="file" name="file" id="file" required>
+        <button type="submit">Split PDF</button>
+
+      {% elif tool_name == "Compress Image" %}
+        <label for="file">Select an image file:</label>
+        <input type="file" name="file" id="file" required>
+        <button type="submit">Compress Image</button>
+
+      {% elif tool_name == "Compress PDF" %}
+        <label for="file">Select a PDF file:</label>
+        <input type="file" name="file" id="file" required>
+        <button type="submit">Compress PDF</button>
+      {% endif %}
+    </form>
+  </section>
+
+  <footer>
+    <p>&copy; 2025 PAPERPREP</p>
+  </footer>
+</body>
+</html>
