@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PAPERPREP</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+<body class="{{ theme }}-theme">
+  <nav>
+    <div class="nav-brand">PAPERPREP</div>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <div class="dropdown">
+        <button class="dropbtn">Menu ▾</button>
+        <div class="dropdown-content">
+          <a href="/about">About</a>
+          <a href="/privacy">Privacy</a>
+          <a href="/contact">Contact</a>
+          <a href="/terms">Terms & Conditions</a>
+        </div>
+      </div>
+      <button id="theme-toggle">🌙</button>
+    </div>
+  </nav>
+
+  <main>
+    <h1>Welcome to PAPERPREP</h1>
+    <div class="tools-grid">
+      <a class="tool-card" href="/tool/pdf-to-word">PDF to Word</a>
+      <a class="tool-card" href="/tool/jpg-to-word">JPG to Word</a>
+      <a class="tool-card" href="/tool/ppt-to-pdf">PPT to PDF</a>
+      <a class="tool-card" href="/tool/pdf-to-ppt">PDF to PPT</a>
+      <a class="tool-card" href="/tool/images-to-pdf">Images to PDF</a>
+      <a class="tool-card" href="/tool/merge-pdf">Merge PDF</a>
+      <a class="tool-card" href="/tool/image-compressor">Image Compressor</a>
+      <a class="tool-card" href="/tool/pdf-compressor">PDF Compressor</a>
+    </div>
+  </main>
+</body>
+</html>
