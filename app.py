@@ -282,7 +282,7 @@ BASE_HTML = """
   <div class="brand" onclick="location.href='{{ url_for('home') }}'">PAPERPREP</div>
   <div>
     <button class="btn" id="theme-toggle" aria-label="Toggle Dark/Light Theme">
-      <i class="fas fa-moon"></i> Dark Mode
+      <i class="fas fa-moon"></i>
     </button>
     <div class="menu">
       <button class="menu-button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list" id="menu-button" aria-label="Menu">
@@ -298,13 +298,6 @@ BASE_HTML = """
   </div>
 </nav>
 <main>
-  {% if flashes %}
-  <ul style="max-width:500px; margin: 0 auto 20px auto; list-style:none; padding-left:0; color:#d33;">
-    {% for message in flashes %}
-      <li>{{ message }}</li>
-    {% endfor %}
-  </ul>
-  {% endif %}
   {{ content|safe }}
 </main>
 <footer class="footer">
@@ -316,16 +309,16 @@ BASE_HTML = """
     toggleBtn.addEventListener('click', () => {
       document.body.classList.toggle('dark');
       if(document.body.classList.contains('dark')){
-        toggleBtn.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+        toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
         localStorage.setItem('theme', 'dark');
       } else {
-        toggleBtn.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+        toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
         localStorage.setItem('theme', 'light');
       }
     });
     if(localStorage.getItem('theme') === 'dark'){
       document.body.classList.add('dark');
-      toggleBtn.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+      toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
     }
     const menuButton = document.getElementById('menu-button');
     const menuList = document.getElementById('menu-list');
@@ -355,13 +348,9 @@ def allowed_file(filename, tool_name):
 
 
 def render_page(title, content_html):
-    flashes = get_flashed_messages()
     return BASE_HTML.replace("{{ title }}", title)\
                     .replace("{{ year }}", str(datetime.now().year))\
-                    .replace("{{ content|safe }}", content_html)\
-                    .replace("{% if flashes %}", "" if flashes else "{% if flashes %}")\
-                    .replace("{% endif %}", "")\
-                    .replace("{{ flashes }}", str(flashes))
+                    .replace("{{ content|safe }}", content_html)
 
 
 @app.route('/')
@@ -721,3 +710,4 @@ def pdf_compress():
 if __name__ == '__main__':
     # Use 0.0.0.0 to be reachable on local network if hosting
     app.run(debug=True, host='0.0.0.0', port=5000)
+
