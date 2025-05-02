@@ -38,7 +38,8 @@ BASE_HTML = """
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PAPERPREP - {{ title }}</title>
+<title>PAPERPREP - File Converter {{ title }}</title>
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
 <style>
   :root {
@@ -283,19 +284,10 @@ BASE_HTML = """
 
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9764517671001230" crossorigin="anonymous"></script>
-  <meta name="description" content="Convert PDF, Word, Images, PPT, and more with PAPERPREP – the all-in-one file conversion toolkit. Fast, free, and easy to use." />
-  <meta name="keywords" content="file converter, PAPERPREP, PDF tools, PDF to Word, Image to PDF, PPT to PDF, compress PDF, merge PDF" />
-  <meta name="author" content="BPK" />
-  <meta name="robots" content="index, follow" />
-  <meta property="og:title" content="PAPERPREP - Convert PDFs, Images & More" />
-  <meta property="og:description" content="Convert and manage your documents easily using PAPERPREP. A professional all-in-one file converter for students and professionals." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://paperprep.space/" />
-<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
 </head>
 <body>
 <nav>
-  <div class="brand" onclick="location.href='{{ url_for('home') }}'">PAPERPREP</div>
+  <div class="brand" onclick="location.href='{{ url_for('home') }}'">PAPERPREP-File Converter</div>
   <div>
     <button class="btn" id="theme-toggle" aria-label="Toggle Dark/Light Theme">
       <i class="fas fa-moon"></i>
@@ -317,7 +309,7 @@ BASE_HTML = """
   {{ content|safe }}
 </main>
 <footer class="footer">
-  &copy; {{ year }} PAPERPREP - College Project. All rights reserved.
+  &copy; {{ year }} PAPERPREP . All rights reserved.
 </footer>
 <script>
   (function(){
@@ -369,20 +361,20 @@ def render_page(title, content_html, description=None, keywords=None):
     base_html = base_html.replace("{{ content|safe }}", content_html)
 
     if description:
-        description_meta = f'<meta name="description" content="{description}" />'
+        description_meta = f'<meta name="description" content=" Convert PDF, Word, Images, PPT, and more with PAPERPREP – the all-in-one file conversion toolkit. Fast, free, and easy to use." />'
         # Insert after the existing description tag, or create one if it doesn't exist
         if '<meta name="description"' in base_html:
             base_html = base_html.replace('<meta name="description" content="Convert PDF, Word, Images, PPT, and more with PAPERPREP – the all-in-one file conversion toolkit. Fast, free, and easy to use." />', description_meta)
         else:
-            base_html = base_html.replace('</title>', f'</title>\n    {description_meta}')
+            base_html = base_html.replace('</title>', f'</title>\n    {"PAPERPREP - Convert PDFs, Images & More"}')
 
     if keywords:
-        keywords_meta = f'<meta name="keywords" content="{keywords}" />'
+        keywords_meta = f'<meta name="keywords" content="file converter, PAPERPREP, PDF tools, PDF to Word, Image to PDF, PPT to PDF, compress PDF, merge PDF" />'
         # Insert after the existing keywords tag, or create one if it doesn't exist
         if '<meta name="keywords"' in base_html:
             base_html = base_html.replace('<meta name="keywords" content="file converter, PAPERPREP, PDF tools, PDF to Word, Image to PDF, PPT to PDF, compress PDF, merge PDF" />', keywords_meta)
         else:
-            base_html = base_html.replace('</title>', f'</title>\n    {keywords_meta}')
+            base_html = base_html.replace('</title>', f'</title>\n    {"PAPERPREP - Convert PDFs, Images & More"}')
 
     return base_html
 
