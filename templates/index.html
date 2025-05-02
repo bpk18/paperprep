@@ -1,205 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PAPERPREP - Professional Document Conversion Tools</title>
-
-  <!-- SEO -->
-  <meta name="description" content="PAPERPREP offers efficient and reliable tools for converting PDFs, Word documents, images, and presentations. Simplify your workflow with our intuitive and professional suite of converters." />
-  <meta name="keywords" content="file converter, PDF to Word, image to PDF, compress PDF, merge PDFs, PPT to PDF, document tools, file utilities" />
-  <meta name="author" content="Your Name" />
-  <meta name="robots" content="index, follow" />
-  <meta property="og:title" content="PAPERPREP - Professional File Conversion Suite" />
-  <meta property="og:description" content="Convert, compress, merge, and manage your documents with ease using PAPERPREP." />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://yourdomain.com/" />
-  <meta property="og:image" content="https://yourdomain.com/static/logo.png" />
-
-  <!-- TailwindCSS -->
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-
-  <!-- FontAwesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
-
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
-
-  <!-- Favicon -->
-  <link rel="icon" href="{{ url_for('static', filename='logo.jpg') }}" />
-
-  <style>
-    :root {
-      --primary-dark: #1e293b;
-      --primary-light: #f1f5f9;
-    }
-
-    body {
-      background-color: var(--primary-light);
-      color: #1f2937;
-      transition: all 0.3s ease;
-    }
-
-    body.dark {
-      background-color: var(--primary-dark);
-      color: #f8fafc;
-    }
-
-    .header-text {
-      color: #1e293b;
-    }
-
-    body.dark .header-text {
-      color: #f8fafc;
-    }
-
-    .card {
-      background-color: rgba(0, 0, 0, 0.05);
-      backdrop-filter: blur(6px);
-    }
-
-    body.dark .card {
-      background-color: rgba(255, 255, 255, 0.05);
-    }
-
-    #splash-screen {
-      background-color: #f1f5f9;
-      color: #1e293b;
-      position: fixed;
-      z-index: 50;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-    }
-
-    #splash-screen img {
-      width: 120px;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.1); opacity: 0.8; }
-      100% { transform: scale(1); opacity: 1; }
-    }
-
-    .navbar {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 0.875rem;
-    }
-
-    .navbar a {
-      color: #ffffff;
-      transition: color 0.2s ease-in-out;
-    }
-
-    body.dark .navbar a {
-      color: #f8fafc;
-    }
-
-    .navbar a:hover {
-      color: #6366f1;
-    }
-
-    .navbar-brand {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 1.5rem;
-    }
-
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="PAPERPREP is a futuristic and responsive toolset for converting PDFs, images, and presentations.">
+    <meta name="keywords" content="PDF tools, Image to PDF, File conversion, Merge PDF, Compress PDF, Convert PPT">
+    <meta name="author" content="PAPERPREP Team">
+    <title>PAPERPREP - File Conversion Made Easy</title>
+    <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script>
+      if (!localStorage.getItem('theme')) {
+          localStorage.setItem('theme', 'light');
+          document.documentElement.setAttribute('data-theme', 'light');
+      } else {
+          document.documentElement.setAttribute('data-theme', localStorage.getItem('theme'));
+      }
+    </script>
 </head>
 <body>
-  <!-- Splash Screen -->
-  <div id="splash-screen">
-    <img src="{{ url_for('static', filename='logo.png') }}" alt="PAPERPREP Logo" />
-    <p class="mt-4 text-xl font-bold tracking-wide">Initializing PAPERPREP...</p>
-  </div>
+    <header>
+        <button class="menu-toggle" onclick="toggleMenu()">&#9776;</button>
+        <nav id="mobile-menu" class="hidden">
+            <a href="/tool/pdf-to-word">PDF to Word</a>
+            <a href="/tool/images-to-pdf">Image to PDF</a>
+            <a href="/tool/ppt-to-pdf">PPT to PDF</a>
+            <a href="/tool/pdf-to-ppt">PDF to PPT</a>
+            <a href="/tool/merge-pdf">Merge PDFs</a>
+            <a href="/tool/pdf-splitter">Split PDF</a>
+            <a href="/tool/compress-image">Compress Image</a>
+            <a href="/tool/compress-pdf">Compress PDF</a>
+            <hr>
+            <a href="/about">About</a>
+            <a href="/privacy">Privacy</a>
+            <a href="/contact">Contact</a>
+            <a href="/terms">Terms & Conditions</a>
+        </nav>
+        <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+    </header>
 
-  <!-- Theme Toggle Button -->
-  <button id="theme-toggle" class="absolute top-5 right-5 p-2 rounded-full bg-gray-200 text-gray-800 shadow">
-    <i id="theme-icon" class="fas fa-sun"></i>
-  </button>
+    <main>
+        <section class="tool-grid">
+            <a href="/tool/pdf-to-word" class="tool-card">PDF to Word</a>
+            <a href="/tool/images-to-pdf" class="tool-card">Image to PDF</a>
+            <a href="/tool/ppt-to-pdf" class="tool-card">PPT to PDF</a>
+            <a href="/tool/pdf-to-ppt" class="tool-card">PDF to PPT</a>
+            <a href="/tool/merge-pdf" class="tool-card">Merge PDFs</a>
+            <a href="/tool/pdf-splitter" class="tool-card">Split PDF</a>
+            <a href="/tool/compress-image" class="tool-card">Compress Image</a>
+            <a href="/tool/compress-pdf" class="tool-card">Compress PDF</a>
+        </section>
+    </main>
 
-  <!-- Navbar -->
-  <nav class="bg-gray-800 text-white p-4">
-    <div class="max-w-7xl mx-auto flex justify-between items-center">
-      <a href="/" class="navbar-brand">PAPERPREP</a>
-      <ul class="flex space-x-6 navbar">
-        <li><a href="/">Home</a></li>
-        <li><a href="/about">About</a></li>
-        <li><a href="/privacy">Privacy Policy</a></li>
-        <li><a href="/terms">Terms of Service</a></li>
-        <li><a href="/contact">Contact</a></li>
-      </ul>
-    </div>
-  </nav>
+    <footer>
+        <p>&copy; 2025 PAPERPREP. All rights reserved.</p>
+    </footer>
 
-  <!-- Main Content -->
-  <main class="container mx-auto p-6">
-    <div class="flex flex-col items-center mb-12">
-      <h1 class="text-4xl md:text-5xl font-bold header-text" style="font-family: 'Orbitron', sans-serif;">
-        PAPERPREP
-      </h1>
-      <p class="text-center text-sm mt-2 text-gray-600 max-w-md">
-        Your One-Stop Platform for Seamless File Conversion
-      </p>
-    </div>
+    <script>
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem("theme");
+            const newTheme = currentTheme === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-theme", newTheme);
+            localStorage.setItem("theme", newTheme);
+        }
 
-    <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
-      {% for tool in [
-        ('pdf-to-word', 'fa-file-word', 'Easily convert PDFs to editable Word documents.'),
-        ('images-to-pdf', 'fa-file-image', 'Merge multiple images into a single PDF file.'),
-        ('pdf-splitter', 'fa-scissors', 'Split large PDF files into individual pages.'),
-        ('ppt-to-pdf', 'fa-file-powerpoint', 'Convert PowerPoint slides to shareable PDF format.'),
-        ('pdf-to-ppt', 'fa-file-pdf', 'Convert PDF files back to editable PowerPoint slides.'),
-        ('merge-pdf', 'fa-compress-alt', 'Combine multiple PDFs into a single, organized document.'),
-        ('compress-image', 'fa-compress', 'Reduce image size while retaining quality.'),
-        ('compress-pdf', 'fa-file-archive', 'Compress PDF files without losing quality.')
-      ] %}
-      <a href="{{ url_for('tool', tool_name=tool[0]) }}" class="card p-6 rounded-2xl shadow-lg text-center transition-transform hover:scale-105">
-        <i class="fas {{ tool[1] }} text-4xl text-indigo-500 mb-4" aria-hidden="true"></i>
-        <h2 class="text-xl font-semibold capitalize mb-1">{{ tool[0].replace('-', ' ') }}</h2>
-        <p class="text-sm opacity-80">{{ tool[2] }}</p>
-      </a>
-      {% endfor %}
-    </section>
-  </main>
-
-  <footer class="mt-12 text-center text-sm text-gray-500">
-    &copy; 2025 PAPERPREP | All rights reserved.
-  </footer>
-
-  <!-- Theme and Splash Script -->
-  <script>
-    const themeToggle = document.getElementById('theme-toggle');
-    const themeIcon = document.getElementById('theme-icon');
-    const body = document.body;
-
-    function applyTheme() {
-      const theme = localStorage.getItem('theme') || 'light';
-      if (theme === 'dark') {
-        body.classList.add('dark');
-        themeIcon.classList.remove('fa-sun');
-        themeIcon.classList.add('fa-moon');
-      } else {
-        body.classList.remove('dark');
-        themeIcon.classList.remove('fa-moon');
-        themeIcon.classList.add('fa-sun');
-      }
-    }
-
-    themeToggle.addEventListener('click', () => {
-      const isDark = body.classList.contains('dark');
-      localStorage.setItem('theme', isDark ? 'light' : 'dark');
-      applyTheme();
-    });
-
-    window.addEventListener('load', () => {
-      applyTheme();
-      document.getElementById('splash-screen').style.display = 'none';
-    });
-  </script>
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+        }
+    </script>
 </body>
 </html>
