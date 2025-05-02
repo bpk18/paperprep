@@ -10,7 +10,148 @@
   <title>PAPERPREP</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
   <style>
-    /* Include your styling for navbar and layout here */
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #222222;
+      --card-bg: #ffffff;
+      --card-hover: #eef;
+      --nav-bg: #ffffff;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #121212;
+      --text-color: #eeeeee;
+      --card-bg: #1e1e1e;
+      --card-hover: #333;
+      --nav-bg: #1b1b1b;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--nav-bg);
+      padding: 10px 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .nav-left {
+      font-size: 1.5rem;
+      font-weight: bold;
+      font-family: 'Orbitron', sans-serif;
+    }
+
+    .nav-toggle {
+      display: none;
+      font-size: 26px;
+      cursor: pointer;
+    }
+
+    .nav-menu {
+      list-style: none;
+      display: flex;
+      gap: 15px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-menu li a {
+      text-decoration: none;
+      color: var(--text-color);
+      font-weight: 500;
+    }
+
+    .theme-switch {
+      cursor: pointer;
+      background: none;
+      border: 1px solid var(--text-color);
+      color: var(--text-color);
+      padding: 5px 10px;
+      border-radius: 8px;
+      margin-left: 10px;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-color);
+    }
+
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.2rem;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .tool-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+      transition: 0.3s ease;
+      font-size: 1.1rem;
+      font-weight: 500;
+      text-decoration: none;
+      color: var(--text-color);
+    }
+
+    .tool-card:hover {
+      transform: scale(1.05);
+      background: var(--card-hover);
+    }
+
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      background: var(--nav-bg);
+      color: var(--text-color);
+    }
+
+    @media (max-width: 768px) {
+      .nav-toggle {
+        display: block;
+      }
+
+      .nav-menu {
+        flex-direction: column;
+        display: none;
+        width: 100%;
+        background: var(--nav-bg);
+        position: absolute;
+        top: 60px;
+        left: 0;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      }
+
+      .nav-menu.active {
+        display: flex;
+      }
+    }
   </style>
 </head>
 
@@ -28,6 +169,7 @@
       <li><a href="/tool/compress-image">🗜️ Compress Image</a></li>
       <li><a href="/tool/compress-pdf">📉 Compress PDF</a></li>
     </ul>
+    <button class="theme-switch" onclick="toggleTheme()">🌓 Theme</button>
   </nav>
 
   <header class="hero">
@@ -55,20 +197,19 @@
       const menu = document.getElementById('nav-menu');
       menu.classList.toggle('active');
     }
-    
+
     function toggleTheme() {
-      const currentTheme = document.body.getAttribute('data-theme');
-      const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-      document.body.setAttribute('data-theme', newTheme);
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
       localStorage.setItem('theme', newTheme);
     }
 
-    window.addEventListener('load', () => {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        document.body.setAttribute('data-theme', savedTheme);
-      }
-    });
+    // Load saved theme on page load
+    window.onload = () => {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    };
   </script>
 </body>
 </html>
