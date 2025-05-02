@@ -28,7 +28,7 @@ def pdf_to_word():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             # Implement conversion logic here
             return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename), as_attachment=True)
-    return render_template('tools.html', tool_name='PDF to Word')
+    return render_template('tool.html', tool_name='PDF to Word')
 
 @app.route('/tool/images-to-pdf', methods=['GET', 'POST'])
 def images_to_pdf():
@@ -39,7 +39,7 @@ def images_to_pdf():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             # Implement conversion logic here
             return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename), as_attachment=True)
-    return render_template('tools.html', tool_name='Image to PDF')
+    return render_template('tool.html', tool_name='Image to PDF')
 
 @app.route('/tool/ppt-to-pdf', methods=['GET', 'POST'])
 def ppt_to_pdf():
@@ -50,7 +50,7 @@ def ppt_to_pdf():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             # Implement conversion logic here
             return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename), as_attachment=True)
-    return render_template('tools.html', tool_name='PPT to PDF')
+    return render_template('tool.html', tool_name='PPT to PDF')
 
 @app.route('/tool/pdf-to-ppt', methods=['GET', 'POST'])
 def pdf_to_ppt():
@@ -61,7 +61,7 @@ def pdf_to_ppt():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             # Implement conversion logic here
             return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename), as_attachment=True)
-    return render_template('tools.html', tool_name='PDF to PPT')
+    return render_template('tool.html', tool_name='PDF to PPT')
 
 @app.route('/tool/merge-pdf', methods=['GET', 'POST'])
 def merge_pdf():
@@ -73,7 +73,7 @@ def merge_pdf():
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
         # Implement merge logic here
         return send_file(os.path.join(app.config['UPLOAD_FOLDER'], 'merged.pdf'), as_attachment=True)
-    return render_template('tools.html', tool_name='Merge PDFs')
+    return render_template('tool.html', tool_name='Merge PDFs')
 
 @app.route('/tool/pdf-splitter', methods=['GET', 'POST'])
 def split_pdf():
@@ -84,7 +84,7 @@ def split_pdf():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             # Implement split logic here
             return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename), as_attachment=True)
-    return render_template('tools.html', tool_name='Split PDF')
+    return render_template('tool.html', tool_name='Split PDF')
 
 @app.route('/tool/compress-image', methods=['GET', 'POST'])
 def compress_image():
@@ -95,7 +95,7 @@ def compress_image():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             # Implement compression logic here
             return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename), as_attachment=True)
-    return render_template('tools.html', tool_name='Compress Image')
+    return render_template('tool.html', tool_name='Compress Image')
 
 @app.route('/tool/compress-pdf', methods=['GET', 'POST'])
 def compress_pdf():
@@ -106,7 +106,7 @@ def compress_pdf():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             # Implement compression logic here
             return send_file(os.path.join(app.config['UPLOAD_FOLDER'], filename), as_attachment=True)
-    return render_template('tools.html', tool_name='Compress PDF')
+    return render_template('tool.html', tool_name='Compress PDF')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
