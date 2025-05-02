@@ -1,7 +1,5 @@
-werkzeug.utils 
- PyPDF2 
-PIL 
- fpdf 
- os
- io
- zipfile
+Flask==2.1.1
+Werkzeug==2.1.1
+PyPDF2==1.26.0
+Pillow==9.0.0
+fpdf==1.7.2
