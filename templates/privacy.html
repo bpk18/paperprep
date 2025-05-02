@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{{ tool if tool else title }}</title>
+  <title>Privacy Policy</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="{{ theme }}-theme">
@@ -18,21 +17,8 @@
     </div>
   </nav>
   <main>
-    {% if tool %}
-      <h2>{{ tool }}</h2>
-      <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" required>
-        <button type="submit">Upload</button>
-      </form>
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          <ul>{% for msg in messages %}<li>{{ msg }}</li>{% endfor %}</ul>
-        {% endif %}
-      {% endwith %}
-    {% else %}
-      <h2>Privacy</h2>
-      <p>This is the Privacy page.</p>
-    {% endif %}
+    <h2>Privacy Policy</h2>
+    <p>We respect your privacy. Uploaded files are not stored permanently and are deleted after conversion.</p>
   </main>
 </body>
 </html>
