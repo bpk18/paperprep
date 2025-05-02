@@ -1,0 +1,24 @@
+
+{% extends "base.html" %}
+{% block title %}Home - PaperPrep{% endblock %}
+{% block content %}
+<h2 class="text-3xl font-bold mb-6">PaperPrep PDF Tools</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% set tools = [
+        ('PDF to Word', 'pdf-to-word'),
+        ('Images to PDF', 'images-to-pdf'),
+        ('PPT to PDF', 'ppt-to-pdf'),
+        ('PDF to PPT', 'pdf-to-ppt'),
+        ('Word to PDF', 'word-to-pdf'),
+        ('Image Resizer', 'image-resizer'),
+        ('PDF Compressor', 'pdf-compressor')
+    ] %}
+
+    {% for name, route in tools %}
+    <a href="{{ url_for('tool_page', tool=route) }}"
+       class="bg-white dark:bg-gray-800 shadow-md rounded-lg p-6 hover:ring-2 hover:ring-blue-400 transition transform hover:scale-105 flex items-center space-x-4">
+        <span class="text-lg font-medium">{{ name }}</span>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

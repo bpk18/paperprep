@@ -1,0 +1,13 @@
+
+{% extends "base.html" %}
+{% block title %}{{ tool_name }} - PaperPrep{% endblock %}
+{% block content %}
+<h2 class="text-2xl font-semibold mb-4">{{ tool_name }}</h2>
+<form action="{{ url_for('process') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+    <input type="hidden" name="tool" value="{{ tool_name }}">
+    <label>Upload File:</label>
+    <input type="file" name="file" class="w-full p-2 border rounded dark:bg-gray-800" required>
+    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Simulate Upload</button>
+</form>
+<a href="/" class="text-blue-500 mt-4 inline-block">← Back to all tools</a>
+{% endblock %}
