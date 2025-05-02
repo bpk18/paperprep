@@ -287,7 +287,7 @@ BASE_HTML = """
 </head>
 <body>
 <nav>
-  <div class="brand" onclick="location.href='{{ url_for('home') }}'">PAPERPREP-File Converter</div>
+  <div class="brand" onclick="location.href='{{ url_for('home') }}'">PAPERPREP</div>
   <div>
     <button class="btn" id="theme-toggle" aria-label="Toggle Dark/Light Theme">
       <i class="fas fa-moon"></i>
