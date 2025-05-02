@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request, send_file, redirect, url_for
 from werkzeug.utils import secure_filename
-from PyPDF2 import PdfFileMerger, PdfWriter
+import pypdf2
 from PIL import Image
 from fpdf import FPDF
 import os
