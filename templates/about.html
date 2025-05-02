@@ -1,9 +1,8 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>{{ tool if tool else title }}</title>
+  <title>About</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body class="{{ theme }}-theme">
@@ -18,21 +17,8 @@
     </div>
   </nav>
   <main>
-    {% if tool %}
-      <h2>{{ tool }}</h2>
-      <form method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" required>
-        <button type="submit">Upload</button>
-      </form>
-      {% with messages = get_flashed_messages() %}
-        {% if messages %}
-          <ul>{% for msg in messages %}<li>{{ msg }}</li>{% endfor %}</ul>
-        {% endif %}
-      {% endwith %}
-    {% else %}
-      <h2>About</h2>
-      <p>This is the About page.</p>
-    {% endif %}
+    <h2>About</h2>
+    <p>PAPERPREP is your all-in-one document conversion and compression platform designed for students and professionals. Fast, clean, and mobile-friendly.</p>
   </main>
 </body>
 </html>
