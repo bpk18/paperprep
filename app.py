@@ -1,4 +1,3 @@
-from paperprep import app
 from flask import render_template, request, send_file
 # Import necessary libraries for each tool
 from PIL import Image
