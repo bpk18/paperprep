@@ -291,7 +291,7 @@ BASE_HTML = """
   <meta property="og:description" content="Convert and manage your documents easily using PAPERPREP. A professional all-in-one file converter for students and professionals." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://paperprep.space/" />
-   <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
 </head>
 <body>
 <nav>
@@ -363,10 +363,28 @@ def allowed_file(filename, tool_name):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS.get(tool_name, set())
 
 
-def render_page(title, content_html):
-    return BASE_HTML.replace("{{ title }}", title)\
-                    .replace("{{ year }}", str(datetime.now().year))\
-                    .replace("{{ content|safe }}", content_html)
+def render_page(title, content_html, description=None, keywords=None):
+    base_html = BASE_HTML.replace("{{ title }}", title)
+    base_html = base_html.replace("{{ year }}", str(datetime.now().year))
+    base_html = base_html.replace("{{ content|safe }}", content_html)
+
+    if description:
+        description_meta = f'<meta name="description" content="{description}" />'
+        # Insert after the existing description tag, or create one if it doesn't exist
+        if '<meta name="description"' in base_html:
+            base_html = base_html.replace('<meta name="description" content="Convert PDF, Word, Images, PPT, and more with PAPERPREP – the all-in-one file conversion toolkit. Fast, free, and easy to use." />', description_meta)
+        else:
+            base_html = base_html.replace('</title>', f'</title>\n    {description_meta}')
+
+    if keywords:
+        keywords_meta = f'<meta name="keywords" content="{keywords}" />'
+        # Insert after the existing keywords tag, or create one if it doesn't exist
+        if '<meta name="keywords"' in base_html:
+            base_html = base_html.replace('<meta name="keywords" content="file converter, PAPERPREP, PDF tools, PDF to Word, Image to PDF, PPT to PDF, compress PDF, merge PDF" />', keywords_meta)
+        else:
+            base_html = base_html.replace('</title>', f'</title>\n    {keywords_meta}')
+
+    return base_html
 
 
 @app.route('/')
