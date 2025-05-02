@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import Flask, render_template, request, flash, redirect, url_for
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'  # Needed for flashing messages
+app.secret_key = 'your_secret_key'
 
 @app.route('/')
 def index():
@@ -28,13 +29,12 @@ def process():
     tool = request.form.get('tool')
     uploaded_file = request.files.get('file')
 
-    if not uploaded_file or uploaded_file.filename == '':
-        flash('Please upload a file.', 'danger')
-        return redirect(url_for('index'))
-
-    # Simulate file processing
-    print(f"Processing file: {uploaded_file.filename} with tool: {tool}")
-    flash(f"Success! File '{uploaded_file.filename}' was processed using '{tool}'.", 'success')
+    if uploaded_file and tool:
+        filename = secure_filename(uploaded_file.filename)
+        print(f"Received file: {filename} for tool: {tool}")
+        flash(f"Successfully processed '{filename}' using the '{tool}' tool!", 'success')
+    else:
+        flash('Please select a file and a tool to process.', 'error')
     return redirect(url_for('index'))
 
 @app.errorhandler(404)
@@ -42,4 +42,5 @@ def page_not_found(e):
     return render_template('404.html'), 404
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=5000)
+
