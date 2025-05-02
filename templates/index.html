@@ -107,6 +107,12 @@
       margin-top: 2rem;
     }
 
+    .theme-toggle {
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
     @media (max-width: 768px) {
       .nav-toggle {
         display: block;
@@ -133,7 +139,7 @@
 <body>
   <nav class="navbar">
     <div class="nav-left">PAPERPREP</div>
-    <div class="nav-toggle" onclick="toggleMenu()">☰</div>
+    <div class="nav-toggle" onclick="toggleMenu()">&#9776;</div>
     <ul class="nav-menu" id="nav-menu">
       <li><a href="/tool/pdf-to-word">📄 PDF to Word</a></li>
       <li><a href="/tool/images-to-pdf">🖼️ Image to PDF</a></li>
@@ -147,6 +153,7 @@
       <li><a href="/contact">📬 Contact</a></li>
       <li><a href="/privacy">🔒 Privacy</a></li>
       <li><a href="/terms">📜 Terms</a></li>
+      <li><a href="#" class="theme-toggle" onclick="toggleTheme()">🌙</a></li>
     </ul>
   </nav>
 
@@ -174,6 +181,12 @@
     function toggleMenu() {
       const menu = document.getElementById('nav-menu');
       menu.classList.toggle('active');
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      const currentTheme = body.getAttribute('data-theme');
+      body.setAttribute('data-theme', currentTheme === 'light' ? 'dark' : 'light');
     }
   </script>
 </body>
