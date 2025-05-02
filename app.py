@@ -291,6 +291,7 @@ BASE_HTML = """
   <meta property="og:description" content="Convert and manage your documents easily using PAPERPREP. A professional all-in-one file converter for students and professionals." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://paperprep.space/" />
+   <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
 </head>
 <body>
 <nav>
