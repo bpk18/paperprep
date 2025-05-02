@@ -42,6 +42,16 @@ BASE_HTML = """
 <meta name="description" content="PAPERPREP is your all-in-one file converter for PDFs, Word documents, images, and more. Fast, free, and easy to use." />
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "PAPERPREP - All-in-One File Converter",
+  "url": "https://paperprep.space",
+  "description": "PAPERPREP is your all-in-one file converter for PDFs, Word documents, images, and more. Fast, free, and easy to use."
+}
+</script>
+
 <style>
   :root {
     --primary-color: #5A9BD4;
