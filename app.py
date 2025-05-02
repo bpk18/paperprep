@@ -38,10 +38,10 @@ BASE_HTML = """
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>PAPERPREP - All-in-One File Converter</title>
+<title>{{ title }}</title>
 <meta name="description" content="PAPERPREP is your all-in-one file converter for PDFs, Word documents, images, and more. Fast, free, and easy to use." />
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -130,9 +130,8 @@ BASE_HTML = """
     overflow: hidden;
     display: none;
     min-width: 150px;
-    box-shadow: 0 3px 12px rgba(0,0,0,0.3);
-    z-index: 1001;
-  }
+    box-shadow: 0 3px 12px
+    }
 
   nav .dropdown a {
     display: block;
