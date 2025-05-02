@@ -83,6 +83,12 @@ BASE_HTML = """
     top: 0;
     z-index: 1000;
   }
+  /* Added to align theme toggle and menu button horizontally */
+  nav > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
 
   nav .brand {
     font-weight: bold;
@@ -710,4 +716,3 @@ def pdf_compress():
 if __name__ == '__main__':
     # Use 0.0.0.0 to be reachable on local network if hosting
     app.run(debug=True, host='0.0.0.0', port=5000)
-
