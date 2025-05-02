@@ -8,7 +8,7 @@
     <meta name="author" content="PAPERPREP Team">
     <title>PAPERPREP - File Conversion Made Easy</title>
     <link rel="icon" href="/static/favicon.ico" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Orbitron:wght@500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/style.css">
     <script>
       if (!localStorage.getItem('theme')) {
@@ -18,38 +18,92 @@
           document.documentElement.setAttribute('data-theme', localStorage.getItem('theme'));
       }
     </script>
+    <style>
+        .site-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 500;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background-color: var(--bg-color);
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .mobile-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                gap: 0.5rem;
+                background-color: var(--bg-color);
+                padding: 1rem;
+                position: absolute;
+                top: 4rem;
+                right: 1rem;
+                border-radius: 8px;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            }
+            .nav-links.active {
+                display: flex;
+            }
+            .mobile-toggle {
+                display: block;
+            }
+        }
+
+        .tool-card {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <button class="menu-toggle" onclick="toggleMenu()">&#9776;</button>
-        <nav id="mobile-menu" class="hidden">
+    <header class="navbar">
+        <div class="site-title">PAPERPREP</div>
+        <div class="mobile-toggle" onclick="toggleNav()">☰</div>
+        <nav class="nav-links" id="navLinks">
             <a href="/tool/pdf-to-word">PDF to Word</a>
             <a href="/tool/images-to-pdf">Image to PDF</a>
             <a href="/tool/ppt-to-pdf">PPT to PDF</a>
             <a href="/tool/pdf-to-ppt">PDF to PPT</a>
-            <a href="/tool/merge-pdf">Merge PDFs</a>
+            <a href="/tool/merge-pdf">Merge PDF</a>
             <a href="/tool/pdf-splitter">Split PDF</a>
             <a href="/tool/compress-image">Compress Image</a>
             <a href="/tool/compress-pdf">Compress PDF</a>
-            <hr>
             <a href="/about">About</a>
-            <a href="/privacy">Privacy</a>
             <a href="/contact">Contact</a>
-            <a href="/terms">Terms & Conditions</a>
+            <a href="/privacy">Privacy</a>
+            <a href="/terms">Terms</a>
         </nav>
-        <button class="theme-toggle" onclick="toggleTheme()">Toggle Theme</button>
+        <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
     </header>
 
     <main>
         <section class="tool-grid">
-            <a href="/tool/pdf-to-word" class="tool-card">PDF to Word</a>
-            <a href="/tool/images-to-pdf" class="tool-card">Image to PDF</a>
-            <a href="/tool/ppt-to-pdf" class="tool-card">PPT to PDF</a>
-            <a href="/tool/pdf-to-ppt" class="tool-card">PDF to PPT</a>
-            <a href="/tool/merge-pdf" class="tool-card">Merge PDFs</a>
-            <a href="/tool/pdf-splitter" class="tool-card">Split PDF</a>
-            <a href="/tool/compress-image" class="tool-card">Compress Image</a>
-            <a href="/tool/compress-pdf" class="tool-card">Compress PDF</a>
+            <a href="/tool/pdf-to-word" class="tool-card"><img src="/static/icons/pdf-to-word.png" alt="PDF to Word" width="24"> PDF to Word</a>
+            <a href="/tool/images-to-pdf" class="tool-card"><img src="/static/icons/image-to-pdf.png" alt="Image to PDF" width="24"> Image to PDF</a>
+            <a href="/tool/ppt-to-pdf" class="tool-card"><img src="/static/icons/ppt-to-pdf.png" alt="PPT to PDF" width="24"> PPT to PDF</a>
+            <a href="/tool/pdf-to-ppt" class="tool-card"><img src="/static/icons/pdf-to-ppt.png" alt="PDF to PPT" width="24"> PDF to PPT</a>
+            <a href="/tool/merge-pdf" class="tool-card"><img src="/static/icons/merge-pdf.png" alt="Merge PDF" width="24"> Merge PDF</a>
+            <a href="/tool/pdf-splitter" class="tool-card"><img src="/static/icons/split-pdf.png" alt="Split PDF" width="24"> Split PDF</a>
+            <a href="/tool/compress-image" class="tool-card"><img src="/static/icons/compress-image.png" alt="Compress Image" width="24"> Compress Image</a>
+            <a href="/tool/compress-pdf" class="tool-card"><img src="/static/icons/compress-pdf.png" alt="Compress PDF" width="24"> Compress PDF</a>
         </section>
     </main>
 
@@ -65,9 +119,9 @@
             localStorage.setItem("theme", newTheme);
         }
 
-        function toggleMenu() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
+        function toggleNav() {
+            const links = document.getElementById("navLinks");
+            links.classList.toggle("active");
         }
     </script>
 </body>
