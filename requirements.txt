@@ -1,5 +1,5 @@
-Flask==2.1.1
-Werkzeug==2.1.1
-PyPDF2==1.26.0
-Pillow==9.0.0
-fpdf==1.7.2
+Flask
+Pillow  # For image processing
+PyPDF2  # For PDF manipulation
+python-pptx  # For PowerPoint manipulation (if needed for PPT to PDF)
+# Add other libraries as needed for specific conversions
