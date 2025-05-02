@@ -28,7 +28,7 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       position: sticky;
       top: 0;
-      z-index: 10;
+      z-index: 1000;
     }
 
     .nav-left {
@@ -41,6 +41,7 @@
       display: none;
       font-size: 26px;
       cursor: pointer;
+      padding-left: 15px;
     }
 
     .nav-menu {
@@ -55,6 +56,15 @@
       text-decoration: none;
       color: #333;
       font-weight: 500;
+      padding: 8px 10px;
+    }
+
+    .theme-toggle {
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 20px;
+      margin-left: 10px;
     }
 
     .hero {
@@ -107,20 +117,59 @@
       margin-top: 2rem;
     }
 
+    .dark-mode {
+      background: #121212;
+      color: #eee;
+    }
+
+    .dark-mode .navbar {
+      background: #1f1f1f;
+    }
+
+    .dark-mode .tool-card {
+      background: #1f1f1f;
+      color: #ddd;
+    }
+
+    .dark-mode .tool-card:hover {
+      background: #2c2c2c;
+    }
+
+    .dark-mode footer {
+      background: #1a1a1a;
+      color: #ccc;
+    }
+
+    .dark-mode .nav-menu {
+      background: #1a1a1a;
+    }
+
     @media (max-width: 768px) {
       .nav-toggle {
         display: block;
       }
 
       .nav-menu {
-        flex-direction: column;
         display: none;
-        width: 100%;
-        background: #fff;
         position: absolute;
         top: 60px;
         left: 0;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        right: 0;
+        flex-direction: column;
+        background: #ffffff;
+        width: 100%;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        padding: 10px 0;
+        z-index: 999;
+      }
+
+      .dark-mode .nav-menu {
+        background: #1a1a1a;
+      }
+
+      .nav-menu li {
+        margin: 10px 0;
+        text-align: center;
       }
 
       .nav-menu.active {
@@ -133,7 +182,10 @@
 <body>
   <nav class="navbar">
     <div class="nav-left">PAPERPREP</div>
-    <div class="nav-toggle" onclick="toggleMenu()">☰</div>
+    <div style="display: flex; align-items: center;">
+      <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+      <div class="nav-toggle" onclick="toggleMenu()">☰</div>
+    </div>
     <ul class="nav-menu" id="nav-menu">
       <li><a href="/tool/pdf-to-word">📄 PDF to Word</a></li>
       <li><a href="/tool/images-to-pdf">🖼️ Image to PDF</a></li>
@@ -175,6 +227,24 @@
       const menu = document.getElementById('nav-menu');
       menu.classList.toggle('active');
     }
+
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      document.body.classList.toggle('dark-mode', newTheme === 'dark');
+      localStorage.setItem('theme', newTheme);
+      document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    (function () {
+      const savedTheme = localStorage.getItem('theme') || 'light';
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.body.classList.toggle('dark-mode', savedTheme === 'dark');
+      window.addEventListener('DOMContentLoaded', () => {
+        document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+      });
+    })();
   </script>
 </body>
 </html>
