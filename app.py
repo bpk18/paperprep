@@ -283,6 +283,14 @@ BASE_HTML = """
 
 </style>
 <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9764517671001230" crossorigin="anonymous"></script>
+  <meta name="description" content="Convert PDF, Word, Images, PPT, and more with PAPERPREP – the all-in-one file conversion toolkit. Fast, free, and easy to use." />
+  <meta name="keywords" content="file converter, PAPERPREP, PDF tools, PDF to Word, Image to PDF, PPT to PDF, compress PDF, merge PDF" />
+  <meta name="author" content="BPK" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="PAPERPREP - Convert PDFs, Images & More" />
+  <meta property="og:description" content="Convert and manage your documents easily using PAPERPREP. A professional all-in-one file converter for students and professionals." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://paperprep.space/" />
 </head>
 <body>
 <nav>
