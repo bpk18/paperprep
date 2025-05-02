@@ -1,250 +1,44 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="PAPERPREP – Your go-to toolset for PDF, Image & Document conversions.">
-  <meta name="keywords" content="PAPERPREP, PDF tools, image to pdf, merge pdf, compress pdf, file converter">
-  <meta name="author" content="PAPERPREP Team">
-  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-  <title>PAPERPREP</title>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
-
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #fdfdfd;
-      color: #222;
-      margin: 0;
-      padding: 0;
-    }
-
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #ffffff;
-      padding: 10px 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-
-    .nav-left {
-      font-size: 1.5rem;
-      font-weight: bold;
-      font-family: 'Orbitron', sans-serif;
-    }
-
-    .nav-toggle {
-      display: none;
-      font-size: 26px;
-      cursor: pointer;
-      padding-left: 15px;
-    }
-
-    .nav-menu {
-      list-style: none;
-      display: flex;
-      gap: 15px;
-      margin: 0;
-      padding: 0;
-    }
-
-    .nav-menu li a {
-      text-decoration: none;
-      color: #333;
-      font-weight: 500;
-      padding: 8px 10px;
-    }
-
-    .theme-toggle {
-      cursor: pointer;
-      background: none;
-      border: none;
-      font-size: 20px;
-      margin-left: 10px;
-    }
-
-    .hero {
-      text-align: center;
-      padding: 2rem;
-      background: linear-gradient(to right, #f1f1f1, #fafafa);
-    }
-
-    .hero h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 2.5rem;
-      margin-bottom: 0.5rem;
-    }
-
-    .hero p {
-      font-size: 1.2rem;
-      color: #666;
-    }
-
-    .tool-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.2rem;
-      padding: 2rem;
-      text-align: center;
-    }
-
-    .tool-card {
-      background: #fff;
-      border-radius: 12px;
-      padding: 1.5rem;
-      box-shadow: 0 0 12px rgba(0,0,0,0.1);
-      transition: 0.3s ease;
-      font-size: 1.1rem;
-      font-weight: 500;
-      text-decoration: none;
-      color: #333;
-    }
-
-    .tool-card:hover {
-      transform: scale(1.05);
-      background: #eef;
-    }
-
-    footer {
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.9rem;
-      background: #f8f8f8;
-      margin-top: 2rem;
-    }
-
-    .dark-mode {
-      background: #121212;
-      color: #eee;
-    }
-
-    .dark-mode .navbar {
-      background: #1f1f1f;
-    }
-
-    .dark-mode .tool-card {
-      background: #1f1f1f;
-      color: #ddd;
-    }
-
-    .dark-mode .tool-card:hover {
-      background: #2c2c2c;
-    }
-
-    .dark-mode footer {
-      background: #1a1a1a;
-      color: #ccc;
-    }
-
-    .dark-mode .nav-menu {
-      background: #1a1a1a;
-    }
-
-    @media (max-width: 768px) {
-      .nav-toggle {
-        display: block;
-      }
-
-      .nav-menu {
-        display: none;
-        position: absolute;
-        top: 60px;
-        left: 0;
-        right: 0;
-        flex-direction: column;
-        background: #ffffff;
-        width: 100%;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        padding: 10px 0;
-        z-index: 999;
-      }
-
-      .dark-mode .nav-menu {
-        background: #1a1a1a;
-      }
-
-      .nav-menu li {
-        margin: 10px 0;
-        text-align: center;
-      }
-
-      .nav-menu.active {
-        display: flex;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>PaperPrep - Home</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+<body class="bg-gray-100 text-gray-900">
+    <nav class="bg-white shadow p-4 flex justify-between">
+        <h1 class="text-2xl font-bold">PaperPrep</h1>
+        <div class="space-x-4">
+            <a href="{{ url_for('about') }}">About</a>
+            <a href="{{ url_for('privacy') }}">Privacy</a>
+            <a href="{{ url_for('contact') }}">Contact</a>
+            <a href="{{ url_for('terms') }}">Terms</a>
+        </div>
+    </nav>
 
-<body>
-  <nav class="navbar">
-    <div class="nav-left">PAPERPREP</div>
-    <div style="display: flex; align-items: center;">
-      <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-      <div class="nav-toggle" onclick="toggleMenu()">☰</div>
-    </div>
-    <ul class="nav-menu" id="nav-menu">
-      <li><a href="/tool/pdf-to-word">📄 PDF to Word</a></li>
-      <li><a href="/tool/images-to-pdf">🖼️ Image to PDF</a></li>
-      <li><a href="/tool/ppt-to-pdf">📊 PPT to PDF</a></li>
-      <li><a href="/tool/pdf-to-ppt">📑 PDF to PPT</a></li>
-      <li><a href="/tool/merge-pdf">🧩 Merge PDFs</a></li>
-      <li><a href="/tool/pdf-splitter">✂️ Split PDF</a></li>
-      <li><a href="/tool/compress-image">🗜️ Compress Image</a></li>
-      <li><a href="/tool/compress-pdf">📉 Compress PDF</a></li>
-      <li><a href="/about">ℹ️ About</a></li>
-      <li><a href="/contact">📬 Contact</a></li>
-      <li><a href="/privacy">🔒 Privacy</a></li>
-      <li><a href="/terms">📜 Terms</a></li>
-    </ul>
-  </nav>
+    <main class="p-6">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="p-4 my-2 bg-green-100 border border-green-400 rounded">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
 
-  <header class="hero">
-    <h1>Welcome to PAPERPREP</h1>
-    <p>All-in-one toolset for your file conversions</p>
-  </header>
-
-  <section class="tool-grid">
-    <a href="/tool/pdf-to-word" class="tool-card">📄 PDF to Word</a>
-    <a href="/tool/images-to-pdf" class="tool-card">🖼️ Image to PDF</a>
-    <a href="/tool/ppt-to-pdf" class="tool-card">📊 PPT to PDF</a>
-    <a href="/tool/pdf-to-ppt" class="tool-card">📑 PDF to PPT</a>
-    <a href="/tool/merge-pdf" class="tool-card">🧩 Merge PDFs</a>
-    <a href="/tool/pdf-splitter" class="tool-card">✂️ Split PDF</a>
-    <a href="/tool/compress-image" class="tool-card">🗜️ Compress Image</a>
-    <a href="/tool/compress-pdf" class="tool-card">📉 Compress PDF</a>
-  </section>
-
-  <footer>
-    <p>&copy; 2025 PAPERPREP</p>
-  </footer>
-
-  <script>
-    function toggleMenu() {
-      const menu = document.getElementById('nav-menu');
-      menu.classList.toggle('active');
-    }
-
-    function toggleTheme() {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', newTheme);
-      document.body.classList.toggle('dark-mode', newTheme === 'dark');
-      localStorage.setItem('theme', newTheme);
-      document.querySelector('.theme-toggle').textContent = newTheme === 'dark' ? '☀️' : '🌙';
-    }
-
-    (function () {
-      const savedTheme = localStorage.getItem('theme') || 'light';
-      document.documentElement.setAttribute('data-theme', savedTheme);
-      document.body.classList.toggle('dark-mode', savedTheme === 'dark');
-      window.addEventListener('DOMContentLoaded', () => {
-        document.querySelector('.theme-toggle').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-      });
-    })();
-  </script>
+        <h2 class="text-xl font-semibold mb-4">Choose a Tool</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for tool in ['PDF to Word', 'Multiple Images to PDF', 'PPT to PDF', 'PDF to PPT', 'Word to PDF', 'Image Resizer', 'PDF Compressor'] %}
+            <form method="POST" action="{{ url_for('process') }}" enctype="multipart/form-data" class="p-4 bg-white shadow rounded">
+                <label class="block font-medium mb-2">{{ tool }}</label>
+                <input type="file" name="file" required class="mb-2 block w-full">
+                <input type="hidden" name="tool" value="{{ tool }}">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Upload</button>
+            </form>
+            {% endfor %}
+        </div>
+    </main>
 </body>
 </html>
