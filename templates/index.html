@@ -1,37 +1,167 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>PAPERPREP</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PAPERPREP - All-in-One File Converter</title>
+
+  <!-- SEO -->
+  <meta name="description" content="Convert PDF, Word, Images, PPT, and more with PAPERPREP – the all-in-one file conversion toolkit. Fast, free, and easy to use." />
+  <meta name="keywords" content="file converter, PAPERPREP, PDF tools, PDF to Word, Image to PDF, PPT to PDF, compress PDF, merge PDF" />
+  <meta name="author" content="Your Name" />
+  <meta name="robots" content="index, follow" />
+  <meta property="og:title" content="PAPERPREP - Convert PDFs, Images & More" />
+  <meta property="og:description" content="Convert and manage your documents easily using PAPERPREP. A professional all-in-one file converter for students and professionals." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/" />
+  <meta property="og:image" content="https://yourdomain.com/static/logo.png" />
+
+  <!-- TailwindCSS -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" />
+
+  <style>
+    :root {
+      --primary-dark: #1e293b;
+      --primary-light: #f1f5f9;
+    }
+
+    body {
+      background-color: var(--primary-light);
+      color: #1f2937;
+      transition: all 0.3s ease;
+    }
+
+    body.dark {
+      background-color: var(--primary-dark);
+      color: #f8fafc;
+    }
+
+    .header-text {
+      color: #1e293b;
+    }
+
+    body.dark .header-text {
+      color: #f8fafc;
+    }
+
+    .card {
+      background-color: rgba(0, 0, 0, 0.05);
+      backdrop-filter: blur(6px);
+    }
+
+    body.dark .card {
+      background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    #splash-screen {
+      background-color: #f1f5f9;
+      color: #1e293b;
+      position: fixed;
+      z-index: 50;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    #splash-screen img {
+      width: 120px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
 </head>
-<body class="{{ theme }}-theme">
-  <nav>
-    <div class="brand">PAPERPREP</div>
-    <div class="nav-items">
-      <a href="/">Home</a>
-      <a href="/about">About</a>
-      <a href="/privacy">Privacy</a>
-      <a href="/contact">Contact</a>
-      <a href="/terms">Terms</a>
-      <button id="theme-toggle">Toggle Theme</button>
+<body>
+  <!-- Splash Screen -->
+  <div id="splash-screen">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="PAPERPREP Logo" />
+    <p class="mt-4 text-xl font-bold tracking-wide">PAPERPREP is loading...</p>
+  </div>
+
+  <!-- Theme Toggle Button -->
+  <button id="theme-toggle" class="absolute top-5 right-5 p-2 rounded-full bg-gray-200 text-gray-800 shadow">
+    <i id="theme-icon" class="fas fa-sun"></i>
+  </button>
+
+  <!-- Main Content -->
+  <main class="container mx-auto p-6">
+    <div class="flex flex-col items-center mb-12">
+      <h1 class="text-4xl md:text-5xl font-bold header-text" style="font-family: 'Orbitron', sans-serif;">
+        PAPERPREP
+      </h1>
+      <p class="text-center text-sm mt-2 text-gray-600 max-w-md">
+        Your all-in-one futuristic file converter suite
+      </p>
     </div>
-  </nav>
-  <main>
-    <h1>All-in-One Document Tools</h1>
-    <div class="tools-grid">
-      <a href="/tool/pdf-to-word" class="tool-card"><i class="fas fa-file-word"></i><div>PDF to Word</div></a>
-      <a href="/tool/jpg-to-word" class="tool-card"><i class="fas fa-image"></i><div>JPG to Word</div></a>
-      <a href="/tool/ppt-to-pdf" class="tool-card"><i class="fas fa-file-powerpoint"></i><div>PPT to PDF</div></a>
-      <a href="/tool/pdf-to-ppt" class="tool-card"><i class="fas fa-file-pdf"></i><div>PDF to PPT</div></a>
-      <a href="/tool/images-to-pdf" class="tool-card"><i class="fas fa-file-image"></i><div>Images to PDF</div></a>
-      <a href="/tool/merge-pdf" class="tool-card"><i class="fas fa-compress"></i><div>Merge PDF</div></a>
-      <a href="/tool/image-compressor" class="tool-card"><i class="fas fa-compress-arrows-alt"></i><div>Image Compressor</div></a>
-      <a href="/tool/pdf-compressor" class="tool-card"><i class="fas fa-file-archive"></i><div>PDF Compressor</div></a>
-    </div>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      {% for tool in [
+        ('pdf-to-word', 'fa-file-word', 'Convert PDF files to editable Word documents'),
+        ('images-to-pdf', 'fa-file-image', 'Merge multiple images into a single PDF'),
+        ('pdf-splitter', 'fa-scissors', 'Split large PDFs into individual pages'),
+        ('ppt-to-pdf', 'fa-file-powerpoint', 'Convert PowerPoint slides into PDFs'),
+        ('pdf-to-ppt', 'fa-file-pdf', 'Transform PDFs into PowerPoint presentations'),
+        ('merge-pdf', 'fa-compress-alt', 'Combine several PDF files into one'),
+        ('compress-image', 'fa-compress', 'Reduce image size without losing quality'),
+        ('compress-pdf', 'fa-file-archive', 'Shrink PDF file size for easy sharing')
+      ] %}
+      <a href="{{ url_for('tool', tool_name=tool[0]) }}" class="card p-6 rounded-2xl shadow-lg text-center transition-transform hover:scale-105">
+        <i class="fas {{ tool[1] }} text-4xl text-indigo-500 mb-4" aria-hidden="true"></i>
+        <h2 class="text-xl font-semibold capitalize mb-1">{{ tool[0].replace('-', ' ') }}</h2>
+        <p class="text-sm opacity-80">{{ tool[2] }}</p>
+      </a>
+      {% endfor %}
+    </section>
   </main>
+
+  <footer class="mt-12 text-center text-sm text-gray-500">
+    &copy; 2025 PAPERPREP | Designed for Academic Use
+  </footer>
+
+  <!-- Theme and Splash Script -->
+  <script>
+    const themeToggle = document.getElementById('theme-toggle');
+    const themeIcon = document.getElementById('theme-icon');
+    const body = document.body;
+
+    function applyTheme() {
+      const theme = localStorage.getItem('theme') || 'light';
+      if (theme === 'dark') {
+        body.classList.add('dark');
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+      } else {
+        body.classList.remove('dark');
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+      }
+    }
+
+    themeToggle.addEventListener('click', () => {
+      const isDark = body.classList.contains('dark');
+      localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      applyTheme();
+    });
+
+    window.addEventListener('load', () => {
+      applyTheme();
+      document.getElementById('splash-screen').style.display = 'none';
+    });
+  </script>
 </body>
 </html>
