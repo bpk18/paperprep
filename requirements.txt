@@ -1,1 +1,9 @@
 Flask==2.1.1
+PyMuPDF==1.22.5         # For reading and converting PDFs
+python-docx==1.1.0      # For creating Word files
+pdf2image==1.16.3       # Convert PDF pages to images
+Pillow==10.0.0          # Image handling
+img2pdf==0.5.1          # Combine images into PDF
+PyPDF2==3.0.1           # Merging/compressing PDFs
+pytesseract==0.3.10     # OCR
+opencv-python==4.8.0.76 # Required for image preprocessing in OCR
