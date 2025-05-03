@@ -520,8 +520,8 @@ def render_tool_page(title, description, fields, icon_key, result_fileurl=None, 
         </form>
     {% endblock %}
     '''
-    return render_template_string(page_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
-
+    return render_template_string(page_html, title=title, description=description,
+                                  fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
 
 @app.route('/')
 def home():
