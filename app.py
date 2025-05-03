@@ -1,8 +1,30 @@
-from flask import Flask, render_template_string, request, redirect, url_for, send_from_directory
+import os
+import tempfile
+import shutil
+from flask import Flask, render_template_string, request, redirect, url_for, send_file, flash
+from werkzeug.utils import secure_filename
+from PyPDF2 import PdfMerger, PdfReader
+from PIL import Image
+from pdf2docx import Converter
+from docx import Document
+from io import BytesIO
 
 app = Flask(__name__)
+app.secret_key = 'supersecretkey'  # for flashing messages
 
-# Base HTML layout with navbar, theme toggle, menu and content block with SEO improvements and favicon link
+# Ensure temp directory
+TEMP_DIR = tempfile.mkdtemp()
+
+# Allowed extensions for tools
+ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'bmp', 'gif'}
+ALLOWED_PDF = {'pdf'}
+ALLOWED_PPT = {'ppt', 'pptx'}
+ALLOWED_DOCX = {'docx'}
+
+def allowed_file(filename, allowed_set):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_set
+
+
 base_html = '''
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
@@ -153,6 +175,9 @@ base_html = '''
         main {
           flex-grow: 1;
           padding: 1.5rem 1rem 3rem;
+          max-width: 900px;
+          margin: auto;
+          width: 100%;
         }
 
         /* Footer */
@@ -172,7 +197,7 @@ base_html = '''
           grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
           gap: 1.5rem;
           max-width: 1000px;
-          margin: 0 auto;
+          margin: 0 auto 2rem;
         }
         .tool-card {
           background: var(--card-bg);
@@ -255,10 +280,10 @@ base_html = '''
           user-select: none;
         }
 
-        /* Form styles for contact */
+        /* Form styles for contact and tools */
         form {
           max-width: 500px;
-          margin: 0 auto;
+          margin: 0 auto 2rem;
           display: flex;
           flex-direction: column;
           gap: 1rem;
@@ -269,7 +294,7 @@ base_html = '''
           user-select: none;
           color: var(--text);
         }
-        input[type="text"], input[type="email"], textarea {
+        input[type="file"], input[type="text"], input[type="email"], textarea {
           padding: 0.5rem 0.8rem;
           border-radius: 8px;
           border: 1px solid var(--border-color);
@@ -279,7 +304,7 @@ base_html = '''
           resize: vertical;
           transition: border-color 0.3s;
         }
-        input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
+        input[type="file"]:focus, input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
           border-color: var(--primary);
           outline: none;
         }
@@ -304,6 +329,37 @@ base_html = '''
           background-color: var(--btn-hover-bg);
         }
 
+        /* Flash messages */
+        .flash {
+          max-width: 500px;
+          margin: 0 auto 1.5rem;
+          padding: 1rem;
+          background-color: #f44336;
+          color: white;
+          border-radius: 8px;
+          text-align: center;
+        }
+
+        /* Result download link */
+        .result-link {
+          display: flex;
+          justify-content: center;
+          margin-bottom: 2rem;
+        }
+        .result-link a {
+          font-weight: 700;
+          background-color: var(--primary);
+          color: var(--btn-text);
+          padding: 0.6rem 1.5rem;
+          border-radius: 25px;
+          text-decoration: none;
+          box-shadow: 0 4px 10px var(--card-shadow);
+          transition: background-color 0.3s ease;
+        }
+        .result-link a:hover {
+          background-color: var(--btn-hover-bg);
+        }
+
         /* Scroll locking when menu open */
         body.menu-open {
           overflow: hidden;
@@ -324,10 +380,18 @@ base_html = '''
             <a href="{{ url_for('privacy') }}" role="menuitem" tabindex="0">Privacy</a>
             <a href="{{ url_for('contact') }}" role="menuitem" tabindex="0">Contact</a>
             <a href="{{ url_for('terms') }}" role="menuitem" tabindex="0">Terms &amp; Conditions</a>
+            <a href="{{ url_for('home') }}" role="menuitem" tabindex="0">Home</a>
         </div>
         <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark/light theme">Dark Theme</button>
     </nav>
     <main>
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            {% for message in messages %}
+            <div class="flash" role="alert">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
         {% block content %}{% endblock %}
     </main>
     <footer role="contentinfo">
@@ -370,7 +434,7 @@ base_html = '''
 </html>
 '''
 
-# Home page with tools listed
+# Home page with links to tool pages
 home_html = '''
 {% extends 'base.html' %}
 {% block content %}
@@ -378,108 +442,77 @@ home_html = '''
     <p class="lead">Your all-in-one document and image conversion toolkit with a futuristic UI and seamless experience.</p>
     <section class="tools-grid" aria-label="Conversion Tools">
 
-        <!-- PDF to Word -->
-        <article class="tool-card" role="listitem" aria-label="PDF to Word conversion tool">
-            <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <path d="M48 4H16a4 4 0 0 0-4 4v48a4 4 0 0 0 4 4h32a4 4 0 0 0 4-4V12l-12-8zM16 56V8h29.3L48 12v44H16z"/>
-                <path d="M24 28h16v4H24zm0 8h11v4H24z" fill="var(--primary)"/>
-            </svg>
+        <article class="tool-card">
             <div class="tool-name">PDF to Word</div>
-            <button class="btn" onclick="alert('PDF to Word tool coming soon!')">Open</button>
+            <a class="btn" href="{{ url_for('pdf_to_word') }}">Open</a>
         </article>
 
-        <!-- JPG to Word -->
-        <article class="tool-card" role="listitem" aria-label="JPG to Word conversion tool">
-            <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <circle cx="32" cy="26" r="8" stroke="var(--primary)" stroke-width="3" fill="none"/>
-                <path d="M16 44h32v6H16z" fill="var(--primary)"/>
-                <path d="M8 54h48v4H8z" fill="var(--secondary)"/>
-            </svg>
+        <article class="tool-card">
             <div class="tool-name">JPG to Word</div>
-            <button class="btn" onclick="alert('JPG to Word tool coming soon!')">Open</button>
+            <a class="btn" href="{{ url_for('jpg_to_word') }}">Open</a>
         </article>
 
-        <!-- PPT to PDF -->
-        <article class="tool-card" role="listitem" aria-label="PPT to PDF conversion tool">
-            <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <rect x="14" y="12" width="36" height="40" rx="3" ry="3" fill="var(--primary)"/>
-                <path fill="var(--btn-text)" d="M22 20h20v24H22z"/>
-                <rect x="22" y="20" width="16" height="2" fill="var(--primary)"/>
-                <rect x="22" y="35" width="16" height="2" fill="var(--primary)"/>
-            </svg>
+        <article class="tool-card">
             <div class="tool-name">PPT to PDF</div>
-            <button class="btn" onclick="alert('PPT to PDF tool coming soon!')">Open</button>
+            <a class="btn" href="{{ url_for('ppt_to_pdf') }}">Open</a>
         </article>
 
-        <!-- PDF to PPT -->
-        <article class="tool-card" role="listitem" aria-label="PDF to PPT conversion tool">
-            <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <rect x="14" y="12" width="36" height="40" rx="3" ry="3" fill="var(--primary)"/>
-                <path fill="var(--btn-text)" d="M22 20h20v24H22z"/>
-                <path d="M26 24h12v16H26z" fill="var(--primary)"/>
-            </svg>
+        <article class="tool-card">
             <div class="tool-name">PDF to PPT</div>
-            <button class="btn" onclick="alert('PDF to PPT tool coming soon!')">Open</button>
+            <a class="btn" href="{{ url_for('pdf_to_ppt') }}">Open</a>
         </article>
 
-        <!-- Multiple images to one PDF -->
-        <article class="tool-card" role="listitem" aria-label="Multiple images to PDF conversion tool">
-            <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <rect x="10" y="14" width="44" height="36" rx="4" ry="4" fill="var(--primary)"/>
-                <circle cx="32" cy="32" r="8" fill="var(--btn-text)"/>
-                <path d="M24 40h16v4H24z" fill="var(--primary)"/>
-            </svg>
+        <article class="tool-card">
             <div class="tool-name">Images to PDF</div>
-            <button class="btn" onclick="alert('Images to PDF tool coming soon!')">Open</button>
+            <a class="btn" href="{{ url_for('images_to_pdf') }}">Open</a>
         </article>
 
-        <!-- Merge PDF -->
-        <article class="tool-card" role="listitem" aria-label="Merge PDF tool">
-            <svg class="tool-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-                <rect x="8" y="14" width="48" height="36" rx="4" ry="4" fill="var(--primary)"/>
-                <path d="M20 24h24v4H20zM20 34h24v4H20z" fill="var(--btn-text)"/>
-            </svg>
+        <article class="tool-card">
             <div class="tool-name">Merge PDF</div>
-            <button class="btn" onclick="alert('Merge PDF tool coming soon!')">Open</button>
+            <a class="btn" href="{{ url_for('merge_pdf') }}">Open</a>
         </article>
 
-        <!-- Image Compressor -->
-        <article class="tool-card" role="listitem" aria-label="Image Compressor tool">
-            <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <circle cx="32" cy="32" r="20" stroke="var(--primary)" stroke-width="4" fill="none"/>
-                <path d="M22 32l6 6 12-12" stroke="var(--primary)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+        <article class="tool-card">
             <div class="tool-name">Image Compressor</div>
-            <button class="btn" onclick="alert('Image Compressor tool coming soon!')">Open</button>
+            <a class="btn" href="{{ url_for('image_compressor') }}">Open</a>
         </article>
 
-        <!-- PDF Compressor -->
-        <article class="tool-card" role="listitem" aria-label="PDF Compressor tool">
-            <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <rect x="16" y="16" width="32" height="32" fill="var(--primary)" rx="6" ry="6"/>
-                <path d="M24 24h16v16H24z" fill="var(--btn-text)"/>
-                <path d="M24 24h16v4H24z" fill="var(--primary)"/>
-            </svg>
+        <article class="tool-card">
             <div class="tool-name">PDF Compressor</div>
-            <button class="btn" onclick="alert('PDF Compressor tool coming soon!')">Open</button>
+            <a class="btn" href="{{ url_for('pdf_compressor') }}">Open</a>
         </article>
-
-        <!-- Placeholder for other tools -->
-        <article class="tool-card" role="listitem" aria-label="More tools coming soon">
-            <svg class="tool-icon" viewBox="0 0 24 24" fill="var(--primary)" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-                <circle cx="12" cy="12" r="10" stroke="var(--primary)" stroke-width="1" fill="none"/>
-                <line x1="8" y1="12" x2="16" y2="12" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
-                <line x1="12" y1="8" x2="12" y2="16" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"/>
-            </svg>
-            <div class="tool-name">More Tools Soon</div>
-            <button class="btn" onclick="alert('More tools coming soon!')">Open</button>
-        </article>
-
     </section>
 {% endblock %}
 '''
 
-# About page content
+generic_tool_html = '''
+{% extends 'base.html' %}
+{% block content %}
+    <h1>{{ title }}</h1>
+    <p class="lead">{{ description }}</p>
+
+    {% if result_fileurl %}
+        <div class="result-link">
+            <a href="{{ result_fileurl }}" download="{{ result_filename }}">Download {{ title }} Result</a>
+        </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% for field in fields %}
+            <label for="{{ field.id }}">{{ field.label }}</label>
+            <input
+              type="{{ field.type }}"
+              name="{{ field.name }}"{% if field.multiple %} multiple{% endif %}
+              id="{{ field.id }}"{% if field.accept %} accept="{{ field.accept }}"{% endif %}
+              required="{{ 'required' if field.required else '' }}"
+            />
+        {% endfor %}
+        <input type="submit" value="Convert" />
+    </form>
+{% endblock %}
+'''
+
+# About, Privacy, Contact, Terms templates - reuse from before but with minor adjustments
 about_html = '''
 {% extends 'base.html' %}
 {% block content %}
@@ -491,7 +524,6 @@ about_html = '''
 {% endblock %}
 '''
 
-# Privacy page
 privacy_html = '''
 {% extends 'base.html' %}
 {% block content %}
@@ -505,7 +537,6 @@ privacy_html = '''
 {% endblock %}
 '''
 
-# Contact page with simple form (no backend submission, just alert)
 contact_html = '''
 {% extends 'base.html' %}
 {% block content %}
@@ -526,7 +557,6 @@ contact_html = '''
 {% endblock %}
 '''
 
-# Terms page content
 terms_html = '''
 {% extends 'base.html' %}
 {% block content %}
@@ -542,17 +572,12 @@ terms_html = '''
 {% endblock %}
 '''
 
-# Serve favicon.ico from static folder
-@app.route('/favicon.ico')
-def favicon():
-    return send_from_directory(app.static_folder, 'favicon.ico')
-
-
-# Register templates in Flask's template loader
+# Register the templates
 from jinja2 import DictLoader
 app.jinja_loader = DictLoader({
     'base.html': base_html,
     'home.html': home_html,
+    'generic_tool.html': generic_tool_html,
     'about.html': about_html,
     'privacy.html': privacy_html,
     'contact.html': contact_html,
@@ -579,6 +604,312 @@ def contact():
 def terms():
     return render_template_string(terms_html, title="Terms & Conditions")
 
+
+# Tool: PDF to Word
+@app.route('/pdf-to-word', methods=['GET', 'POST'])
+def pdf_to_word():
+    title = "PDF to Word"
+    description = "Convert your PDF documents to editable Word files (.docx)."
+    result_fileurl = None
+    result_filename = None
+
+    fields = [
+        {"id": "pdf_file", "name": "pdf_file", "label": "Upload PDF file", "type": "file", "accept": ".pdf", "multiple": False, "required": True}
+    ]
+
+    if request.method == 'POST':
+        if 'pdf_file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['pdf_file']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename, ALLOWED_PDF):
+            filename = secure_filename(file.filename)
+            input_path = os.path.join(TEMP_DIR, filename)
+            file.save(input_path)
+            
+            # Output file
+            output_filename = os.path.splitext(filename)[0] + '.docx'
+            output_path = os.path.join(TEMP_DIR, output_filename)
+            
+            try:
+                cv = Converter(input_path)
+                cv.convert(output_path, start=0, end=None)
+                cv.close()
+                return send_file(output_path, as_attachment=True, download_name=output_filename)
+            except Exception as e:
+                flash(f'Conversion failed: {e}')
+                return redirect(request.url)
+        else:
+            flash('Invalid file type. Please upload a PDF file.')
+            return redirect(request.url)
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Tool: JPG to Word (simple create docx with embedded image)
+@app.route('/jpg-to-word', methods=['GET', 'POST'])
+def jpg_to_word():
+    title = "JPG to Word"
+    description = "Convert JPG or other image files into a Word document with the image embedded."
+    result_fileurl = None
+    result_filename = None
+
+    fields = [
+        {"id": "image_file", "name": "image_file", "label": "Upload Image file", "type": "file", "accept": "image/*", "multiple": False, "required": True}
+    ]
+
+    if request.method == 'POST':
+        if 'image_file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['image_file']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename, ALLOWED_IMAGE_EXTENSIONS):
+            filename = secure_filename(file.filename)
+            input_path = os.path.join(TEMP_DIR, filename)
+            file.save(input_path)
+            
+            output_filename = os.path.splitext(filename)[0] + '.docx'
+            output_path = os.path.join(TEMP_DIR, output_filename)
+            
+            try:
+                doc = Document()
+                doc.add_paragraph("Image embedded below:")
+                doc.add_picture(input_path, width=docx.shared.Inches(5))
+                doc.save(output_path)
+                return send_file(output_path, as_attachment=True, download_name=output_filename)
+            except Exception as e:
+                flash(f'Conversion failed: {e}')
+                return redirect(request.url)
+        else:
+            flash('Invalid file type. Please upload an image file.')
+            return redirect(request.url)
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Tool: PPT to PDF (for simplicity, just reject, as no easy pure python conversion without libreoffice or external tools)
+@app.route('/ppt-to-pdf', methods=['GET', 'POST'])
+def ppt_to_pdf():
+    title = "PPT to PDF"
+    description = "Convert your PowerPoint files (.ppt, .pptx) to PDF. (NOTE: Requires external tool to fully support)"
+    result_fileurl = None
+    result_filename = None
+
+    fields = [
+        {"id": "ppt_file", "name": "ppt_file", "label": "Upload PPT/PPTX file", "type": "file", "accept": ".ppt,.pptx", "multiple": False, "required": True}
+    ]
+
+    if request.method == 'POST':
+        flash('PPT to PDF conversion requires external tools (LibreOffice). This feature is coming soon.')
+        return redirect(request.url)
+
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Tool: PDF to PPT (placeholder, no direct conversion implemented)
+@app.route('/pdf-to-ppt', methods=['GET', 'POST'])
+def pdf_to_ppt():
+    title = "PDF to PPT"
+    description = "Convert PDF to PowerPoint (PPT) files. (Feature coming soon)"
+    result_fileurl = None
+    result_filename = None
+
+    fields = [
+        {"id": "pdf_file", "name": "pdf_file", "label": "Upload PDF file", "type": "file", "accept": ".pdf", "multiple": False, "required": True}
+    ]
+
+    if request.method == 'POST':
+        flash('PDF to PPT conversion feature will be added soon!')
+        return redirect(request.url)
+
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Tool: Multiple images to one PDF
+@app.route('/images-to-pdf', methods=['GET', 'POST'])
+def images_to_pdf():
+    title = "Images to PDF"
+    description = "Combine multiple image files into a single PDF document."
+    result_fileurl = None
+    result_filename = None
+
+    fields = [
+        {"id": "images", "name": "images", "label": "Upload Image files", "type": "file", "accept": "image/*", "multiple": True, "required": True}
+    ]
+
+    if request.method == 'POST':
+        files = request.files.getlist('images')
+        if not files or len(files) == 0:
+            flash('No files selected')
+            return redirect(request.url)
+        image_files = []
+        try:
+            for file in files:
+                if file and allowed_file(file.filename, ALLOWED_IMAGE_EXTENSIONS):
+                    filename = secure_filename(file.filename)
+                    path = os.path.join(TEMP_DIR, filename)
+                    file.save(path)
+                    image_files.append(path)
+                else:
+                    flash('Invalid file in selection. Please upload images only.')
+                    return redirect(request.url)
+            if not image_files:
+                flash('No valid image files found.')
+                return redirect(request.url)
+            
+            images = [Image.open(img).convert('RGB') for img in image_files]
+            output_path = os.path.join(TEMP_DIR, "combined_images.pdf")
+            images[0].save(output_path, save_all=True, append_images=images[1:])
+            return send_file(output_path, as_attachment=True, download_name="combined_images.pdf")
+        except Exception as e:
+            flash(f'Error during conversion: {e}')
+            return redirect(request.url)
+
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Tool: Merge PDF
+@app.route('/merge-pdf', methods=['GET', 'POST'])
+def merge_pdf():
+    title = "Merge PDF"
+    description = "Merge multiple PDF files into one unified PDF document."
+    result_fileurl = None
+    result_filename = None
+
+    fields = [
+        {"id": "pdfs", "name": "pdfs", "label": "Upload PDF files", "type": "file", "accept": ".pdf", "multiple": True, "required": True}
+    ]
+
+    if request.method == 'POST':
+        files = request.files.getlist('pdfs')
+        if not files or len(files) == 0:
+            flash('No files selected')
+            return redirect(request.url)
+        pdf_paths = []
+        try:
+            for file in files:
+                if file and allowed_file(file.filename, ALLOWED_PDF):
+                    filename = secure_filename(file.filename)
+                    path = os.path.join(TEMP_DIR, filename)
+                    file.save(path)
+                    pdf_paths.append(path)
+                else:
+                    flash('Invalid file in selection. Please upload PDFs only.')
+                    return redirect(request.url)
+            if not pdf_paths:
+                flash('No valid PDF files found.')
+                return redirect(request.url)
+            
+            merger = PdfMerger()
+            for pdf in pdf_paths:
+                merger.append(pdf)
+            output_path = os.path.join(TEMP_DIR, "merged.pdf")
+            merger.write(output_path)
+            merger.close()
+            return send_file(output_path, as_attachment=True, download_name="merged.pdf")
+        except Exception as e:
+            flash(f'Error during merge: {e}')
+            return redirect(request.url)
+
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Tool: Image compressor (lower quality JPEG)
+@app.route('/image-compressor', methods=['GET', 'POST'])
+def image_compressor():
+    title = "Image Compressor"
+    description = "Compress images by lowering quality without significant loss."
+    result_fileurl = None
+    result_filename = None
+
+    fields = [
+        {"id": "image_file", "name": "image_file", "label": "Upload image file", "type": "file", "accept": "image/*", "multiple": False, "required": True}
+    ]
+
+    if request.method == 'POST':
+        if 'image_file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['image_file']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename, ALLOWED_IMAGE_EXTENSIONS):
+            filename = secure_filename(file.filename)
+            input_path = os.path.join(TEMP_DIR, filename)
+            file.save(input_path)
+            output_filename = f"compressed_{filename}"
+            output_path = os.path.join(TEMP_DIR, output_filename)
+            try:
+                img = Image.open(input_path)
+                img.save(output_path, optimize=True, quality=30)
+                return send_file(output_path, as_attachment=True, download_name=output_filename)
+            except Exception as e:
+                flash(f'Compression failed: {e}')
+                return redirect(request.url)
+        else:
+            flash('Invalid file type. Please upload an image file.')
+            return redirect(request.url)
+
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Tool: PDF Compressor (basic, recreate PDF with PyPDF2 - limited compression capability)
+@app.route('/pdf-compressor', methods=['GET', 'POST'])
+def pdf_compressor():
+    title = "PDF Compressor"
+    description = "Basic PDF compression by rewriting the PDF file. (Advanced compression may not be available)"
+    result_fileurl = None
+    result_filename = None
+
+    fields = [
+        {"id": "pdf_file", "name": "pdf_file", "label": "Upload PDF file", "type": "file", "accept": ".pdf", "multiple": False, "required": True}
+    ]
+
+    if request.method == 'POST':
+        if 'pdf_file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['pdf_file']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename, ALLOWED_PDF):
+            filename = secure_filename(file.filename)
+            input_path = os.path.join(TEMP_DIR, filename)
+            file.save(input_path)
+            output_filename = f"compressed_{filename}"
+            output_path = os.path.join(TEMP_DIR, output_filename)
+            try:
+                reader = PdfReader(input_path)
+                from PyPDF2 import PdfWriter
+                writer = PdfWriter()
+                for page in reader.pages:
+                    writer.add_page(page)
+                with open(output_path, 'wb') as fout:
+                    writer.write(fout)
+                return send_file(output_path, as_attachment=True, download_name=output_filename)
+            except Exception as e:
+                flash(f'Compression failed: {e}')
+                return redirect(request.url)
+        else:
+            flash('Invalid file type. Please upload a PDF file.')
+            return redirect(request.url)
+
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Serve favicon.ico from static folder
+@app.route('/favicon.ico')
+def favicon():
+    return send_file('static/favicon.ico')
+
+
 if __name__ == '__main__':
-    # Use 0.0.0.0 as host to be accessible externally; port 5000 is default but set explicitly
+    # Run on all interfaces port 5000
     app.run(host='0.0.0.0', port=5000, debug=True)
+
