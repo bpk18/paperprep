@@ -712,4 +712,5 @@ def pdf_compressor():
     ))
 
 if __name__ == "__main__":
-    app.run(debug=True , port = 5000 , host= 0.0.0.0 )
+    # Host on all interfaces, port 8000
+    app.run(host="0.0.0.0", port=8000, debug=True)
