@@ -40,8 +40,8 @@ INDEX_HTML = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9764517671001230"
-     crossorigin="anonymous"></script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9764517671001230"crossorigin="anonymous"></script>
+<script type="text/javascript">(function(a,b,c,d,e,f,g){a[c]=a[c]||function(){(a[c].q=a[c].q||[]).push(arguments)};f=b.createElement(d);f.async=1;f.setAttribute("adquake-key",e);f.src="https://script.adquake.com/js/adquake.js";g=b.getElementsByTagName(d)[0];g.parentNode.insertBefore(f,g);})(window,document,"adquake","script","TaTQsUORcEqp8NOEjtfjlw==");</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <meta name="description" content="PAPERPREP: Futuristic file conversion and compression tools for PDFs, images, presentations, and more. Clean, responsive UI." />
