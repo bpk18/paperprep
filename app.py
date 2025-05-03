@@ -349,15 +349,6 @@ INDEX_HTML = """
         <span></span><span></span><span></span>
       </button>
       <ul class="menu" id="main-menu" role="menu" aria-label="Main navigation menu">
-        <li><a href="{{ url_for('tool_page', tool='pdf-to-word') }}" role="menuitem" tabindex="0">PDF to Word</a></li>
-        <li><a href="{{ url_for('tool_page', tool='jpg-to-word') }}" role="menuitem" tabindex="0">JPG to Word</a></li>
-        <li><a href="{{ url_for('tool_page', tool='ppt-to-pdf') }}" role="menuitem" tabindex="0">PPT to PDF</a></li>
-        <li><a href="{{ url_for('tool_page', tool='pdf-to-ppt') }}" role="menuitem" tabindex="0">PDF to PPT</a></li>
-        <li><a href="{{ url_for('tool_page', tool='multiple-images-to-pdf') }}" role="menuitem" tabindex="0">Multiple Images to PDF</a></li>
-        <li><a href="{{ url_for('tool_page', tool='merge-pdf') }}" role="menuitem" tabindex="0">Merge PDF</a></li>
-        <li><a href="{{ url_for('tool_page', tool='image-compressor') }}" role="menuitem" tabindex="0">Image Compressor</a></li>
-        <li><a href="{{ url_for('tool_page', tool='pdf-compressor') }}" role="menuitem" tabindex="0">PDF Compressor</a></li>
-        <li>
           <div class="dropdown">
             <button class="dropdown-button" aria-haspopup="true" aria-expanded="false" aria-label="Open info menu">&#8942;</button>
             <div class="dropdown-menu" role="menu" aria-label="Information menu">
