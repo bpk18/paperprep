@@ -55,6 +55,9 @@ INDEX_HTML = """
       background-color: #f0f4f8; color: #222; min-height: 100vh;
       display: flex; flex-direction: column;
     }
+    h1{
+    text-align:center;
+    }
     :root {
       --color-primary: #5c6ac4;
       --color-primary-light: #8c97f9;
@@ -341,7 +344,6 @@ INDEX_HTML = """
     <div class="logo" aria-label="PAPERPREP">PAPERPREP</div>
     <nav aria-label="Main navigation and info menu">
       <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="main-menu">
-        <span></span><span></span><span></span>
       </button>
       <ul class="menu" id="main-menu" role="menu">
         <!-- No links shown in nav -->
