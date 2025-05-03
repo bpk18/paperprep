@@ -39,18 +39,29 @@ BASE_HTML = """
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>{{ title }}</title>
+<!-- HTML Meta Tags -->
+<title>Paperprep - All in One File Converter </title>
 <meta name="description" content="PAPERPREP is your all-in-one file converter for PDFs, Word documents, images, and more. Fast, free, and easy to use." />
-<link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"/>
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "PAPERPREP - All-in-One File Converter",
-  "url": "https://paperprep.space",
-  "description": "PAPERPREP is your all-in-one file converter for PDFs, Word documents, images, and more. Fast, free, and easy to use."
-}
-</script>
+
+<!-- Google / Search Engine Tags -->
+<meta itemprop="name" content="Paperprep - All in One File Converter " />
+<meta itemprop="description" content="PAPERPREP is your all-in-one file converter for PDFs, Word documents, images, and more. Fast, free, and easy to use." />
+<meta itemprop="image" content="Fevicon.ico" />
+
+<!-- Facebook Meta Tags -->
+<meta property="og:url" content="https://www.paperprep.space/" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Paperprep - All in One File Converter " />
+<meta property="og:description" content="PAPERPREP is your all-in-one file converter for PDFs, Word documents, images, and more. Fast, free, and easy to use." />
+<meta property="og:image" content="Fevicon.ico" />
+
+<!-- Twitter Meta Tags -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Paperprep - All in One File Converter " />
+<meta name="twitter:description" content="PAPERPREP is your all-in-one file converter for PDFs, Word documents, images, and more. Fast, free, and easy to use." />
+<meta name="twitter:image" content="Fevicon.ico" />
+
+<!-- Meta Tags Generated via https://heymeta.com -->
 
 <style>
   :root {
