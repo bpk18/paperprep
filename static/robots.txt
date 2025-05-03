@@ -1,5 +1,8 @@
 User-agent: *
+Disallow: /static/
+Disallow: /uploads/
+Allow: /static/sitemap.xml
 Allow: /
-Sitemap: https://paperprep/sitemap.xml
 
+Sitemap: https://paperprep.space/static/sitemap.xml
 
