@@ -36,6 +36,7 @@ base_html = '''
     <meta name="keywords" content="PDF to Word, JPG to Word, PPT to PDF, PDF to PPT, Image to PDF, Merge PDF, Compress PDF, Compress Image, Document Converter" />
     <meta name="author" content="PAPERPREP" />
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9764517671001230" crossorigin="anonymous"></script>
     <style>
         /* Reset and base */
         *, *::before, *::after {
