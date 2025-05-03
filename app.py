@@ -40,6 +40,8 @@ INDEX_HTML = """
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9764517671001230"
+     crossorigin="anonymous"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
   <meta name="description" content="PAPERPREP: Futuristic file conversion and compression tools for PDFs, images, presentations, and more. Clean, responsive UI." />
