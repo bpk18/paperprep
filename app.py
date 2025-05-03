@@ -1,759 +1,715 @@
-from flask import Flask, request, send_file, redirect, url_for, flash, get_flashed_messages
-from werkzeug.utils import secure_filename
-import os
-import io
-import tempfile
-from datetime import datetime
-
-from PIL import Image
-import pytesseract
-from docx import Document
-from pdf2docx import Converter
-from pptx import Presentation
-from pptx.util import Inches
-import PyPDF2
-
-try:
-    from pdf2image import convert_from_bytes
-except ImportError:
-    convert_from_bytes = None
+from flask import Flask, render_template_string
 
 app = Flask(__name__)
-app.secret_key = "replace-with-your-secret-key"
 
-ALLOWED_EXTENSIONS = {
-    'pdf_to_word': {'pdf'},
-    'jpg_to_word': {'jpg', 'jpeg', 'png'},
-    'ppt_to_pdf': {'pptx', 'ppt'},
-    'pdf_to_ppt': {'pdf'},
-    'images_to_pdf': {'jpg', 'jpeg', 'png', 'bmp', 'gif'},
-    'merge_pdf': {'pdf'},
-    'image_compress': {'jpg', 'jpeg', 'png'},
-    'pdf_compress': {'pdf'}
-}
+# Shared CSS for all pages
+base_css = """
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600&family=Inter:wght@400;600&display=swap');
 
-BASE_HTML = """
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>{{ title }}</title>
-<!-- HTML Meta Tags -->
-<title>Paperprep - All in One File Converter </title>
-<meta name="description" content="PAPERPREP is your all-in-one file converter for PDFs, Word documents, images, and more. Fast, free, and easy to use." />
-
-<!-- Google / Search Engine Tags -->
-<meta itemprop="name" content="Paperprep - All in One File Converter " />
-<meta itemprop="description" content="PAPERPREP is your all-in-one file converter for PDFs, Word documents, images, and more. Fast, free, and easy to use." />
-<meta itemprop="image" content="Fevicon.ico" />
-
-<!-- Facebook Meta Tags -->
-<meta property="og:url" content="https://www.paperprep.space/" />
-<meta property="og:type" content="website" />
-<meta property="og:title" content="Paperprep - All in One File Converter " />
-<meta property="og:description" content="PAPERPREP is your all-in-one file converter for PDFs, Word documents, images, and more. Fast, free, and easy to use." />
-<meta property="og:image" content="Fevicon.ico" />
-
-<!-- Twitter Meta Tags -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Paperprep - All in One File Converter " />
-<meta name="twitter:description" content="PAPERPREP is your all-in-one file converter for PDFs, Word documents, images, and more. Fast, free, and easy to use." />
-<meta name="twitter:image" content="Fevicon.ico" />
-
-<!-- Meta Tags Generated via https://heymeta.com -->
-
-<style>
   :root {
-    --primary-color: #5A9BD4;
-    --secondary-color: #6BA292;
-    --light-bg: #f0f4f8;
-    --light-text: #222;
-    --dark-bg: #121212;
-    --dark-text: #e0e0e0;
-    --button-bg: var(--primary-color);
-    --button-hover-bg: #3a7ecf;
-    --button-text: white;
-    --nav-height: 60px;
-    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --color-bg-light: #ffffff;
+    --color-bg-dark: #1a1a2e;
+    --color-primary: #3b82f6;
+    --color-primary-dark: #60a5fa;
+    --color-text-light: #1f2937;
+    --color-text-dark: #d1d5db;
+    --color-card-bg-light: #f9fafb;
+    --color-card-bg-dark: #16213e;
+    --color-btn-bg-light: #3b82f6;
+    --color-btn-bg-dark: #2563eb;
+    --color-btn-text-light: #ffffff;
+    --color-btn-text-dark: #e0e7ff;
+    --color-border-light: #e5e7eb;
+    --color-border-dark: #0f172a;
+    --shadow-light: 0 8px 16px rgba(59, 130, 246, 0.15);
+    --shadow-dark: 0 8px 16px rgba(37, 99, 235, 0.4);
   }
 
   body {
     margin: 0;
-    font-family: var(--font-family);
-    background-color: var(--light-bg);
-    color: var(--light-text);
-    transition: background-color 0.3s ease, color 0.3s ease;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--color-bg-light);
+    color: var(--color-text-light);
+    overflow-x: hidden;
   }
-
-  body.dark {
-    background-color: var(--dark-bg);
-    color: var(--dark-text);
+  body.dark-theme {
+    background-color: var(--color-bg-dark);
+    color: var(--color-text-dark);
   }
 
   nav {
-    background: var(--primary-color);
-    height: var(--nav-height);
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 56px;
+    background: var(--color-card-bg-light);
+    border-bottom: 1px solid var(--color-border-light);
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    padding: 0 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    position: sticky;
-    top: 0;
-    z-index: 1000;
+    align-items: center;
+    padding: 0 1rem;
+    z-index: 1001;
+    box-shadow: var(--shadow-light);
+    user-select: none;
   }
-  /* Added to align theme toggle and menu button horizontally */
-  nav > div {
+  body.dark-theme nav {
+    background: var(--color-card-bg-dark);
+    border-color: var(--color-border-dark);
+    box-shadow: var(--shadow-dark);
+  }
+
+  nav .logo {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    font-size: 1.5rem;
+    color: var(--color-primary);
+  }
+  body.dark-theme nav .logo {
+    color: var(--color-primary-dark);
+  }
+
+  /* Menu button container */
+  .menu-container {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 1rem;
   }
 
-  nav .brand {
-    font-weight: bold;
-    font-size: 1.5rem;
-    color: white;
-    cursor: pointer;
-  }
-
-  nav .menu {
+  /* Dropdown Menu button */
+  .menu-button {
     position: relative;
-  }
-
-  nav .menu-button {
     background: none;
     border: none;
-    font-size: 1.5rem;
-    color: white;
     cursor: pointer;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--color-primary);
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    user-select: none;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  .menu-button svg {
+    width: 20px;
+    height: 20px;
+    margin-left: 6px;
+    fill: currentColor;
+    transition: transform 0.3s ease;
+  }
+  .menu-button[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+  .menu-button:hover, .menu-button:focus {
+    background-color: var(--color-primary);
+    color: #fff;
+    outline: none;
+  }
+  body.dark-theme .menu-button {
+    color: var(--color-primary-dark);
+  }
+  body.dark-theme .menu-button:hover,
+  body.dark-theme .menu-button:focus {
+    background-color: var(--color-primary-dark);
+    color: #fff;
+    outline: none;
   }
 
-  nav .dropdown {
+  /* Dropdown menu */
+  .dropdown-menu {
     position: absolute;
+    top: 42px;
     right: 0;
-    top: calc(var(--nav-height) - 5px);
-    background: var(--primary-color);
-    border-radius: 5px;
-    overflow: hidden;
+    background: var(--color-card-bg-light);
+    border: 1px solid var(--color-border-light);
+    border-radius: 8px;
+    box-shadow: var(--shadow-light);
     display: none;
-    min-width: 150px;
-    box-shadow: 0 3px 12px
-    }
-
-  nav .dropdown a {
+    min-width: 200px;
+    z-index: 1002;
+    user-select: none;
+  }
+  body.dark-theme .dropdown-menu {
+    background: var(--color-card-bg-dark);
+    border-color: var(--color-border-dark);
+    box-shadow: var(--shadow-dark);
+  }
+  .dropdown-menu.open {
     display: block;
-    padding: 10px 15px;
-    color: white;
+  }
+  .dropdown-menu ul {
+    list-style: none;
+    margin: 0; padding: 8px 0;
+    border-radius: 8px;
+  }
+  .dropdown-menu ul li {
+    margin: 0;
+  }
+  .dropdown-menu ul li a {
+    display: block;
+    padding: 10px 16px;
+    color: var(--color-primary);
     text-decoration: none;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
+    font-weight: 600;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+  }
+  .dropdown-menu ul li a:hover,
+  .dropdown-menu ul li a:focus {
+    background-color: var(--color-primary);
+    color: #fff;
+    outline: none;
+  }
+  body.dark-theme .dropdown-menu ul li a {
+    color: var(--color-primary-dark);
+  }
+  body.dark-theme .dropdown-menu ul li a:hover,
+  body.dark-theme .dropdown-menu ul li a:focus {
+    background-color: var(--color-primary-dark);
+    color: #fff;
+    outline: none;
   }
 
-  nav .dropdown a:last-child {
-    border-bottom: none;
+  /* Theme toggle button */
+  #theme-toggle {
+    background-color: var(--color-btn-bg-light);
+    color: var(--color-btn-text-light);
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    border-radius: 25px;
+    padding: 6px 14px;
+    cursor: pointer;
+    box-shadow: var(--shadow-light);
+    transition: background-color 0.3s ease;
+    user-select: none;
   }
-
-  nav .dropdown a:hover {
-    background: var(--secondary-color);
+  #theme-toggle:hover, #theme-toggle:focus {
+    background-color: var(--color-primary-dark);
+    outline: none;
   }
-
-  nav .menu:hover .dropdown {
-    display: block;
+  body.dark-theme #theme-toggle {
+    background-color: var(--color-btn-bg-dark);
+    color: var(--color-btn-text-dark);
+    box-shadow: var(--shadow-dark);
+  }
+  body.dark-theme #theme-toggle:hover,
+  body.dark-theme #theme-toggle:focus {
+    background-color: var(--color-primary);
+    outline: none;
   }
 
   main {
-    flex-grow: 1;
-    padding: 20px;
-    max-width: 900px;
-    margin: 0 auto;
-    width: 100%;
+    margin-top: 56px;
+    padding: 1rem;
+    max-width: 360px;
+    margin-left: auto;
+    margin-right: auto;
+    user-select: none;
   }
 
-  h1, h2 {
+  h2 {
+    font-family: 'Orbitron', sans-serif;
+    color: var(--color-primary);
     text-align: center;
-    margin-bottom: 15px;
+    margin-bottom: 1.5rem;
+  }
+  body.dark-theme h2 {
+    color: var(--color-primary-dark);
   }
 
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 20px;
-    margin-top: 20px;
-  }
-
-  .tool-card {
-    background: white;
+  .tool-container {
+    background: var(--color-card-bg-light);
     border-radius: 15px;
-    box-shadow: 0 4px 8px rgb(0 0 0 / 0.1);
-    padding: 20px;
-    transition: box-shadow 0.3s ease;
+    padding: 2rem 1.5rem;
+    box-shadow: var(--shadow-light);
     text-align: center;
+  }
+  body.dark-theme .tool-container {
+    background: var(--color-card-bg-dark);
+    box-shadow: var(--shadow-dark);
+  }
+
+  .tool-icon-large {
+    width: 96px;
+    height: 96px;
+    margin-bottom: 1rem;
+    fill: var(--color-primary);
+    transition: fill 0.3s ease;
+  }
+  body.dark-theme .tool-icon-large {
+    fill: var(--color-primary-dark);
+  }
+
+  label.file-label {
+    padding: 12px 24px;
+    border-radius: 30px;
+    background-color: var(--color-btn-bg-light);
+    color: var(--color-btn-text-light);
     cursor: pointer;
-    color: var(--light-text);
+    font-weight: 700;
+    box-shadow: var(--shadow-light);
+    margin-bottom: 12px;
+    display: inline-block;
+    transition: background-color 0.3s ease;
+    user-select: none;
+    font-size: 1rem;
+  }
+  label.file-label:hover, label.file-label:focus {
+    background-color: var(--color-primary-dark);
+    outline: none;
+  }
+  body.dark-theme label.file-label {
+    background-color: var(--color-btn-bg-dark);
+    color: var(--color-btn-text-dark);
+    box-shadow: var(--shadow-dark);
+  }
+  body.dark-theme label.file-label:hover, body.dark-theme label.file-label:focus {
+    background-color: var(--color-btn-bg-light);
+    color: var(--color-btn-text-light);
+    outline: none;
   }
 
-  body.dark .tool-card {
-    background: #1e1e1e;
-    color: var(--dark-text);
-    box-shadow: 0 4px 12px rgb(255 255 255 / 0.1);
+  input[type="file"] {
+    display: none;
   }
 
-  .tool-card:hover {
-    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
-  }
-
-  .tool-card i {
-    font-size: 3.5rem;
-    margin-bottom: 10px;
-    color: var(--primary-color);
-  }
-
-  body.dark .tool-card i {
-    color: #82b1ff;
-  }
-
-  .btn, button, input[type="submit"]  {
-    background-color: var(--button-bg);
-    color: var(--button-text);
+  button.submit-btn {
+    margin-top: 12px;
+    padding: 12px 0;
+    width: 100%;
     border: none;
     border-radius: 30px;
-    padding: 10px 25px;
-    font-size: 1rem;
+    background-color: var(--color-btn-bg-light);
+    color: var(--color-btn-text-light);
+    font-weight: 700;
+    font-size: 1.1rem;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
+    box-shadow: var(--shadow-light);
     transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  button.submit-btn:hover, button.submit-btn:focus {
+    background-color: var(--color-primary-dark);
+    outline: none;
+  }
+  body.dark-theme button.submit-btn {
+    background-color: var(--color-btn-bg-dark);
+    color: var(--color-btn-text-dark);
+    box-shadow: var(--shadow-dark);
+  }
+  body.dark-theme button.submit-btn:hover, body.dark-theme button.submit-btn:focus {
+    background-color: var(--color-btn-bg-light);
+    color: var(--color-btn-text-light);
+    outline: none;
   }
 
-  .btn:hover, button:hover, input[type="submit"]:hover {
-    background-color: var(--button-hover-bg);
-  }
-
-  label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-
-  input[type=file], textarea, input[type=text], input[type=email] {
-    border: 2px dashed var(--primary-color);
-    padding: 10px;
-    width: 100%;
+  section.info-section {
+    margin-top: 1rem;
+    background: var(--color-card-bg-light);
     border-radius: 12px;
-    cursor: pointer;
-    background-color: transparent;
-    transition: border-color 0.3s ease;
-    color: var(--light-text);
-    font-size: 1rem;
+    padding: 1rem;
+    box-shadow: var(--shadow-light);
+    user-select: text;
+  }
+  body.dark-theme section.info-section {
+    background: var(--color-card-bg-dark);
+    box-shadow: var(--shadow-dark);
+  }
+  section.info-section h2 {
+    font-family: 'Orbitron', sans-serif;
+    margin-bottom: 0.75rem;
+    color: var(--color-primary);
+  }
+  body.dark-theme section.info-section h2 {
+    color: var(--color-primary-dark);
+  }
+  section.info-section p, section.info-section a {
+    font-weight: 400;
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
+  section.info-section a {
+    color: var(--color-primary);
+    text-decoration: underline;
+  }
+  body.dark-theme section.info-section a {
+    color: var(--color-primary-dark);
   }
 
-  body.dark input[type=file], body.dark textarea, body.dark input[type=text], body.dark input[type=email] {
-    border-color: #82b1ff;
-    color: var(--dark-text);
-  }
-
-  input[type=file]:hover, textarea:hover, input[type=text]:hover, input[type=email]:hover {
-    border-color: var(--secondary-color);
-  }
-
-  form {
-    max-width: 500px;
-    margin: 30px auto;
-    background:#fff;
-    padding: 25px 30px;
-    border-radius: 15px;
-    box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
-  }
-
-  body.dark form {
-    background: #1e1e1e;
-    box-shadow: 0 4px 12px rgb(255 255 255 / 0.1);
-  }
-
-  .form-group {
-    margin-bottom: 20px;
-  }
-
-  .footer {
-    background: var(--primary-color);
-    color: white;
+  footer {
     text-align: center;
-    padding: 15px 8px;
-    font-size: 0.875rem;
+    margin: 2rem 0 1rem;
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    user-select:none;
+  }
+  body.dark-theme footer {
+    color: var(--color-text-dark);
   }
 
-  /* Responsive */
-  @media (max-width: 600px) {
-    .tools-grid {
-      grid-template-columns: 1fr 1fr;
-      gap: 15px;
-    }
-
-    form {
-      margin: 20px 10px 40px 10px;
-      padding: 20px;
-    }
+  a:focus, button:focus, label.file-label:focus, .tool-container:focus-within, .menu-button:focus {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 2px;
   }
 
-  /* Scrollbar for dropdown */
-  nav .dropdown {
-    max-height: 200px;
-    overflow-y: auto;
+  [id] {
+    scroll-margin-top: 70px;
   }
-
-</style>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9764517671001230" crossorigin="anonymous"></script>
-</head>
-<body>
-<nav>
-  <div class="brand" onclick="location.href='{{ url_for('home') }}'">PAPERPREP</div>
-  <div>
-    <button class="btn" id="theme-toggle" aria-label="Toggle Dark/Light Theme">
-      <i class="fas fa-moon"></i>
-    </button>
-    <div class="menu">
-      <button class="menu-button" aria-haspopup="true" aria-expanded="false" aria-controls="menu-list" id="menu-button" aria-label="Menu">
-        <i class="fas fa-bars"></i>
-      </button>
-      <div class="dropdown" id="menu-list" role="menu" aria-labelledby="menu-button">
-        <a href="{{ url_for('about') }}" role="menuitem">About</a>
-        <a href="{{ url_for('privacy') }}" role="menuitem">Privacy</a>
-        <a href="{{ url_for('contact') }}" role="menuitem">Contact</a>
-        <a href="{{ url_for('terms') }}" role="menuitem">Terms & Conditions</a>
-      </div>
-    </div>
-  </div>
-</nav>
-<main>
-  {{ content|safe }}
-</main>
-<footer class="footer">
-  &copy; {{ year }} PAPERPREP . All rights reserved.
-</footer>
-<script>
-  (function(){
-    const toggleBtn = document.getElementById('theme-toggle');
-    toggleBtn.addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      if(document.body.classList.contains('dark')){
-        toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-        localStorage.setItem('theme', 'dark');
-      } else {
-        toggleBtn.innerHTML = '<i class="fas fa-moon"></i>';
-        localStorage.setItem('theme', 'light');
-      }
-    });
-    if(localStorage.getItem('theme') === 'dark'){
-      document.body.classList.add('dark');
-      toggleBtn.innerHTML = '<i class="fas fa-sun"></i>';
-    }
-    const menuButton = document.getElementById('menu-button');
-    const menuList = document.getElementById('menu-list');
-    menuButton.addEventListener('click', () => {
-      const expanded = menuButton.getAttribute('aria-expanded') === 'true' || false;
-      menuButton.setAttribute('aria-expanded', !expanded);
-      if(menuList.style.display === 'block') {
-        menuList.style.display = 'none';
-      } else {
-        menuList.style.display = 'block';
-      }
-    });
-    document.addEventListener('click', (e) => {
-      if (!menuButton.contains(e.target) && !menuList.contains(e.target)) {
-        menuList.style.display = 'none';
-        menuButton.setAttribute('aria-expanded', false);
-      }
-    });
-  })();
-</script>
-</body>
-</html>
 """
 
-def allowed_file(filename, tool_name):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS.get(tool_name, set())
+base_js = """
+  const menuButton = document.getElementById('menu-button');
+  const dropdownMenu = document.getElementById('dropdown-menu');
 
+  function closeDropdown() {
+    dropdownMenu.classList.remove('open');
+    menuButton.setAttribute('aria-expanded', 'false');
+  }
+  function openDropdown() {
+    dropdownMenu.classList.add('open');
+    menuButton.setAttribute('aria-expanded', 'true');
+  }
 
-def render_page(title, content_html, description=None, keywords=None):
-    base_html = BASE_HTML.replace("{{ title }}", title)
-    base_html = base_html.replace("{{ year }}", str(datetime.now().year))
-    base_html = base_html.replace("{{ content|safe }}", content_html)
+  menuButton.addEventListener('click', () => {
+    const isOpen = dropdownMenu.classList.contains('open');
+    if(isOpen){
+      closeDropdown();
+    } else {
+      openDropdown();
+    }
+  });
 
-    if description:
-        description_meta = f'<meta name="description" content=" Convert PDF, Word, Images, PPT, and more with PAPERPREP – the all-in-one file conversion toolkit. Fast, free, and easy to use." />'
-        # Insert after the existing description tag, or create one if it doesn't exist
-        if '<meta name="description"' in base_html:
-            base_html = base_html.replace('<meta name="description" content="Convert PDF, Word, Images, PPT, and more with PAPERPREP – the all-in-one file conversion toolkit. Fast, free, and easy to use." />', description_meta)
-        else:
-            base_html = base_html.replace('</title>', f'</title>\n    {"PAPERPREP - Convert PDFs, Images & More"}')
+  document.addEventListener('click', (e) => {
+    if(!menuButton.contains(e.target) && !dropdownMenu.contains(e.target)){
+      closeDropdown();
+    }
+  });
 
-    if keywords:
-        keywords_meta = f'<meta name="keywords" content="file converter, PAPERPREP, PDF tools, PDF to Word, Image to PDF, PPT to PDF, compress PDF, merge PDF" />'
-        # Insert after the existing keywords tag, or create one if it doesn't exist
-        if '<meta name="keywords"' in base_html:
-            base_html = base_html.replace('<meta name="keywords" content="file converter, PAPERPREP, PDF tools, PDF to Word, Image to PDF, PPT to PDF, compress PDF, merge PDF" />', keywords_meta)
-        else:
-            base_html = base_html.replace('</title>', f'</title>\n    {"PAPERPREP - Convert PDFs, Images & More"}')
+  menuButton.addEventListener('keydown', e => {
+    if(e.key === 'ArrowDown' || e.key === 'Enter' || e.key === ' '){
+      e.preventDefault();
+      openDropdown();
+      dropdownMenu.querySelector('a').focus();
+    }
+    if(e.key === 'Escape'){
+      closeDropdown();
+      menuButton.focus();
+    }
+  });
 
-    return base_html
+  dropdownMenu.addEventListener('keydown', e => {
+    if(e.key === 'Escape'){
+      closeDropdown();
+      menuButton.focus();
+    }
+  });
 
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const storedTheme = localStorage.getItem('paperprep-theme');
+  function applyTheme(theme) {
+    if(theme === 'dark') {
+      document.body.classList.add('dark-theme');
+      themeToggleBtn.textContent = 'Light Mode';
+    } else {
+      document.body.classList.remove('dark-theme');
+      themeToggleBtn.textContent = 'Dark Mode';
+    }
+    localStorage.setItem('paperprep-theme', theme);
+  }
+  applyTheme(storedTheme || 'light');
 
-@app.route('/')
-def home():
-    tools_html = """
-    <h1>Welcome to PAPERPREP</h1>
-    <h2>Your all-in-one document & image conversion tool</h2>
-    <div class="tools-grid">
-      <div class="tool-card" onclick="location.href='{}'" tabindex="0" role="button" aria-pressed="false">
-        <i class="fas fa-file-pdf"></i>
-        <h3>PDF to Word</h3>
-      </div>
-      <div class="tool-card" onclick="location.href='{}'" tabindex="0" role="button" aria-pressed="false">
-        <i class="fas fa-file-image"></i>
-        <h3>JPG to Word</h3>
-      </div>
-      <div class="tool-card" onclick="location.href='{}'" tabindex="0" role="button" aria-pressed="false">
-        <i class="fas fa-file-powerpoint"></i>
-        <h3>PPT to PDF</h3>
-      </div>
-      <div class="tool-card" onclick="location.href='{}'" tabindex="0" role="button" aria-pressed="false">
-        <i class="fas fa-file-pdf"></i>
-        <h3>PDF to PPT</h3>
-      </div>
-      <div class="tool-card" onclick="location.href='{}'" tabindex="0" role="button" aria-pressed="false">
-        <i class="fas fa-file-image"></i>
-        <h3>Multiple Images to PDF</h3>
-      </div>
-      <div class="tool-card" onclick="location.href='{}'" tabindex="0" role="button" aria-pressed="false">
-        <i class="fas fa-file-pdf"></i>
-        <h3>Merge PDF</h3>
-      </div>
-      <div class="tool-card" onclick="location.href='{}'" tabindex="0" role="button" aria-pressed="false">
-        <i class="fas fa-compress"></i>
-        <h3>Image Compressor</h3>
-      </div>
-      <div class="tool-card" onclick="location.href='{}'" tabindex="0" role="button" aria-pressed="false">
-        <i class="fas fa-file-pdf"></i>
-        <h3>PDF Compressor</h3>
-      </div>
+  themeToggleBtn.addEventListener('click', () => {
+    if(document.body.classList.contains('dark-theme')) {
+      applyTheme('light');
+    } else {
+      applyTheme('dark');
+    }
+  });
+
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function(e) {
+          e.preventDefault();
+          const target = document.querySelector(this.getAttribute('href'));
+          if(target){
+            target.scrollIntoView({behavior: 'smooth', block: 'start'});
+            target.focus();
+          }
+      });
+  });
+"""
+
+def render_base_page(title, description, keywords, content_html):
+    return f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>{title} - PAPERPREP</title>
+<meta name="description" content="{description}" />
+<meta name="keywords" content="{keywords}" />
+<meta name="author" content="PAPERPREP Team" />
+<link rel="icon" type="image/x-icon" href="{{{{ url_for('static', filename='fevicon.ico') }}}}" />
+<style>
+{base_css}
+</style>
+</head>
+<body>
+<nav role="navigation" aria-label="Primary navigation">
+  <div class="logo" tabindex="0">PAPERPREP</div>
+  <div class="menu-container">
+    <button class="menu-button" id="menu-button" aria-haspopup="true" aria-expanded="false" aria-controls="dropdown-menu" aria-label="Open menu">
+      Menu
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+        <path d="M7 10l5 5 5-5H7z"/>
+      </svg>
+    </button>
+    <button id="theme-toggle" aria-label="Toggle dark mode">Dark Mode</button>
+  </div>
+
+  <div class="dropdown-menu" id="dropdown-menu" role="menu" aria-label="Site menu">
+    <ul>
+      <li><a href="/" role="menuitem" tabindex="-1">Home</a></li>
+      <li><a href="/pdf-to-word" role="menuitem" tabindex="-1">PDF to Word</a></li>
+      <li><a href="/jpg-to-word" role="menuitem" tabindex="-1">JPG to Word</a></li>
+      <li><a href="/ppt-to-pdf" role="menuitem" tabindex="-1">PPT to PDF</a></li>
+      <li><a href="/pdf-to-ppt" role="menuitem" tabindex="-1">PDF to PPT</a></li>
+      <li><a href="/images-to-pdf" role="menuitem" tabindex="-1">Images to PDF</a></li>
+      <li><a href="/merge-pdf" role="menuitem" tabindex="-1">Merge PDFs</a></li>
+      <li><a href="/image-compressor" role="menuitem" tabindex="-1">Image Compressor</a></li>
+      <li><a href="/pdf-compressor" role="menuitem" tabindex="-1">PDF Compressor</a></li>
+      <li><a href="#about-section" role="menuitem" tabindex="-1">About</a></li>
+      <li><a href="#privacy-section" role="menuitem" tabindex="-1">Privacy</a></li>
+      <li><a href="#contact-section" role="menuitem" tabindex="-1">Contact</a></li>
+      <li><a href="#terms-section" role="menuitem" tabindex="-1">Terms &amp; Conditions</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main tabindex="0">
+  {content_html}
+</main>
+
+<footer>
+  © 2024 PAPERPREP - Made with 💡 for college projects
+</footer>
+<script>
+{base_js}
+</script>
+</body>
+</html>"""
+
+home_content = """
+<h2>Welcome to PAPERPREP</h2>
+<section class="info-section" id="about-section" tabindex="0">
+  <h2>About PAPERPREP</h2>
+  <p>PAPERPREP is your all-in-one platform for document and image conversion needs. Transform your files effortlessly with support for various formats, prepared for college projects and professional showcase, featuring a clean, futuristic, and user-friendly interface with responsive design for all devices.</p>
+</section>
+<section class="info-section" id="privacy-section" tabindex="0">
+  <h2>Privacy Policy</h2>
+  <p>Your privacy matters. PAPERPREP does not store or share your files. All conversions happen locally or are securely processed. We recommend reviewing the specific policies before uploading sensitive documents.</p>
+</section>
+<section class="info-section" id="contact-section" tabindex="0">
+  <h2>Contact Us</h2>
+  <p>For feedback, suggestions, or support, reach out to us at <a href="mailto:support@paperprep.example.com">support@paperprep.example.com</a>. We are here to help you get the best experience.</p>
+</section>
+<section class="info-section" id="terms-section" tabindex="0">
+  <h2>Terms &amp; Conditions</h2>
+  <p>By using PAPERPREP, you agree to our terms and conditions. Use the platform responsibly. We disclaim liability for data loss or inaccurate conversions. Please backup your files before use.</p>
+</section>
+"""
+
+def render_tool_page(title, description, keywords, svg_icon, file_accept, label_text, action_alert_text):
+    content = f"""
+    <h2>{title}</h2>
+    <div class="tool-container">
+      {svg_icon}
+      <form onsubmit="alert('{action_alert_text}'); return false;">
+        <label class="file-label" for="file-input">{label_text}</label>
+        <input type="file" id="file-input" accept="{file_accept}" />
+        <button type="submit" class="submit-btn">Convert</button>
+      </form>
     </div>
-    """.format(
-        url_for('pdf_to_word'),
-        url_for('jpg_to_word'),
-        url_for('ppt_to_pdf'),
-        url_for('pdf_to_ppt'),
-        url_for('images_to_pdf'),
-        url_for('merge_pdf'),
-        url_for('image_compress'),
-        url_for('pdf_compress'),
-    )
-    return render_page("Home", tools_html)
-
-
-@app.route('/about')
-def about():
-    html = """
-    <h1>About PAPERPREP</h1>
-    <p>PAPERPREP is your ultimate college companion for document and image conversion and compression tools.</p>
-    <p>This project was developed as a college assignment with a focus on usability, design, and functionality.</p>
     """
-    return render_page("About", html)
+    return render_base_page(title, description, keywords, content)
 
-@app.route('/privacy')
-def privacy():
-    html = """
-    <h1>Privacy Policy</h1>
-    <p>We respect your privacy. Any files you upload are processed temporarily and not stored or shared. No data is kept after processing.</p>
-    """
-    return render_page("Privacy", html)
+svg_pdf_to_word = """
+<svg class="tool-icon-large" viewBox="0 0 64 64" aria-hidden="true" focusable="false" >
+  <rect x="12" y="10" width="40" height="44" rx="6" ry="6" stroke="currentColor" fill="none" stroke-width="3"/>
+  <path fill="currentColor" fill-opacity="0.15" d="M20 18h24v12H20z"/>
+  <path stroke="currentColor" stroke-width="2" d="M24 30h16M24 36h16" fill="none" />
+  <text x="32" y="50" font-family="Orbitron" font-size="12" fill="currentColor" text-anchor="middle" dominant-baseline="middle" opacity="0.7">PDF→DOC</text>
+</svg>
+"""
 
-@app.route('/contact', methods=['GET','POST'])
-def contact():
-    if request.method == 'POST':
-        name = request.form.get('name','').strip()
-        email = request.form.get('email','').strip()
-        message = request.form.get('message','').strip()
-        if not name or not email or not message:
-            flash("All fields are required.")
-            return redirect(url_for('contact'))
-        html = f"""
-        <h1>Contact Us</h1>
-        <p>Thank you for reaching out, {name}! We will get back to you shortly.</p>
-        """
-        return render_page("Contact", html)
-    else:
-        html = """
-        <h1>Contact Us</h1>
-        <form method="post">
-          <div class="form-group">
-            <label for="name">Your Name:</label>
-            <input id="name" name="name" required placeholder="Your full name" />
-          </div>
-          <div class="form-group">
-            <label for="email">Your Email:</label>
-            <input id="email" name="email" type="email" required placeholder="example@mail.com" />
-          </div>
-          <div class="form-group">
-            <label for="message">Message:</label>
-            <textarea id="message" name="message" required rows="4" placeholder="Your message here"></textarea>
-          </div>
-          <input type="submit" class="btn" value="Send Message"/>
-        </form>
-        """
-        return render_page("Contact", html)
+svg_jpg_to_word = """
+<svg class="tool-icon-large" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <rect x="10" y="10" width="44" height="44" rx="8" ry="8" stroke="currentColor" fill="none" stroke-width="3"/>
+  <circle cx="32" cy="30" r="12" fill="currentColor" fill-opacity="0.12"/>
+  <path stroke="currentColor" stroke-width="2" d="M14 46h36" fill="none" stroke-linecap="round"/>
+  <text x="32" y="54" font-family="Orbitron" font-size="12" fill="currentColor" text-anchor="middle" dominant-baseline="middle" opacity="0.7">JPG→DOC</text>
+</svg>
+"""
 
-@app.route('/terms')
-def terms():
-    html = """
-    <h1>Terms & Conditions</h1>
-    <p>Use PAPERPREP responsibly. We do not guarantee 100% accuracy on conversions and are not liable for data loss.</p>
-    <p>The software is provided as-is without warranties of any kind.</p>
-    """
-    return render_page("Terms & Conditions", html)
+svg_ppt_to_pdf = """
+<svg class="tool-icon-large" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <rect x="14" y="14" width="36" height="36" rx="6" ry="6" stroke="currentColor" fill="none" stroke-width="3"/>
+  <path fill="currentColor" fill-opacity="0.15" d="M22 24h20v16H22z"/>
+  <text x="32" y="50" font-family="Orbitron" font-size="12" fill="currentColor" text-anchor="middle" dominant-baseline="middle" opacity="0.7">PPT→PDF</text>
+</svg>
+"""
 
+svg_pdf_to_ppt = """
+<svg class="tool-icon-large" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <rect x="14" y="14" width="36" height="36" rx="6" ry="6" stroke="currentColor" fill="none" stroke-width="3"/>
+  <path fill="currentColor" fill-opacity="0.15" d="M22 24h20v16H22z"/>
+  <line x1="22" y1="44" x2="42" y2="44" stroke="currentColor" stroke-width="2" />
+  <text x="32" y="50" font-family="Orbitron" font-size="12" fill="currentColor" text-anchor="middle" dominant-baseline="middle" opacity="0.7">PDF→PPT</text>
+</svg>
+"""
 
-def render_form_page(title, heading, accept, multiple=False, note=None):
-    multiple_attr = ' multiple' if multiple else ''
-    note_html = f"<p><small>{note}</small></p>" if note else ""
-    input_name = "file" if not multiple else "files"
-    accept_attr = ','.join(accept)
-    html = f"""
-    <h1>{heading}</h1>
-    <form method="post" enctype="multipart/form-data">
-      <div class="form-group">
-        <label for="{input_name}">Upload file{'s' if multiple else ''} ({accept_attr}):</label>
-        <input type="file" id="{input_name}" name="{input_name}" accept="{accept_attr}"{multiple_attr} required />
-      </div>
-      <input type="submit" class="btn" value="Convert" />
-    </form>
-    {note_html}
-    """
-    return render_page(title, html)
+svg_images_to_pdf = """
+<svg class="tool-icon-large" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <rect x="8" y="14" width="48" height="36" rx="6" ry="6" stroke="currentColor" fill="none" stroke-width="3"/>
+  <circle cx="24" cy="32" r="12" fill="currentColor" fill-opacity="0.12"/>
+  <rect x="38" y="32" width="14" height="10" fill="currentColor" fill-opacity="0.12" rx="2" ry="2"/>
+  <text x="32" y="52" font-family="Orbitron" font-size="10" fill="currentColor" text-anchor="middle" dominant-baseline="middle" opacity="0.7">Imgs→PDF</text>
+</svg>
+"""
 
+svg_merge_pdf = """
+<svg class="tool-icon-large" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <rect x="10" y="14" width="44" height="36" rx="6" ry="6" stroke="currentColor" fill="none" stroke-width="3"/>
+  <rect x="16" y="22" width="32" height="12" fill="currentColor" fill-opacity="0.15"/>
+  <rect x="16" y="38" width="32" height="12" fill="currentColor" fill-opacity="0.15"/>
+  <text x="32" y="52" font-family="Orbitron" font-size="10" fill="currentColor" text-anchor="middle" dominant-baseline="middle" opacity="0.7">Merge PDF</text>
+</svg>
+"""
 
-@app.route('/pdf-to-word', methods=['GET','POST'])
+svg_image_compressor = """
+<svg class="tool-icon-large" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <circle cx="32" cy="32" r="26" stroke="currentColor" fill="none" stroke-width="3"/>
+  <line x1="32" y1="10" x2="32" y2="54" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="22,38 32,48 42,38" fill="currentColor" fill-opacity="0.3"/>
+  <text x="32" y="56" font-family="Orbitron" font-size="10" fill="currentColor" text-anchor="middle" dominant-baseline="middle" opacity="0.7">Img Compress</text>
+</svg>
+"""
+
+svg_pdf_compressor = """
+<svg class="tool-icon-large" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+  <rect x="14" y="14" width="36" height="36" rx="6" ry="6" stroke="currentColor" fill="none" stroke-width="3"/>
+  <path d="M22 30h20v8H22z" fill="currentColor" fill-opacity="0.15"/>
+  <text x="32" y="52" font-family="Orbitron" font-size="10" fill="currentColor" text-anchor="middle" dominant-baseline="middle" opacity="0.7">PDF Compress</text>
+</svg>
+"""
+
+@app.route("/")
+def home():
+    return render_template_string(render_base_page(
+        "Home",
+        "Welcome to PAPERPREP document and image conversion platform. Convert PDF, Word, JPG, PPT and compress your files with a futuristic and easy-to-use interface.",
+        "document conversion, pdf to word, jpg to word, ppt to pdf, pdf to ppt, merge pdf, image compressor, pdf compressor",
+        home_content
+    ))
+
+@app.route("/pdf-to-word")
 def pdf_to_word():
-    if request.method == 'POST':
-        file = request.files.get('file')
-        if not file or file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if not allowed_file(file.filename, 'pdf_to_word'):
-            flash('Invalid file type')
-            return redirect(request.url)
-        try:
-            with tempfile.TemporaryDirectory() as tmpdir:
-                pdf_path = os.path.join(tmpdir, secure_filename(file.filename))
-                file.save(pdf_path)
-                docx_path = os.path.join(tmpdir, 'converted.docx')
-                cv = Converter(pdf_path)
-                cv.convert(docx_path, start=0, end=None)
-                cv.close()
-                return send_file(docx_path, as_attachment=True, download_name='converted.docx')
-        except Exception as e:
-            flash(f'Conversion failed: {e}')
-            return redirect(request.url)
-    else:
-        return render_form_page("PDF to Word", "PDF to Word Converter", ['.pdf'])
+    return render_template_string(render_tool_page(
+        "PDF to Word",
+        "Convert your PDF documents to editable Word files quickly and easily.",
+        "pdf to word, convert pdf to doc, pdf converter",
+        svg_pdf_to_word,
+        ".pdf",
+        "Choose PDF file",
+        "PDF to Word conversion feature not implemented."
+    ))
 
-
-@app.route('/jpg-to-word', methods=['GET','POST'])
+@app.route("/jpg-to-word")
 def jpg_to_word():
-    if request.method == 'POST':
-        file = request.files.get('file')
-        if not file or file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if not allowed_file(file.filename, 'jpg_to_word'):
-            flash('Invalid file type')
-            return redirect(request.url)
-        try:
-            image = Image.open(file.stream).convert('RGB')
-            text = pytesseract.image_to_string(image)
-            if not text.strip():
-                flash("No text detected in the image.")
-                return redirect(request.url)
-            doc = Document()
-            doc.add_paragraph(text)
-            mem_file = io.BytesIO()
-            doc.save(mem_file)
-            mem_file.seek(0)
-            return send_file(mem_file, mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                             as_attachment=True, download_name='converted.docx')
-        except Exception as e:
-            flash(f"OCR conversion failed: {e}")
-            return redirect(request.url)
-    else:
-        return render_form_page("JPG to Word", "JPG to Word Converter (OCR)", ['.jpg','.jpeg','.png'])
+    return render_template_string(render_tool_page(
+        "JPG to Word",
+        "Extract text from JPG or PNG image files and save as Word documents.",
+        "jpg to word, image to doc, jpg converter",
+        svg_jpg_to_word,
+        "image/jpeg,image/png",
+        "Choose JPG or PNG file",
+        "JPG to Word conversion feature not implemented."
+    ))
 
-
-@app.route('/ppt-to-pdf', methods=['GET','POST'])
+@app.route("/ppt-to-pdf")
 def ppt_to_pdf():
-    if request.method == 'POST':
-        file = request.files.get('file')
-        if not file or file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if not allowed_file(file.filename, 'ppt_to_pdf'):
-            flash('Invalid file type')
-            return redirect(request.url)
-        # python-pptx cannot export slides as images easily, so we do a basic workaround
-        # We'll just return a flash message that this feature is not fully implemented 
-        flash("PPT to PDF conversion is not implemented fully as python-pptx can't save as PDF directly.")
-        return redirect(request.url)
-    else:
-        return render_form_page("PPT to PDF", "PPT to PDF Converter", ['.pptx'])
+    return render_template_string(render_tool_page(
+        "PPT to PDF",
+        "Convert your PowerPoint presentations to PDF format for easy sharing.",
+        "ppt to pdf, powerpoint to pdf, presentation converter",
+        svg_ppt_to_pdf,
+        ".ppt,.pptx",
+        "Choose PPT file",
+        "PPT to PDF conversion feature not implemented."
+    ))
 
-
-@app.route('/pdf-to-ppt', methods=['GET','POST'])
+@app.route("/pdf-to-ppt")
 def pdf_to_ppt():
-    if convert_from_bytes is None:
-        flash("PDF to PPT requires 'pdf2image' module. Please install it.")
-        return redirect(url_for('home'))
+    return render_template_string(render_tool_page(
+        "PDF to PPT",
+        "Convert PDF files back to editable PowerPoint presentations.",
+        "pdf to ppt, convert pdf to powerpoint, pdf presentation converter",
+        svg_pdf_to_ppt,
+        ".pdf",
+        "Choose PDF file",
+        "PDF to PPT conversion feature not implemented."
+    ))
 
-    if request.method == 'POST':
-        file = request.files.get('file')
-        if not file or file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if not allowed_file(file.filename, 'pdf_to_ppt'):
-            flash('Invalid file type')
-            return redirect(request.url)
-        try:
-            pdf_bytes = file.read()
-            images = convert_from_bytes(pdf_bytes)
-            if not images:
-                flash("No pages found in PDF.")
-                return redirect(request.url)
-            prs = Presentation()
-            prs.slide_height = Inches(7.5)
-            prs.slide_width = Inches(10)
-            for img in images:
-                slide = prs.slides.add_slide(prs.slide_layouts[6])
-                with tempfile.NamedTemporaryFile(suffix=".png") as tmp_img_file:
-                    img.save(tmp_img_file.name, format='PNG')
-                    left = top = Inches(0)
-                    slide.shapes.add_picture(tmp_img_file.name, left, top, width=prs.slide_width, height=prs.slide_height)
-            mem_file = io.BytesIO()
-            prs.save(mem_file)
-            mem_file.seek(0)
-            return send_file(mem_file, mimetype='application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                             as_attachment=True, download_name='converted.pptx')
-        except Exception as e:
-            flash(f"Conversion failed: {e}")
-            return redirect(request.url)
-    else:
-        note = "Note: PDF pages will be converted as images into PPT slides."
-        return render_form_page("PDF to PPT", "PDF to PPT Converter", ['.pdf'], note=note)
-
-
-@app.route('/images-to-pdf', methods=['GET','POST'])
+@app.route("/images-to-pdf")
 def images_to_pdf():
-    if request.method == 'POST':
-        files = request.files.getlist('files')
-        if not files or not any(f.filename for f in files):
-            flash('No selected files')
-            return redirect(request.url)
-        images = []
-        try:
-            for file in files:
-                if not allowed_file(file.filename, 'images_to_pdf'):
-                    flash("Invalid file type in upload. Please upload images.")
-                    return redirect(request.url)
-                images.append(Image.open(file.stream).convert('RGB'))
-            if not images:
-                flash("No valid images uploaded.")
-                return redirect(request.url)
-            mem_file = io.BytesIO()
-            images[0].save(mem_file, format='PDF', save_all=True, append_images=images[1:])
-            mem_file.seek(0)
-            return send_file(mem_file, mimetype='application/pdf', download_name='combined.pdf', as_attachment=True)
-        except Exception as e:
-            flash(f"Image to PDF conversion failed: {e}")
-            return redirect(request.url)
-    else:
-        return render_form_page("Images to PDF", "Multiple Images to One PDF",
-                                ['.jpg', '.jpeg', '.png', '.bmp', '.gif'], multiple=True)
+    return render_template_string(render_tool_page(
+        "Images to PDF",
+        "Combine multiple images into a single PDF document easily.",
+        "images to pdf, picture to pdf, jpg to pdf, png to pdf",
+        svg_images_to_pdf,
+        "image/*",
+        "Choose image files",
+        "Multiple Images to one PDF feature not implemented."
+    ))
 
-
-@app.route('/merge-pdf', methods=['GET','POST'])
+@app.route("/merge-pdf")
 def merge_pdf():
-    if request.method == 'POST':
-        files = request.files.getlist('files')
-        if not files or not any(f.filename for f in files):
-            flash('No selected files')
-            return redirect(request.url)
-        try:
-            merger = PyPDF2.PdfMerger()
-            for file in files:
-                if not allowed_file(file.filename, 'merge_pdf'):
-                    flash("Invalid file type in upload. Please upload PDFs.")
-                    return redirect(request.url)
-                file.stream.seek(0)
-                merger.append(file.stream)
-            mem_file = io.BytesIO()
-            merger.write(mem_file)
-            merger.close()
-            mem_file.seek(0)
-            return send_file(mem_file, mimetype='application/pdf', download_name='merged.pdf', as_attachment=True)
-        except Exception as e:
-            flash(f"Merging PDFs failed: {e}")
-            return redirect(request.url)
-    else:
-        return render_form_page("Merge PDF", "Merge PDF Files", ['.pdf'], multiple=True)
+    return render_template_string(render_tool_page(
+        "Merge PDFs",
+        "Merge multiple PDF files into one seamless document.",
+        "merge pdf, combine pdf, pdf joiner",
+        svg_merge_pdf,
+        ".pdf",
+        "Choose PDF files",
+        "Merge PDF feature not implemented."
+    ))
 
+@app.route("/image-compressor")
+def image_compressor():
+    return render_template_string(render_tool_page(
+        "Image Compressor",
+        "Compress image files to reduce their size without losing quality.",
+        "image compressor, compress jpg, reduce image size",
+        svg_image_compressor,
+        "image/*",
+        "Choose image file",
+        "Image compressor feature not implemented."
+    ))
 
-@app.route('/image-compress', methods=['GET', 'POST'])
-def image_compress():
-    if request.method == 'POST':
-        file = request.files.get('file')
-        if not file or file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if not allowed_file(file.filename, 'image_compress'):
-            flash('Invalid file type')
-            return redirect(request.url)
-        try:
-            img = Image.open(file.stream).convert('RGB')
-            mem_file = io.BytesIO()
-            img.save(mem_file, format='JPEG', quality=40, optimize=True)
-            mem_file.seek(0)
-            return send_file(mem_file, mimetype='image/jpeg', download_name='compressed.jpg', as_attachment=True)
-        except Exception as e:
-            flash(f"Image compression failed: {e}")
-            return redirect(request.url)
-    else:
-        return render_form_page("Image Compressor", "Image Compressor", ['.jpg', '.jpeg', '.png'])
+@app.route("/pdf-compressor")
+def pdf_compressor():
+    return render_template_string(render_tool_page(
+        "PDF Compressor",
+        "Reduce the file size of PDF documents for easier sharing.",
+        "pdf compressor, reduce pdf size",
+        svg_pdf_compressor,
+        ".pdf",
+        "Choose PDF file",
+        "PDF compressor feature not implemented."
+    ))
 
-
-@app.route('/pdf-compress', methods=['GET', 'POST'])
-def pdf_compress():
-    if request.method == 'POST':
-        file = request.files.get('file')
-        if not file or file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if not allowed_file(file.filename, 'pdf_compress'):
-            flash('Invalid file type')
-            return redirect(request.url)
-        try:
-            pdf_reader = PyPDF2.PdfReader(file)
-            pdf_writer = PyPDF2.PdfWriter()
-            for page in pdf_reader.pages:
-                pdf_writer.add_page(page)
-            mem_file = io.BytesIO()
-            pdf_writer.write(mem_file)
-            mem_file.seek(0)
-            return send_file(mem_file, mimetype='application/pdf', download_name='compressed.pdf', as_attachment=True)
-        except Exception as e:
-            flash(f"PDF compression failed: {e}")
-            return redirect(request.url)
-    else:
-        return render_form_page("PDF Compressor", "PDF Compressor", ['.pdf'])
-
-
-if __name__ == '__main__':
-    # Use 0.0.0.0 to be reachable on local network if hosting
-    app.run(debug=True, host='0.0.0.0', port=5000)
+if __name__ == "__main__":
+    app.run(debug=True)
