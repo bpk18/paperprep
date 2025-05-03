@@ -1,18 +1,21 @@
 import os
 import tempfile
+import shutil
 from flask import Flask, render_template_string, request, redirect, url_for, send_file, flash
 from werkzeug.utils import secure_filename
 from PyPDF2 import PdfMerger, PdfReader
 from PIL import Image
 from pdf2docx import Converter
 from docx import Document
-import docx.shared
+from io import BytesIO
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'
+app.secret_key = 'supersecretkey'  # for flashing messages
 
+# Ensure temp directory
 TEMP_DIR = tempfile.mkdtemp()
 
+# Allowed extensions for tools
 ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'bmp', 'gif'}
 ALLOWED_PDF = {'pdf'}
 ALLOWED_PPT = {'ppt', 'pptx'}
@@ -237,9 +240,6 @@ base_html = '''
           box-shadow: 0 4px 10px var(--card-shadow);
           transition: background-color 0.3s ease;
           user-select: none;
-          text-decoration: none;
-          display: inline-block;
-          text-align: center;
         }
         .btn:hover {
           background-color: var(--btn-hover-bg);
@@ -434,169 +434,189 @@ base_html = '''
 </html>
 '''
 
-# SVG icons for tools
-tool_icons = {
-    'pdf_to_word': '''
-    <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <path d="M48 4H16a4 4 0 0 0-4 4v48a4 4 0 0 0 4 4h32a4 4 0 0 0 4-4V12l-12-8zM16 56V8h29.3L48 12v44H16z"/>
-        <path d="M24 28h16v4H24zm0 8h11v4H24z" fill="var(--primary)"/>
-    </svg>
-    ''',
-    'jpg_to_word': '''
-    <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <circle cx="32" cy="26" r="8" stroke="var(--primary)" stroke-width="3" fill="none"/>
-        <path d="M16 44h32v6H16z" fill="var(--primary)"/>
-        <path d="M8 54h48v4H8z" fill="var(--secondary)"/>
-    </svg>
-    ''',
-    'ppt_to_pdf': '''
-    <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <rect x="14" y="12" width="36" height="40" rx="3" ry="3" fill="var(--primary)"/>
-        <path fill="var(--btn-text)" d="M22 20h20v24H22z"/>
-        <rect x="22" y="20" width="16" height="2" fill="var(--primary)"/>
-        <rect x="22" y="35" width="16" height="2" fill="var(--primary)"/>
-    </svg>
-    ''',
-    'pdf_to_ppt': '''
-    <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <rect x="14" y="12" width="36" height="40" rx="3" ry="3" fill="var(--primary)"/>
-        <path fill="var(--btn-text)" d="M22 20h20v24H22z"/>
-        <path d="M26 24h12v16H26z" fill="var(--primary)"/>
-    </svg>
-    ''',
-    'images_to_pdf': '''
-    <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <rect x="10" y="14" width="44" height="36" rx="4" ry="4" fill="var(--primary)"/>
-        <circle cx="32" cy="32" r="8" fill="var(--btn-text)"/>
-        <path d="M24 40h16v4H24z" fill="var(--primary)"/>
-    </svg>
-    ''',
-    'merge_pdf': '''
-    <svg class="tool-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
-        <rect x="8" y="14" width="48" height="36" rx="4" ry="4" fill="var(--primary)"/>
-        <path d="M20 24h24v4H20zM20 34h24v4H20z" fill="var(--btn-text)"/>
-    </svg>
-    ''',
-    'image_compressor': '''
-    <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <circle cx="32" cy="32" r="20" stroke="var(--primary)" stroke-width="4" fill="none"/>
-        <path d="M22 32l6 6 12-12" stroke="var(--primary)" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    ''',
-    'pdf_compressor': '''
-    <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-        <rect x="16" y="16" width="32" height="32" fill="var(--primary)" rx="6" ry="6"/>
-        <path d="M24 24h16v16H24z" fill="var(--btn-text)"/>
-        <path d="M24 24h16v4H24z" fill="var(--primary)"/>
-    </svg>
-    '''
-}
+# Home page with links to tool pages
+home_html = '''
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Welcome to PAPERPREP</h1>
+    <p class="lead">Your all-in-one document and image conversion toolkit with a futuristic UI and seamless experience.</p>
+    <section class="tools-grid" aria-label="Conversion Tools">
 
-# Helper to render tool page with icon
-def render_tool_page(title, description, fields, icon_key, result_fileurl=None, result_filename=None):
-    icon_svg = tool_icons.get(icon_key, '')
-    page_html = '''
-    {% extends 'base.html' %}
-    {% block content %}
-        <h1>{{ title }}</h1>
-        <div style="text-align:center; margin-bottom:1rem;">''' + icon_svg + '''</div>
-        <p class="lead">{{ description }}</p>
+        <article class="tool-card">
+            <div class="tool-name">PDF to Word</div>
+            <a class="btn" href="{{ url_for('pdf_to_word') }}">Open</a>
+        </article>
 
-        {% if result_fileurl %}
-            <div class="result-link">
-                <a href="{{ result_fileurl }}" download="{{ result_filename }}">Download {{ title }} Result</a>
-            </div>
-        {% endif %}
+        <article class="tool-card">
+            <div class="tool-name">JPG to Word</div>
+            <a class="btn" href="{{ url_for('jpg_to_word') }}">Open</a>
+        </article>
 
-        <form method="post" enctype="multipart/form-data">
-            {% for field in fields %}
-                <label for="{{ field.id }}">{{ field.label }}</label>
-                <input
-                  type="{{ field.type }}"
-                  name="{{ field.name }}"{% if field.multiple %} multiple{% endif %}
-                  id="{{ field.id }}"{% if field.accept %} accept="{{ field.accept }}"{% endif %}
-                  required="{{ 'required' if field.required else '' }}"
-                />
-            {% endfor %}
-            <input type="submit" value="Convert" />
-        </form>
-    {% endblock %}
-    '''
-    return render_template_string(page_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+        <article class="tool-card">
+            <div class="tool-name">PPT to PDF</div>
+            <a class="btn" href="{{ url_for('ppt_to_pdf') }}">Open</a>
+        </article>
 
+        <article class="tool-card">
+            <div class="tool-name">PDF to PPT</div>
+            <a class="btn" href="{{ url_for('pdf_to_ppt') }}">Open</a>
+        </article>
 
-# Home page
+        <article class="tool-card">
+            <div class="tool-name">Images to PDF</div>
+            <a class="btn" href="{{ url_for('images_to_pdf') }}">Open</a>
+        </article>
+
+        <article class="tool-card">
+            <div class="tool-name">Merge PDF</div>
+            <a class="btn" href="{{ url_for('merge_pdf') }}">Open</a>
+        </article>
+
+        <article class="tool-card">
+            <div class="tool-name">Image Compressor</div>
+            <a class="btn" href="{{ url_for('image_compressor') }}">Open</a>
+        </article>
+
+        <article class="tool-card">
+            <div class="tool-name">PDF Compressor</div>
+            <a class="btn" href="{{ url_for('pdf_compressor') }}">Open</a>
+        </article>
+    </section>
+{% endblock %}
+'''
+
+generic_tool_html = '''
+{% extends 'base.html' %}
+{% block content %}
+    <h1>{{ title }}</h1>
+    <p class="lead">{{ description }}</p>
+
+    {% if result_fileurl %}
+        <div class="result-link">
+            <a href="{{ result_fileurl }}" download="{{ result_filename }}">Download {{ title }} Result</a>
+        </div>
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% for field in fields %}
+            <label for="{{ field.id }}">{{ field.label }}</label>
+            <input
+              type="{{ field.type }}"
+              name="{{ field.name }}"{% if field.multiple %} multiple{% endif %}
+              id="{{ field.id }}"{% if field.accept %} accept="{{ field.accept }}"{% endif %}
+              required="{{ 'required' if field.required else '' }}"
+            />
+        {% endfor %}
+        <input type="submit" value="Convert" />
+    </form>
+{% endblock %}
+'''
+
+# About, Privacy, Contact, Terms templates - reuse from before but with minor adjustments
+about_html = '''
+{% extends 'base.html' %}
+{% block content %}
+    <h1>About PAPERPREP</h1>
+    <p class="lead">
+        PAPERPREP is your futuristic document and image conversion hub, designed to simplify your workflow.
+        With a clean, sleek UI and powerful tools, we help you transform your files seamlessly on any device.
+    </p>
+{% endblock %}
+'''
+
+privacy_html = '''
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Privacy Policy</h1>
+    <p>
+      We value your privacy. PAPERPREP does not store any files you upload or any personal data. All file processing is done securely and temporarily.
+    </p>
+    <p>
+      By using PAPERPREP, you agree to our processing guidelines and terms.
+    </p>
+{% endblock %}
+'''
+
+contact_html = '''
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Contact Us</h1>
+    <p class="lead">Have questions or feedback? Reach out to us!</p>
+    <form id="contact-form" onsubmit="event.preventDefault(); alert('Thank you for contacting us! We will get back to you soon.'); this.reset();">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="name" placeholder="Your full name" required />
+        
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="your.email@example.com" required />
+        
+        <label for="message">Message</label>
+        <textarea id="message" name="message" placeholder="Write your message here..." required></textarea>
+        
+        <input type="submit" value="Send Message" />
+    </form>
+{% endblock %}
+'''
+
+terms_html = '''
+{% extends 'base.html' %}
+{% block content %}
+    <h1>Terms &amp; Conditions</h1>
+    <p>
+      By using PAPERPREP, you agree to use the platform responsibly.
+      We provide conversion tools as-is without warranties.
+      You are responsible for your files and usage.
+    </p>
+    <p>
+      PAPERPREP reserves the right to modify these terms at any time.
+    </p>
+{% endblock %}
+'''
+
+# Register the templates
+from jinja2 import DictLoader
+app.jinja_loader = DictLoader({
+    'base.html': base_html,
+    'home.html': home_html,
+    'generic_tool.html': generic_tool_html,
+    'about.html': about_html,
+    'privacy.html': privacy_html,
+    'contact.html': contact_html,
+    'terms.html': terms_html,
+})
+
 @app.route('/')
 def home():
-    home_html = '''
-    {% extends 'base.html' %}
-    {% block content %}
-        <h1>Welcome to PAPERPREP</h1>
-        <p class="lead">Your all-in-one document and image conversion toolkit with a futuristic UI and seamless experience.</p>
-        <section class="tools-grid" aria-label="Conversion Tools">
+    return render_template_string(home_html, title="Home")
 
-            <article class="tool-card">
-                {{ icons.pdf_to_word|safe }}
-                <div class="tool-name">PDF to Word</div>
-                <a class="btn" href="{{ url_for('pdf_to_word') }}">Open</a>
-            </article>
+@app.route('/about')
+def about():
+    return render_template_string(about_html, title="About")
 
-            <article class="tool-card">
-                {{ icons.jpg_to_word|safe }}
-                <div class="tool-name">JPG to Word</div>
-                <a class="btn" href="{{ url_for('jpg_to_word') }}">Open</a>
-            </article>
+@app.route('/privacy')
+def privacy():
+    return render_template_string(privacy_html, title="Privacy Policy")
 
-            <article class="tool-card">
-                {{ icons.ppt_to_pdf|safe }}
-                <div class="tool-name">PPT to PDF</div>
-                <a class="btn" href="{{ url_for('ppt_to_pdf') }}">Open</a>
-            </article>
+@app.route('/contact')
+def contact():
+    return render_template_string(contact_html, title="Contact")
 
-            <article class="tool-card">
-                {{ icons.pdf_to_ppt|safe }}
-                <div class="tool-name">PDF to PPT</div>
-                <a class="btn" href="{{ url_for('pdf_to_ppt') }}">Open</a>
-            </article>
-
-            <article class="tool-card">
-                {{ icons.images_to_pdf|safe }}
-                <div class="tool-name">Images to PDF</div>
-                <a class="btn" href="{{ url_for('images_to_pdf') }}">Open</a>
-            </article>
-
-            <article class="tool-card">
-                {{ icons.merge_pdf|safe }}
-                <div class="tool-name">Merge PDF</div>
-                <a class="btn" href="{{ url_for('merge_pdf') }}">Open</a>
-            </article>
-
-            <article class="tool-card">
-                {{ icons.image_compressor|safe }}
-                <div class="tool-name">Image Compressor</div>
-                <a class="btn" href="{{ url_for('image_compressor') }}">Open</a>
-            </article>
-
-            <article class="tool-card">
-                {{ icons.pdf_compressor|safe }}
-                <div class="tool-name">PDF Compressor</div>
-                <a class="btn" href="{{ url_for('pdf_compressor') }}">Open</a>
-            </article>
-        </section>
-    {% endblock %}
-    '''
-    return render_template_string(home_html, title="Home", icons=tool_icons)
+@app.route('/terms')
+def terms():
+    return render_template_string(terms_html, title="Terms & Conditions")
 
 
-# Tools routes all call render_tool_page with relevant params
-
+# Tool: PDF to Word
 @app.route('/pdf-to-word', methods=['GET', 'POST'])
 def pdf_to_word():
     title = "PDF to Word"
     description = "Convert your PDF documents to editable Word files (.docx)."
+    result_fileurl = None
+    result_filename = None
+
     fields = [
         {"id": "pdf_file", "name": "pdf_file", "label": "Upload PDF file", "type": "file", "accept": ".pdf", "multiple": False, "required": True}
     ]
+
     if request.method == 'POST':
         if 'pdf_file' not in request.files:
             flash('No file part')
@@ -609,8 +629,11 @@ def pdf_to_word():
             filename = secure_filename(file.filename)
             input_path = os.path.join(TEMP_DIR, filename)
             file.save(input_path)
+            
+            # Output file
             output_filename = os.path.splitext(filename)[0] + '.docx'
             output_path = os.path.join(TEMP_DIR, output_filename)
+            
             try:
                 cv = Converter(input_path)
                 cv.convert(output_path, start=0, end=None)
@@ -622,15 +645,21 @@ def pdf_to_word():
         else:
             flash('Invalid file type. Please upload a PDF file.')
             return redirect(request.url)
-    return render_tool_page(title, description, fields, 'pdf_to_word')
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
 
+
+# Tool: JPG to Word (simple create docx with embedded image)
 @app.route('/jpg-to-word', methods=['GET', 'POST'])
 def jpg_to_word():
     title = "JPG to Word"
     description = "Convert JPG or other image files into a Word document with the image embedded."
+    result_fileurl = None
+    result_filename = None
+
     fields = [
         {"id": "image_file", "name": "image_file", "label": "Upload Image file", "type": "file", "accept": "image/*", "multiple": False, "required": True}
     ]
+
     if request.method == 'POST':
         if 'image_file' not in request.files:
             flash('No file part')
@@ -643,8 +672,10 @@ def jpg_to_word():
             filename = secure_filename(file.filename)
             input_path = os.path.join(TEMP_DIR, filename)
             file.save(input_path)
+            
             output_filename = os.path.splitext(filename)[0] + '.docx'
             output_path = os.path.join(TEMP_DIR, output_filename)
+            
             try:
                 doc = Document()
                 doc.add_paragraph("Image embedded below:")
@@ -657,39 +688,59 @@ def jpg_to_word():
         else:
             flash('Invalid file type. Please upload an image file.')
             return redirect(request.url)
-    return render_tool_page(title, description, fields, 'jpg_to_word')
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
 
+
+# Tool: PPT to PDF (for simplicity, just reject, as no easy pure python conversion without libreoffice or external tools)
 @app.route('/ppt-to-pdf', methods=['GET', 'POST'])
 def ppt_to_pdf():
     title = "PPT to PDF"
     description = "Convert your PowerPoint files (.ppt, .pptx) to PDF. (NOTE: Requires external tool to fully support)"
+    result_fileurl = None
+    result_filename = None
+
     fields = [
         {"id": "ppt_file", "name": "ppt_file", "label": "Upload PPT/PPTX file", "type": "file", "accept": ".ppt,.pptx", "multiple": False, "required": True}
     ]
+
     if request.method == 'POST':
         flash('PPT to PDF conversion requires external tools (LibreOffice). This feature is coming soon.')
         return redirect(request.url)
-    return render_tool_page(title, description, fields, 'ppt_to_pdf')
 
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Tool: PDF to PPT (placeholder, no direct conversion implemented)
 @app.route('/pdf-to-ppt', methods=['GET', 'POST'])
 def pdf_to_ppt():
     title = "PDF to PPT"
     description = "Convert PDF to PowerPoint (PPT) files. (Feature coming soon)"
+    result_fileurl = None
+    result_filename = None
+
     fields = [
         {"id": "pdf_file", "name": "pdf_file", "label": "Upload PDF file", "type": "file", "accept": ".pdf", "multiple": False, "required": True}
     ]
+
     if request.method == 'POST':
         flash('PDF to PPT conversion feature will be added soon!')
         return redirect(request.url)
-    return render_tool_page(title, description, fields, 'pdf_to_ppt')
 
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Tool: Multiple images to one PDF
 @app.route('/images-to-pdf', methods=['GET', 'POST'])
 def images_to_pdf():
     title = "Images to PDF"
     description = "Combine multiple image files into a single PDF document."
+    result_fileurl = None
+    result_filename = None
+
     fields = [
         {"id": "images", "name": "images", "label": "Upload Image files", "type": "file", "accept": "image/*", "multiple": True, "required": True}
     ]
+
     if request.method == 'POST':
         files = request.files.getlist('images')
         if not files or len(files) == 0:
@@ -709,6 +760,7 @@ def images_to_pdf():
             if not image_files:
                 flash('No valid image files found.')
                 return redirect(request.url)
+            
             images = [Image.open(img).convert('RGB') for img in image_files]
             output_path = os.path.join(TEMP_DIR, "combined_images.pdf")
             images[0].save(output_path, save_all=True, append_images=images[1:])
@@ -716,15 +768,22 @@ def images_to_pdf():
         except Exception as e:
             flash(f'Error during conversion: {e}')
             return redirect(request.url)
-    return render_tool_page(title, description, fields, 'images_to_pdf')
 
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Tool: Merge PDF
 @app.route('/merge-pdf', methods=['GET', 'POST'])
 def merge_pdf():
     title = "Merge PDF"
     description = "Merge multiple PDF files into one unified PDF document."
+    result_fileurl = None
+    result_filename = None
+
     fields = [
         {"id": "pdfs", "name": "pdfs", "label": "Upload PDF files", "type": "file", "accept": ".pdf", "multiple": True, "required": True}
     ]
+
     if request.method == 'POST':
         files = request.files.getlist('pdfs')
         if not files or len(files) == 0:
@@ -744,6 +803,7 @@ def merge_pdf():
             if not pdf_paths:
                 flash('No valid PDF files found.')
                 return redirect(request.url)
+            
             merger = PdfMerger()
             for pdf in pdf_paths:
                 merger.append(pdf)
@@ -754,15 +814,22 @@ def merge_pdf():
         except Exception as e:
             flash(f'Error during merge: {e}')
             return redirect(request.url)
-    return render_tool_page(title, description, fields, 'merge_pdf')
 
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Tool: Image compressor (lower quality JPEG)
 @app.route('/image-compressor', methods=['GET', 'POST'])
 def image_compressor():
     title = "Image Compressor"
     description = "Compress images by lowering quality without significant loss."
+    result_fileurl = None
+    result_filename = None
+
     fields = [
         {"id": "image_file", "name": "image_file", "label": "Upload image file", "type": "file", "accept": "image/*", "multiple": False, "required": True}
     ]
+
     if request.method == 'POST':
         if 'image_file' not in request.files:
             flash('No file part')
@@ -787,15 +854,22 @@ def image_compressor():
         else:
             flash('Invalid file type. Please upload an image file.')
             return redirect(request.url)
-    return render_tool_page(title, description, fields, 'image_compressor')
 
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+
+
+# Tool: PDF Compressor (basic, recreate PDF with PyPDF2 - limited compression capability)
 @app.route('/pdf-compressor', methods=['GET', 'POST'])
 def pdf_compressor():
     title = "PDF Compressor"
     description = "Basic PDF compression by rewriting the PDF file. (Advanced compression may not be available)"
+    result_fileurl = None
+    result_filename = None
+
     fields = [
         {"id": "pdf_file", "name": "pdf_file", "label": "Upload PDF file", "type": "file", "accept": ".pdf", "multiple": False, "required": True}
     ]
+
     if request.method == 'POST':
         if 'pdf_file' not in request.files:
             flash('No file part')
@@ -825,85 +899,17 @@ def pdf_compressor():
         else:
             flash('Invalid file type. Please upload a PDF file.')
             return redirect(request.url)
-    return render_tool_page(title, description, fields, 'pdf_compressor')
+
+    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
 
 
+# Serve favicon.ico from static folder
 @app.route('/favicon.ico')
 def favicon():
     return send_file('static/favicon.ico')
 
 
-@app.route('/about')
-def about():
-    about_html = '''
-    {% extends 'base.html' %}
-    {% block content %}
-        <h1>About PAPERPREP</h1>
-        <p class="lead">
-            PAPERPREP is your futuristic document and image conversion hub, designed to simplify your workflow.
-            With a clean, sleek UI and powerful tools, we help you transform your files seamlessly on any device.
-        </p>
-    {% endblock %}
-    '''
-    return render_template_string(about_html, title="About")
-
-@app.route('/privacy')
-def privacy():
-    privacy_html = '''
-    {% extends 'base.html' %}
-    {% block content %}
-        <h1>Privacy Policy</h1>
-        <p>
-          We value your privacy. PAPERPREP does not store any files you upload or any personal data. All file processing is done securely and temporarily.
-        </p>
-        <p>
-          By using PAPERPREP, you agree to our processing guidelines and terms.
-        </p>
-    {% endblock %}
-    '''
-    return render_template_string(privacy_html, title="Privacy Policy")
-
-@app.route('/contact')
-def contact():
-    contact_html = '''
-    {% extends 'base.html' %}
-    {% block content %}
-        <h1>Contact Us</h1>
-        <p class="lead">Have questions or feedback? Reach out to us!</p>
-        <form id="contact-form" onsubmit="event.preventDefault(); alert('Thank you for contacting us! We will get back to you soon.'); this.reset();">
-            <label for="name">Name</label>
-            <input type="text" id="name" name="name" placeholder="Your full name" required />
-            
-            <label for="email">Email</label>
-            <input type="email" id="email" name="email" placeholder="your.email@example.com" required />
-            
-            <label for="message">Message</label>
-            <textarea id="message" name="message" placeholder="Write your message here..." required></textarea>
-            
-            <input type="submit" value="Send Message" />
-        </form>
-    {% endblock %}
-    '''
-    return render_template_string(contact_html, title="Contact")
-
-@app.route('/terms')
-def terms():
-    terms_html = '''
-    {% extends 'base.html' %}
-    {% block content %}
-        <h1>Terms &amp; Conditions</h1>
-        <p>
-          By using PAPERPREP, you agree to use the platform responsibly.
-          We provide conversion tools as-is without warranties.
-          You are responsible for your files and usage.
-        </p>
-        <p>
-          PAPERPREP reserves the right to modify these terms at any time.
-        </p>
-    {% endblock %}
-    '''
-    return render_template_string(terms_html, title="Terms & Conditions")
-
-
 if __name__ == '__main__':
+    # Run on all interfaces port 5000
     app.run(host='0.0.0.0', port=5000, debug=True)
+
