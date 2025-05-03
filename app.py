@@ -434,6 +434,7 @@ base_html = '''
 </html>
 '''
 
+# SVG icons for tools
 tool_icons = {
     'pdf_to_word': '''
     <svg class="tool-icon" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
@@ -491,6 +492,7 @@ tool_icons = {
     '''
 }
 
+# Helper to render tool page with icon
 def render_tool_page(title, description, fields, icon_key, result_fileurl=None, result_filename=None):
     icon_svg = tool_icons.get(icon_key, '')
     page_html = '''
@@ -520,9 +522,10 @@ def render_tool_page(title, description, fields, icon_key, result_fileurl=None, 
         </form>
     {% endblock %}
     '''
-    return render_template_string(page_html, title=title, description=description,
-                                  fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+    return render_template_string(page_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
 
+
+# Home page
 @app.route('/')
 def home():
     home_html = '''
@@ -584,6 +587,8 @@ def home():
     '''
     return render_template_string(home_html, title="Home", icons=tool_icons)
 
+
+# Tools routes all call render_tool_page with relevant params
 
 @app.route('/pdf-to-word', methods=['GET', 'POST'])
 def pdf_to_word():
@@ -868,13 +873,13 @@ def contact():
         <form id="contact-form" onsubmit="event.preventDefault(); alert('Thank you for contacting us! We will get back to you soon.'); this.reset();">
             <label for="name">Name</label>
             <input type="text" id="name" name="name" placeholder="Your full name" required />
-
+            
             <label for="email">Email</label>
             <input type="email" id="email" name="email" placeholder="your.email@example.com" required />
-
+            
             <label for="message">Message</label>
             <textarea id="message" name="message" placeholder="Write your message here..." required></textarea>
-
+            
             <input type="submit" value="Send Message" />
         </form>
     {% endblock %}
