@@ -141,24 +141,14 @@ INDEX_HTML = """
       padding: 0;
       gap: 1.5rem;
     }
+    /* Hide traditional menu links */
     ul.menu li a {
-      text-decoration: none;
-      color: var(--color-primary);
-      font-weight: 600;
-      transition: color 0.3s;
-    }
-    ul.menu li a:hover,
-    ul.menu li a:focus {
-      color: var(--color-accent);
-      outline: none;
+      display: none;
     }
     body.dark ul.menu li a {
-      color: var(--color-primary-light);
+      display: none;
     }
-    body.dark ul.menu li a:hover,
-    body.dark ul.menu li a:focus {
-      color: var(--color-accent);
-    }
+    /* Media query for hamburger menu */
     @media (max-width: 768px) {
       .menu-toggle {
         display: flex;
@@ -349,12 +339,12 @@ INDEX_HTML = """
 <body>
   <header>
     <div class="logo" aria-label="PAPERPREP">PAPERPREP</div>
-    <nav aria-label="Main navigation">
+    <nav aria-label="Main navigation and info menu">
       <button class="menu-toggle" aria-label="Toggle menu" aria-expanded="false" aria-controls="main-menu">
         <span></span><span></span><span></span>
       </button>
       <ul class="menu" id="main-menu" role="menu">
-        <!-- No tool links here -->
+        <!-- No links shown in nav -->
         <li>
           <div class="dropdown">
             <button class="dropdown-button" aria-haspopup="true" aria-expanded="false" aria-label="Open information menu">&#8942;</button>
@@ -373,11 +363,11 @@ INDEX_HTML = """
 
   <main>
     <h1>Welcome to PAPERPREP</h1>
-    <p style="max-width:600px; margin:0 auto 2rem; text-align:center; color:#475767; font-size: 1.15rem;">
+    <p style="max-width:600px; margin:0 auto 3rem; text-align:center; color:#475767; font-size: 1.15rem;">
       Your futuristic file conversion and compression toolkit. Select a tool below to get started.
     </p>
     <div class="tools-grid" role="list" aria-label="Conversion and compression tools">
-      <article class="card" role="listitem" tabindex="0" aria-label="PDF to Word conversion tool" onclick="window.location.href='{{ url_for('tool_page', tool='pdf-to-word') }}';" onkeypress="if(event.key==='Enter'){window.location.href='{{ url_for('tool_page', tool='pdf-to-word') }}';}">
+      <article class="card" role="listitem" tabindex="0" aria-label="PDF to Word" onclick="window.location.href='{{ url_for('tool_page', tool='pdf-to-word') }}';" onkeypress="if(event.key==='Enter'){window.location.href='{{ url_for('tool_page', tool='pdf-to-word') }}';}">
         <svg class="card-icon" aria-hidden="true" viewBox="0 0 64 64" >
           <path d="M48 2H16C12.7 2 10 4.7 10 8V56C10 59.3 12.7 62 16 62H48C51.3 62 54 59.3 54 56V8C54 4.7 51.3 2 48 2Z"/>
           <path d="M28 18H36V46H28Z" fill="#f4a261"/>
@@ -386,16 +376,82 @@ INDEX_HTML = """
         <h3 class="card-title">PDF to Word</h3>
         <p class="card-desc">Convert your PDF documents to editable Word files.</p>
       </article>
-      <!-- Repeat tool cards similarly, omitted for brevity -->
+      <article class="card" role="listitem" tabindex="0" aria-label="JPG to Word" onclick="window.location.href='{{ url_for('tool_page', tool='jpg-to-word') }}';" onkeypress="if(event.key==='Enter'){window.location.href='{{ url_for('tool_page', tool='jpg-to-word') }}';}">
+        <svg class="card-icon" aria-hidden="true" viewBox="0 0 64 64" >
+          <circle cx="32" cy="32" r="30" fill="#8c97f9"/>
+          <rect x="15" y="22" width="34" height="20" rx="4" ry="4" fill="#61a5c2"/>
+          <circle cx="32" cy="32" r="8" fill="#f4a261"/>
+        </svg>
+        <h3 class="card-title">JPG to Word</h3>
+        <p class="card-desc">Extract text from your JPG images into Word format.</p>
+      </article>
+      <article class="card" role="listitem" tabindex="0" aria-label="PPT to PDF" onclick="window.location.href='{{ url_for('tool_page', tool='ppt-to-pdf') }}';" onkeypress="if(event.key==='Enter'){window.location.href='{{ url_for('tool_page', tool='ppt-to-pdf') }}';}">
+        <svg class="card-icon" aria-hidden="true" viewBox="0 0 64 64">
+          <rect x="14" y="10" width="36" height="44" rx="6" ry="6" fill="#5c6ac4"/>
+          <rect x="20" y="18" width="24" height="28" fill="#f4a261"/>
+          <rect x="20" y="22" width="24" height="6" fill="#fff"/>
+          <rect x="20" y="34" width="24" height="6" fill="#fff"/>
+        </svg>
+        <h3 class="card-title">PPT to PDF</h3>
+        <p class="card-desc">Easily convert your PowerPoint presentations to PDF files.</p>
+      </article>
+      <article class="card" role="listitem" tabindex="0" aria-label="PDF to PPT" onclick="window.location.href='{{ url_for('tool_page', tool='pdf-to-ppt') }}';" onkeypress="if(event.key==='Enter'){window.location.href='{{ url_for('tool_page', tool='pdf-to-ppt') }}';}">
+        <svg class="card-icon" aria-hidden="true" viewBox="0 0 64 64">
+          <path d="M10 54L54 10" stroke="#5c6ac4" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="22" cy="22" r="10" fill="#f4a261"/>
+          <circle cx="42" cy="42" r="10" fill="#61a5c2"/>
+          <text x="22" y="26" font-size="10" text-anchor="middle" fill="#fff" font-family="Segoe UI">PPT</text>
+          <text x="42" y="46" font-size="10" text-anchor="middle" fill="#fff" font-family="Segoe UI">PDF</text>
+        </svg>
+        <h3 class="card-title">PDF to PPT</h3>
+        <p class="card-desc">Convert PDF documents back to editable PowerPoint presentations.</p>
+      </article>
+      <article class="card" role="listitem" tabindex="0" aria-label="Multiple Images into One PDF" onclick="window.location.href='{{ url_for('tool_page', tool='multiple-images-to-pdf') }}';" onkeypress="if(event.key==='Enter'){window.location.href='{{ url_for('tool_page', tool='multiple-images-to-pdf') }}';}">
+        <svg class="card-icon" aria-hidden="true" viewBox="0 0 64 64">
+          <rect x="8" y="12" width="20" height="40" rx="4" ry="4" fill="#5c6ac4"/>
+          <rect x="36" y="12" width="20" height="40" rx="4" ry="4" fill="#61a5c2"/>
+          <path d="M16 26H44" stroke="#f4a261" stroke-width="4" stroke-linecap="round"/>
+          <path d="M16 38H44" stroke="#f4a261" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <h3 class="card-title">Multiple Images into One PDF</h3>
+        <p class="card-desc">Combine multiple images into a single PDF file easily.</p>
+      </article>
+      <article class="card" role="listitem" tabindex="0" aria-label="Merge PDF" onclick="window.location.href='{{ url_for('tool_page', tool='merge-pdf') }}';" onkeypress="if(event.key==='Enter'){window.location.href='{{ url_for('tool_page', tool='merge-pdf') }}';}">
+        <svg class="card-icon" aria-hidden="true" viewBox="0 0 64 64">
+          <rect x="12" y="14" width="40" height="36" rx="6" ry="6" fill="#5c6ac4"/>
+          <path d="M16 20L48 44" stroke="#f4a261" stroke-width="4" stroke-linecap="round"/>
+          <path d="M48 20L16 44" stroke="#f4a261" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <h3 class="card-title">Merge PDF</h3>
+        <p class="card-desc">Combine multiple PDF files into one seamless document.</p>
+      </article>
+      <article class="card" role="listitem" tabindex="0" aria-label="Image Compressor" onclick="window.location.href='{{ url_for('tool_page', tool='image-compressor') }}';" onkeypress="if(event.key==='Enter'){window.location.href='{{ url_for('tool_page', tool='image-compressor') }}';}">
+        <svg class="card-icon" aria-hidden="true" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="26" stroke="#5c6ac4" stroke-width="4" fill="#61a5c2"/>
+          <path d="M20 32H44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+          <path d="M32 20V44" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <h3 class="card-title">Image Compressor</h3>
+        <p class="card-desc">Compress images to reduce file size without losing quality.</p>
+      </article>
+      <article class="card" role="listitem" tabindex="0" aria-label="PDF Compressor" onclick="window.location.href='{{ url_for('tool_page', tool='pdf-compressor') }}';" onkeypress="if(event.key==='Enter'){window.location.href='{{ url_for('tool_page', tool='pdf-compressor') }}';}">
+        <svg class="card-icon" aria-hidden="true" viewBox="0 0 64 64">
+          <rect x="14" y="18" width="36" height="28" rx="6" ry="6" fill="#5c6ac4"/>
+          <path d="M22 26H42" stroke="#f4a261" stroke-width="4" stroke-linecap="round"/>
+          <path d="M22 38H42" stroke="#f4a261" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        <h3 class="card-title">PDF Compressor</h3>
+        <p class="card-desc">Reduce the size of your PDF files for faster sharing.</p>
+      </article>
     </div>
   </main>
 
   <footer>&copy; 2024 PAPERPREP. All rights reserved.</footer>
 
   <!-- Modal -->
-  <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" style="display:none; position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2000;">
-    <div id="modal-content" style="max-width:600px; background:#fff; border-radius:12px; padding:1.5rem 2rem; color:#222; overflow-y:auto; max-height:80vh; position:relative;">
-      <button id="modal-close" aria-label="Close dialog" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:inherit;">&times;</button>
+  <div id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:2000;">
+    <div id="modal-content" style="max-width:600px;background:#fff;border-radius:12px;padding:1.5rem 2rem;color:#222;overflow-y:auto;max-height:80vh;position:relative;">
+      <button id="modal-close" aria-label="Close dialog" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:inherit;">&times;</button>
       <h2 id="modal-title"></h2>
       <div id="modal-body"></div>
     </div>
@@ -455,7 +511,7 @@ INDEX_HTML = """
       about: { title: 'About PAPERPREP', content: `<p>PAPERPREP is an innovative platform designed to make file conversions and compression effortless and efficient. Whether you are a student, professional, or a casual user, our futuristic tools help you manage documents and images with just a few clicks. Our mission is to provide a seamless and intuitive user experience with cutting edge technology and soothing design.</p>` },
       privacy: { title: 'Privacy Policy', content: `<p>Your privacy is important to us. PAPERPREP does not store or share any of your files. All conversions occur securely and temporarily with no user data retention. We use industry best practices to safeguard your information.</p>` },
       contact: { title: 'Contact Us', content: `<p>If you have any questions, suggestions, or need support, feel free to reach out to us at <a href="mailto:support@paperprep.com">support@paperprep.com</a>. We value your feedback.</p>` },
-      terms: { title: 'Terms &amp; Conditions', content: `<p>By using PAPERPREP, you agree to our terms and conditions. We provide our tools "as is" without warranties. Use the services responsibly and respect intellectual property rights.</p>` }
+      terms: { title: 'Terms &amp; Conditions', content: `<p>By using PAPERPREP, you agree to our terms and conditions. We provide our tools &quot;as is&quot; without warranties. Use the services responsibly and respect intellectual property rights.</p>` }
     };
     document.querySelectorAll('.info-menu-btn').forEach(btn => {
       btn.addEventListener('click', e => {
@@ -497,8 +553,13 @@ TOOL_PAGE_HTML_TEMPLATE = """
   <style>
     *, *::before, *::after { box-sizing: border-box; }
     body {
-      margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f0f4f8; color: #222; min-height: 100vh; display: flex; flex-direction: column;
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f0f4f8;
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
     :root {
       --color-primary: #5c6ac4;
@@ -507,72 +568,134 @@ TOOL_PAGE_HTML_TEMPLATE = """
       --color-button-text: #fff;
       --color-button-hover-bg: var(--color-primary-light);
     }
-    body.dark { background-color: #121212; color: #ddd; }
-    body.dark button { background-color: var(--color-primary-light); color: #222; }
-    body.dark button:hover, body.dark button:focus { background-color: var(--color-primary); color: #fff; }
+    body.dark {
+      background-color: #121212;
+      color: #ddd;
+    }
+    body.dark button {
+      background-color: var(--color-primary-light);
+      color: #222;
+    }
+    body.dark button:hover, body.dark button:focus {
+      background-color: var(--color-primary);
+      color: #fff;
+    }
     header {
-      background-color: #fff; padding: 1rem; box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
-      position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center;
+      background-color: #fff;
+      padding: 1rem;
+      box-shadow: 0 2px 8px rgb(0 0 0 / 0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    body.dark header { background-color: #1e1e1e; box-shadow: none; border-bottom: 1px solid #444; }
+    body.dark header {
+      background-color: #1e1e1e;
+      box-shadow: none;
+      border-bottom: 1px solid #444;
+    }
     .logo {
-      font-weight: 900; font-size: 1.5rem; color: var(--color-primary); user-select: none;
+      font-weight: 900;
+      font-size: 1.5rem;
+      color: var(--color-primary);
+      user-select: none;
     }
-    body.dark .logo { color: var(--color-primary-light); }
-    nav { display: flex; align-items: center; gap: 0.75rem; }
+    body.dark .logo {
+      color: var(--color-primary-light);
+    }
+    nav {
+      position: relative;
+    }
     ul.menu {
-      list-style: none; margin: 0; padding: 0; display: flex; gap: 1.5rem;
+      display: flex;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      gap: 1.5rem;
     }
-    .menu-toggle { display: none; }
+    ul.menu li a {
+      text-decoration: none;
+      color: var(--color-primary);
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+    ul.menu li a:hover, ul.menu li a:focus {
+      color: var(--color-primary-light);
+      outline: none;
+    }
     .theme-toggle {
-      border:none; background-color: var(--color-button-bg); color: var(--color-button-text);
-      padding: 0.5rem 1rem; border-radius: 25px; font-weight: 600; cursor: pointer;
-      transition: background-color 0.3s; user-select:none;
+      border: none;
+      background-color: var(--color-button-bg);
+      color: var(--color-button-text);
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      user-select: none;
+      font-size: 1.1rem;
     }
     .theme-toggle:hover, .theme-toggle:focus {
       background-color: var(--color-button-hover-bg);
-      outline:none;
+      outline: none;
     }
     main {
-      flex-grow: 1; padding: 2rem 1rem; max-width: 600px; margin: 0 auto;
-      display: flex; flex-direction: column; gap: 1.5rem; text-align: center;
+      flex-grow: 1;
+      padding: 3rem 1rem;
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      text-align: center;
     }
-    form {
-      display: flex; flex-direction: column; gap: 1rem; align-items: center;
+    label {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 0.3rem;
+      user-select: none;
     }
     input[type="file"] {
+      padding: 1rem;
+      border-radius: 12px;
+      border: 2px dashed var(--color-primary);
+      background-color: #e8f0fe;
+      cursor: pointer;
+      transition: background-color 0.3s;
       max-width: 100%;
-      padding: 0.8rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
+    }
+    input[type="file"]:hover {
+      background-color: #d0e2fd;
     }
     button.submit-btn {
       background-color: var(--color-button-bg);
       color: var(--color-button-text);
-      padding: 0.75rem 1.5rem;
+      padding: 1rem 2rem;
       border: none;
-      border-radius: 25px;
-      font-weight: 700;
+      border-radius: 30px;
+      font-weight: 800;
+      font-size: 1.25rem;
       cursor: pointer;
       user-select: none;
       transition: background-color 0.3s;
-      font-size: 1.1rem;
-      min-width: 200px;
+      box-shadow: 0 8px 20px rgba(92,106,196,.4);
     }
-    button.submit-btn:hover,
-    button.submit-btn:focus {
+    button.submit-btn:hover, button.submit-btn:focus {
       background-color: var(--color-button-hover-bg);
       outline: none;
+      box-shadow: 0 12px 40px rgba(92,106,196,.6);
     }
     body.dark button.submit-btn {
       background-color: var(--color-primary-light);
       color: var(--color-text-dark);
+      box-shadow: 0 8px 20px rgba(140,151,249,.4);
     }
-    body.dark button.submit-btn:hover,
-    body.dark button.submit-btn:focus {
+    body.dark button.submit-btn:hover, body.dark button.submit-btn:focus {
       background-color: var(--color-primary);
       color: #fff;
+      box-shadow: 0 12px 40px rgba(140,151,249,.6);
     }
     a.back-link {
       text-align: left;
@@ -583,8 +706,7 @@ TOOL_PAGE_HTML_TEMPLATE = """
       text-decoration: none;
       cursor: pointer;
     }
-    a.back-link:hover,
-    a.back-link:focus {
+    a.back-link:hover, a.back-link:focus {
       color: var(--color-primary-light);
       outline: none;
     }
@@ -593,7 +715,7 @@ TOOL_PAGE_HTML_TEMPLATE = """
 <body>
   <header>
     <div class="logo"><a href="{{ url_for('index') }}" style="color:inherit; text-decoration:none;">PAPERPREP</a></div>
-    <nav aria-label="Information menu only">
+    <nav>
       <div class="dropdown">
         <button class="dropdown-button" aria-haspopup="true" aria-expanded="false" aria-label="Open information menu">&#8942;</button>
         <div class="dropdown-menu" role="menu" aria-label="Information menu">
@@ -611,9 +733,9 @@ TOOL_PAGE_HTML_TEMPLATE = """
     <h1>{{ title }}</h1>
     <p>{{ description }}</p>
     <form method="post" action="{{ endpoint }}" enctype="multipart/form-data" target="downloadFrame" aria-label="Upload file form for {{ title }}">
-      <label for="fileinput" style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Select {{ 'files' if multiple else 'a file' }} to upload:</label>
+      <label for="fileinput">Upload {{ 'files' if multiple else 'file' }} (drag & drop or click to select)</label>
       <input id="fileinput" type="file" name="{{ 'files' if multiple else 'file' }}" accept="{{ accept }}" {{ 'multiple' if multiple else '' }} required />
-      <button type="submit" class="submit-btn">Convert &amp; Download</button>
+      <button type="submit" class="submit-btn">Convert & Download</button>
     </form>
   </main>
   <footer>
@@ -656,19 +778,19 @@ TOOL_PAGE_HTML_TEMPLATE = """
       }
     });
 
-    // Modal for info windows
     const modal = document.createElement('div');
     modal.id = 'modal';
     modal.role = 'dialog';
     modal.setAttribute('aria-modal', 'true');
     modal.tabIndex = -1;
-    modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:2000;';
+    modal.style.cssText = 'display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:2000;';
     modal.innerHTML = `
-      <div id="modal-content" style="max-width:600px; background:#fff; border-radius:12px; padding:1.5rem 2rem; color:#222; overflow-y:auto; max-height:80vh; position:relative;">
-        <button id="modal-close" aria-label="Close dialog" style="position:absolute; top:12px; right:16px; background:none; border:none; font-size:1.5rem; cursor:pointer; color:inherit;">&times;</button>
+      <div id="modal-content" style="max-width:600px;background:#fff;border-radius:12px;padding:1.5rem 2rem;color:#222;overflow-y:auto;max-height:80vh;position:relative;">
+        <button id="modal-close" aria-label="Close dialog" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:inherit;">&times;</button>
         <h2 id="modal-title"></h2>
         <div id="modal-body"></div>
-      </div>`;
+      </div>
+    `;
     document.body.appendChild(modal);
 
     const modalTitle = modal.querySelector('#modal-title');
