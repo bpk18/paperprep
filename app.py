@@ -1,12 +1,8 @@
 import os
 import io
 import tempfile
-import threading
-from flask import Flask, request, redirect, url_for, flash, render_template_string, send_file, abort, jsonify
+from flask import Flask, request, redirect, url_for, flash, render_template_string, send_file, jsonify
 from werkzeug.utils import secure_filename
-
-# External libraries required:
-# pip install pdf2docx python-docx pytesseract pillow PyPDF2 python-pptx pdf2image
 
 import pytesseract
 from pdf2docx import Converter
@@ -14,12 +10,10 @@ from docx import Document
 from PIL import Image
 from PyPDF2 import PdfMerger, PdfReader, PdfWriter
 from pptx import Presentation
-from pptx.util import Inches
 from pdf2image import convert_from_path
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
-
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024
 
 ALLOWED_EXTENSIONS = {
@@ -98,7 +92,7 @@ BASE_HTML = '''
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PAPERPREP - {% block title %}{% endblock %}</title>
+  <title>PAPERPREP - {{ page_title }}</title>
   <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"/>
   <style>
@@ -435,7 +429,7 @@ BASE_HTML = '''
 </nav>
 
 <main class="container">
-  {% block content %}{% endblock %}
+  {{ content | safe }}
 </main>
 
 <script>
@@ -489,7 +483,6 @@ BASE_HTML = '''
     }, 2000);
   }
 
-  // Intercept form submissions to add animations and asynchronous upload
   document.addEventListener('DOMContentLoaded', () => {
     const forms = document.querySelectorAll('.upload-form');
     forms.forEach(form => {
@@ -505,16 +498,13 @@ BASE_HTML = '''
           body: formData
         }).then(resp => {
           if(resp.ok) {
-            // We expect a file response or redirect
             return resp.blob().then(blob => {
-              // Check if response is pdf, docx, pptx or image or other file
               let disposition = resp.headers.get('Content-Disposition');
               let filename = 'converted_file';
               if(disposition && disposition.indexOf('filename=') !== -1) {
                 let match = disposition.match(/filename="?([^"]+)"?/);
                 if(match) filename = match[1];
               }
-              // Download the file
               const url = window.URL.createObjectURL(blob);
               const a = document.createElement('a');
               a.href = url;
@@ -526,8 +516,8 @@ BASE_HTML = '''
               uploadComplete(submitBtn);
             });
           } else {
-            resp.text().then(text => {
-              alert('Conversion failed: ' + text);
+            resp.json().then(data => {
+              alert('Conversion failed: ' + (data.error || 'Unknown error'));
               submitBtn.disabled = false;
               submitBtn.classList.remove('uploading');
               submitBtn.textContent = 'Upload';
@@ -551,57 +541,42 @@ BASE_HTML = '''
 def allowed_file(filename, extensions):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in extensions
 
+def render_page(page_title, content):
+    return render_template_string(BASE_HTML, page_title=page_title, content=content,
+                                  nav_items=NAV_ITEMS, dark_theme=False)
+
 @app.route('/')
 def home():
-    return render_template_string(
-        BASE_HTML + '''
-        {% block title %}Home{% endblock %}
-        {% block content %}
-        <h1 class="page-title">Welcome to PAPERPREP</h1>
-        <p style="max-width:600px; color:#555;">Explore our powerful and fast file conversion and compression tools. Click on any tool to get started.</p>
-        <div class="tools-grid" role="list">
-          {% for tool in tools %}
-            <a href="{{ url_for(tool.endpoint) }}" class="tool-card" role="listitem" tabindex="0" aria-label="{{ tool.name }}">
-              <i class="{{ tool.icon }} tool-icon" aria-hidden="true"></i>
-              <div class="tool-name">{{ tool.name }}</div>
-              <div class="tool-desc">{{ tool.description }}</div>
-            </a>
-          {% endfor %}
-        </div>
-        {% endblock %}
-        ''',
-        tools=TOOLS,
-        nav_items=NAV_ITEMS,
-        dark_theme=False,
-    )
+    items_html = '<h1 class="page-title">Welcome to PAPERPREP</h1>'
+    items_html += '<p style="max-width:600px; color:#555;">Explore our powerful and fast file conversion and compression tools. Click on any tool to get started.</p>'
+    items_html += '<div class="tools-grid" role="list">'
+    for tool in TOOLS:
+        items_html += f'''<a href="{url_for(tool['endpoint'])}" class="tool-card" role="listitem" tabindex="0" aria-label="{tool['name']}">
+            <i class="{tool['icon']} tool-icon" aria-hidden="true"></i>
+            <div class="tool-name">{tool['name']}</div>
+            <div class="tool-desc">{tool['description']}</div>
+        </a>'''
+    items_html += '</div>'
+    return render_page('Home', items_html)
 
-def tool_page_html(tool):
+
+def tool_page_html(tool, success_msg=None):
     accepted_ext_list = ", ".join(tool['accepted'])
-    return BASE_HTML + '''
-    {% block title %}''' + tool['name'] + '''{% endblock %}
-    {% block content %}
-      <h1 class="page-title">{{ tool.name }}</h1>
-      <p>{{ tool.description }}</p>
-      <p><b>Accepted file types:</b> ''' + accepted_ext_list + '''</p>
-
-      <form class="upload-form" method="POST" enctype="multipart/form-data" aria-label="Upload file form" action="{{ url_for(tool.endpoint) }}">
-        <label for="file" style="font-weight:600; margin-bottom:0.5rem; display:block;">Choose file{% if multiple %}s{% endif %}</label>
-        {% if multiple %}
-          <input class="file-input" type="file" name="file" id="file" accept="{{ accepted_files }}" multiple required aria-required="true"/>
-        {% else %}
-          <input class="file-input" type="file" name="file" id="file" accept="{{ accepted_files }}" required aria-required="true"/>
-        {% endif %}
-        <button type="submit" class="submit-btn" aria-live="polite">Upload</button>
-      </form>
-
-      {% if success_msg %}
-      <div class="flash-message" role="alert" aria-live="assertive">{{ success_msg|safe }}</div>
-      {% endif %}
-    {% endblock %}
-    {% block scripts %}
-    <script></script>
-    {% endblock %}
+    multiple = 'multiple' if tool['endpoint'] in ['images_to_pdf', 'merge_pdf'] else ''
+    multiple_bool = tool['endpoint'] in ['images_to_pdf', 'merge_pdf']
+    form_html = f'''
+    <h1 class="page-title">{tool['name']}</h1>
+    <p>{tool['description']}</p>
+    <p><b>Accepted file types:</b> {accepted_ext_list}</p>
+    <form class="upload-form" method="POST" enctype="multipart/form-data" aria-label="Upload file form" action="{url_for(tool['endpoint'])}">
+      <label for="file" style="font-weight:600; margin-bottom:0.5rem; display:block;">Choose file{'s' if multiple_bool else ''}</label>
+      <input class="file-input" type="file" name="file" id="file" accept="{','.join(['.'+e for e in tool['accepted']])}" {multiple} required aria-required="true"/>
+      <button type="submit" class="submit-btn" aria-live="polite">Upload</button>
+    </form>
     '''
+    if success_msg:
+        form_html += f'<div class="flash-message" role="alert" aria-live="assertive">{success_msg}</div>'
+    return render_page(tool['name'], form_html)
 
 def pdf_to_word_convert(input_path, output_path):
     converter = Converter(input_path)
@@ -619,7 +594,7 @@ def pdf_to_ppt_convert(input_path, output_path):
     presentation = Presentation()
     slides = convert_from_path(input_path)
     for slide_img in slides:
-        slide = presentation.slides.add_slide(presentation.slide_layouts[6]) 
+        slide = presentation.slides.add_slide(presentation.slide_layouts[6])
         image_stream = io.BytesIO()
         slide_img.save(image_stream, format='PNG')
         image_stream.seek(0)
@@ -669,7 +644,6 @@ for tool in TOOLS:
 
     def make_route(tool=tool):
         def tool_func():
-            success_msg = None
             if request.method == 'POST':
                 files = request.files.getlist('file')
                 if not files or all(f.filename == '' for f in files):
@@ -725,29 +699,22 @@ for tool in TOOLS:
                 finally:
                     for d in temp_dirs:
                         shutil.rmtree(d, ignore_errors=True)
-            return render_template_string(tool_page_html(tool),
-                                          tool=tool,
-                                          success_msg=None,
-                                          nav_items=NAV_ITEMS,
-                                          dark_theme=False,
-                                          accepted_files=",".join(f".{e}" for e in tool['accepted']),
-                                          multiple=tool['endpoint'] in ['images_to_pdf', 'merge_pdf'])
+            return tool_page_html(tool)
         tool_func.__name__ = endpoint
         tool_func.methods = ['GET', 'POST']
         return tool_func
 
     app.add_url_rule(f'/{endpoint}', view_func=make_route(), methods=['GET', 'POST'])
 
+
 def static_page_html(title, content):
-    return BASE_HTML + '''
-    {% block title %}''' + title + '''{% endblock %}
-    {% block content %}
-      <h1 class="page-title">''' + title + '''</h1>
-      <div style="max-width:700px; white-space: pre-line;">
-      ''' + content + '''
-      </div>
-    {% endblock %}
+    return f'''
+    <h1 class="page-title">{title}</h1>
+    <div style="max-width:700px; white-space: pre-line;">
+    {content}
+    </div>
     '''
+
 
 @app.route('/about')
 def about():
@@ -756,11 +723,7 @@ def about():
         "for all your document needs. Built with cutting-edge technology and a sleek UI for an "
         "awesome user experience."
     )
-    return render_template_string(
-        static_page_html('About', content),
-        nav_items=NAV_ITEMS,
-        dark_theme=False,
-    )
+    return render_page('About', static_page_html('About', content))
 
 
 @app.route('/privacy')
@@ -769,11 +732,7 @@ def privacy():
         "Your privacy is important to us. We do not store your uploaded files or share any data. "
         "All processing is done securely and temporarily."
     )
-    return render_template_string(
-        static_page_html('Privacy Policy', content),
-        nav_items=NAV_ITEMS,
-        dark_theme=False,
-    )
+    return render_page('Privacy Policy', static_page_html('Privacy Policy', content))
 
 
 @app.route('/contact')
@@ -784,11 +743,7 @@ def contact():
         "Phone: +1 234 567 8900\n"
         "Address: 123 College St, City, Country"
     )
-    return render_template_string(
-        static_page_html('Contact', content),
-        nav_items=NAV_ITEMS,
-        dark_theme=False,
-    )
+    return render_page('Contact', static_page_html('Contact', content))
 
 
 @app.route('/terms')
@@ -798,11 +753,7 @@ def terms():
         "Use PAPERPREP at your own risk. We strive to provide accurate conversions but "
         "do not guarantee results. By using the service, you accept our terms."
     )
-    return render_template_string(
-        static_page_html('Terms and Conditions', content),
-        nav_items=NAV_ITEMS,
-        dark_theme=False,
-    )
+    return render_page('Terms and Conditions', static_page_html('Terms and Conditions', content))
 
 
 if __name__ == '__main__':
