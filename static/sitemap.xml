@@ -6,7 +6,6 @@
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
 <!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
 
-
 <url>
   <loc>https://www.paperprep.space/</loc>
   <lastmod>2025-05-03T18:18:18+00:00</lastmod>
@@ -63,15 +62,4 @@
   <priority>0.80</priority>
 </url>
 <url>
-  <loc>https://www.paperprep.space/image-compressor</loc>
-  <lastmod>2025-05-03T18:18:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/pdf-compressor</loc>
-  <lastmod>2025-05-03T18:18:18+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-
-
-</urlset>
+ 
