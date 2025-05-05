@@ -2,5 +2,6 @@ Flask
 PyPDF2
 pillow
 pdf2docx
-python-docx>
+python-docx
 Werkzeug
+docx2pdf
