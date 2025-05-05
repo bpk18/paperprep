@@ -1,7 +1,8 @@
 Flask
-PyPDF2
-pillow
 pdf2docx
 python-docx
-Werkzeug
-docx2pdf
+pytesseract
+Pillow
+PyPDF2
+python-pptx
+pdf2image
