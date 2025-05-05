@@ -1,917 +1,371 @@
+from flask import Flask, request, redirect, url_for, render_template_string, flash
 import os
-import tempfile
-import shutil
-from flask import Flask, render_template_string, request, redirect, url_for, send_file, flash
-from werkzeug.utils import secure_filename
-from PyPDF2 import PdfMerger, PdfReader
-from PIL import Image
-from pdf2docx import Converter
-from docx import Document
-from io import BytesIO
-from docx.shared import Inches
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'  # for flashing messages
+app.secret_key = 'your_secret_key_here'  # Needed for flash messages
 
-# Ensure temp directory
-TEMP_DIR = tempfile.mkdtemp()
+# Tool list with route and display names and icons (using Font Awesome)
+tools = [
+    {"name":"PDF to Word", "route":"pdf_to_word", "icon":"fas fa-file-pdf"},
+    {"name":"JPG to Word", "route":"jpg_to_word", "icon":"fas fa-file-image"},
+    {"name":"PPT to PDF", "route":"ppt_to_pdf", "icon":"fas fa-file-powerpoint"},
+    {"name":"PDF to PPT", "route":"pdf_to_ppt", "icon":"fas fa-file-pdf"},
+    {"name":"Multiple Images to One PDF", "route":"images_to_pdf", "icon":"fas fa-file-image"},
+    {"name":"Merge PDF", "route":"merge_pdf", "icon":"fas fa-file-pdf"},
+    {"name":"Image Compressor", "route":"image_compressor", "icon":"fas fa-compress"},
+    {"name":"PDF Compressor", "route":"pdf_compressor", "icon":"fas fa-compress"},
+    # Add more tools here if needed
+]
 
-# Allowed extensions for tools
-ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'bmp', 'gif'}
-ALLOWED_PDF = {'pdf'}
-ALLOWED_PPT = {'ppt', 'pptx'}
-ALLOWED_DOCX = {'docx'}
-
-def allowed_file(filename, allowed_set):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_set
-
-
-base_html = '''
+# Base HTML template with placeholders for page content and title
+base_template = """
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" {% if dark_mode %}class="dark-theme"{% endif %}>
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>PAPERPREP - {{ title }}</title>
-    <meta name="description" content="PAPERPREP: Your futuristic document and image conversion toolkit. Convert PDFs, Word, Images, and more with ease. Mobile responsive, modern UI." />
-    <meta name="keywords" content="PDF to Word, JPG to Word, PPT to PDF, PDF to PPT, Image to PDF, Merge PDF, Compress PDF, Compress Image, Document Converter" />
-    <meta name="author" content="PAPERPREP" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1,user-scalable=no" />
+    <meta name="description" content="PAPERPREP - Fast and reliable document conversion tools including {% for tool in tools %}{{tool.name}}{% if not loop.last %}, {% endif %}{% endfor %}." />
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon" />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9764517671001230" crossorigin="anonymous"></script>
+    <title>PAPERPREP - {{ title }}</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
     <style>
-        /* Reset and base */
-        *, *::before, *::after {
-          box-sizing: border-box;
-        }
+        /* Light theme */
         body {
-          margin: 0;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          background-color: var(--bg);
-          color: var(--text);
-          transition: background-color 0.3s, color 0.3s;
-          min-height: 100vh;
-          display: flex;
-          flex-direction: column;
+            background: #f0f4f8;
+            color: #121212;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        a {
-          color: var(--primary);
-          text-decoration: none;
+        /* Dark theme overrides */
+        html.dark-theme body {
+            background: #121212;
+            color: #e0e0e0;
         }
-        a:hover {
-          text-decoration: underline;
+        .navbar {
+            background-color: #0d6efd;
+            transition: background-color 0.3s ease;
         }
-        /* Light theme variables */
-        :root {
-          --bg: #f3f7ff;
-          --text: #1a1a1a;
-          --primary: #3f51b5;
-          --secondary: #7986cb;
-          --card-bg: #ffffff;
-          --card-shadow: rgba(63, 81, 181, 0.15);
-          --btn-bg: #3f51b5;
-          --btn-text: #ffffff;
-          --btn-hover-bg: #2c3e9e;
-          --nav-bg: #ffffff;
-          --nav-text: #1a1a1a;
-          --border-color: #d1d9ff;
+        html.dark-theme .navbar {
+            background-color: #0a58ca;
         }
-        /* Dark theme variables */
-        [data-theme="dark"] {
-          --bg: #121217;
-          --text: #e4e6eb;
-          --primary: #8ab4f8;
-          --secondary: #3c4048;
-          --card-bg: #1c1c28;
-          --card-shadow: rgba(139, 170, 255, 0.3);
-          --btn-bg: #8ab4f8;
-          --btn-text: #121217;
-          --btn-hover-bg: #6890f1;
-          --nav-bg: #1c1c28;
-          --nav-text: #e4e6eb;
-          --border-color: #333849;
+        .navbar-brand, .nav-link, .navbar-toggler-icon {
+            color: white !important;
         }
-
-        /* Navbar Styles */
-        nav {
-          background: var(--nav-bg);
-          color: var(--nav-text);
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0.7rem 1.5rem;
-          box-shadow: 0 2px 4px var(--card-shadow);
-          position: sticky;
-          top: 0;
-          z-index: 1000;
+        .nav-link:hover {
+            text-decoration: underline;
         }
-        .navbar-brand {
-          font-weight: 900;
-          font-size: 1.5rem;
-          letter-spacing: 3px;
-          color: var(--primary);
-          user-select: none;
+        .btn-primary {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            border: none;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.5);
+            font-weight: 600;
+            transition: background 0.3s ease, transform 0.2s ease;
         }
-        .nav-links {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
+        .btn-primary:hover {
+            background: linear-gradient(45deg, #00f2fe, #4facfe);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 242, 254, 0.7);
         }
-        .nav-links a {
-          font-weight: 600;
-          font-size: 1rem;
-          padding: 0.3rem 0.6rem;
-          border-radius: 5px;
-          transition: background-color 0.3s;
+        .btn-toggle {
+            background: #198754;
+            border: none;
+            color: white;
+            padding: 0.375rem 0.75rem;
+            font-weight: 600;
+            border-radius: 0.375rem;
+            box-shadow: 0 4px 12px rgba(25, 135, 84, 0.6);
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            user-select: none;
         }
-        .nav-links a:hover,
-        .nav-links a:focus {
-          background-color: var(--secondary);
-          color: var(--btn-text);
-          outline: none;
+        .btn-toggle:hover {
+            background-color: #158247;
         }
-        /* Hamburger menu */
-        .menu-toggle {
-          display: none;
-          flex-direction: column;
-          justify-content: space-around;
-          width: 25px;
-          height: 22px;
-          cursor: pointer;
+        html.dark-theme .btn-toggle {
+            background-color: #0dcaf0;
+            box-shadow: 0 4px 12px rgba(13, 202, 240, 0.7);
+            color: #121212;
         }
-        .menu-toggle span {
-          width: 100%;
-          height: 3px;
-          background: var(--nav-text);
-          border-radius: 5px;
-          transition: all 0.3s;
+        html.dark-theme .btn-toggle:hover {
+            background-color: #0bb9e6;
         }
-
-        /* Mobile nav toggle */
-        #nav-checkbox {
-          display: none;
+        .container {
+            max-width: 540px;
+            margin-top: 3rem;
+            margin-bottom: 3rem;
         }
-        #nav-checkbox:checked ~ .nav-links {
-          display: flex;
-          flex-direction: column;
-          position: absolute;
-          top: 60px;
-          left: 0;
-          right: 0;
-          background: var(--nav-bg);
-          padding: 1rem 0;
-          border-top: 1px solid var(--border-color);
-          box-shadow: 0 6px 10px var(--card-shadow);
-          z-index: 999;
+        h1, h2 {
+            font-weight: 700;
+            letter-spacing: 0.06em;
         }
-        @media (max-width: 768px) {
-          .nav-links {
+        .tool-list {
+            margin-top: 2rem;
+        }
+        .card-tool {
+            cursor: pointer;
+            border-radius: 12px;
+            box-shadow: 0 7px 25px rgba(0,0,0,0.11);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: white;
+        }
+        html.dark-theme .card-tool {
+            background: #1e1e1e;
+            box-shadow: 0 7px 25px rgba(13,202,240,0.3);
+        }
+        .card-tool:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.2);
+        }
+        html.dark-theme .card-tool:hover {
+            box-shadow: 0 15px 45px rgba(13,202,240,0.6);
+        }
+        .card-icon {
+            font-size: 2.8rem;
+            color: #0d6efd;
+            margin-bottom: 1rem;
+        }
+        html.dark-theme .card-icon {
+            color: #0dcaf0;
+        }
+        .form-file {
+            margin-bottom: 1rem;
+        }
+        input[type="file"] {
             display: none;
-            width: 100%;
-          }
-          .menu-toggle {
+        }
+        label.custom-file-upload {
+            display: inline-block;
+            padding: 10px 20px;
+            cursor: pointer;
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            border-radius: 8px;
+            color: white;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.5);
+            transition: background 0.3s ease;
+        }
+        label.custom-file-upload:hover {
+            background: linear-gradient(45deg, #00f2fe, #4facfe);
+        }
+        .animation-area {
+            margin-top: 1rem;
+            height: 4rem;
             display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #198754;
+            font-weight: 700;
+            font-size: 1.2rem;
+            user-select: none;
+        }
+        html.dark-theme .animation-area {
+            color: #0dcaf0;
+        }
+        /* Animations for loading */
+        .lds-ring {
+          display: inline-block;
+          position: relative;
+          width: 48px;
+          height: 48px;
+        }
+        .lds-ring div {
+          box-sizing: border-box;
+          display: block;
+          position: absolute;
+          width: 40px;
+          height: 40px;
+          margin: 4px;
+          border: 4px solid #198754;
+          border-radius: 50%;
+          animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+          border-color: #198754 transparent transparent transparent;
+        }
+        html.dark-theme .lds-ring div {
+            border-color: #0dcaf0 transparent transparent transparent;
+        }
+        .lds-ring div:nth-child(1) {
+          animation-delay: -0.45s;
+        }
+        .lds-ring div:nth-child(2) {
+          animation-delay: -0.3s;
+        }
+        .lds-ring div:nth-child(3) {
+          animation-delay: -0.15s;
+        }
+        @keyframes lds-ring {
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
           }
         }
-
-        /* Main content */
-        main {
-          flex-grow: 1;
-          padding: 1.5rem 1rem 3rem;
-          max-width: 900px;
-          margin: auto;
-          width: 100%;
-        }
-
-        /* Footer */
-        footer {
-          background: var(--nav-bg);
-          color: var(--nav-text);
-          text-align: center;
-          padding: 1rem;
-          font-size: 0.9rem;
-          border-top: 1px solid var(--border-color);
-          user-select: none;
-        }
-
-        /* Tool Cards Grid */
-        .tools-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-          gap: 1.5rem;
-          max-width: 1000px;
-          margin: 0 auto 2rem;
-        }
-        .tool-card {
-          background: var(--card-bg);
-          border-radius: 12px;
-          box-shadow: 0 4px 14px var(--card-shadow);
-          padding: 1.4rem 1.2rem;
-          text-align: center;
-          display: flex;
-          flex-direction: column;
-          justify-content: space-between;
-          transition: transform 0.3s ease;
-          user-select: none;
-        }
-        .tool-card:hover {
-          transform: translateY(-5px);
-          box-shadow: 0 10px 30px var(--card-shadow);
-        }
-        .tool-icon {
-          width: 60px;
-          height: 60px;
-          margin: 0 auto 1rem;
-          fill: var(--primary);
-          transition: fill 0.3s;
-        }
-        .tool-name {
-          font-size: 1.2rem;
-          font-weight: 700;
-          margin-bottom: 1rem;
-          color: var(--text);
-        }
-        .btn {
-          background-color: var(--btn-bg);
-          color: var(--btn-text);
-          border: none;
-          border-radius: 30px;
-          cursor: pointer;
-          padding: 0.5rem 1.8rem;
-          font-weight: 700;
-          letter-spacing: 1px;
-          box-shadow: 0 4px 10px var(--card-shadow);
-          transition: background-color 0.3s ease;
-          user-select: none;
-        }
-        .btn:hover {
-          background-color: var(--btn-hover-bg);
-        }
-
-        /* Toggle Button */
-        .theme-toggle-btn {
-          background: transparent;
-          border: 2px solid var(--primary);
-          border-radius: 30px;
-          cursor: pointer;
-          padding: 0.3rem 1rem;
-          font-weight: 600;
-          color: var(--primary);
-          transition: background-color 0.3s, color 0.3s;
-          user-select: none;
-        }
-        .theme-toggle-btn:hover {
-          background-color: var(--primary);
-          color: var(--btn-text);
-        }
-
-        /* Responsive Typography */
-        h1 {
-          font-size: 2.5rem;
-          text-align: center;
-          margin-bottom: 1rem;
-          user-select: none;
-          color: var(--primary);
-        }
-        p.lead {
-          font-size: 1.1rem;
-          text-align: center;
-          margin-bottom: 1.8rem;
-          max-width: 700px;
-          margin-left: auto;
-          margin-right: auto;
-          user-select: none;
-        }
-
-        /* Form styles for contact and tools */
-        form {
-          max-width: 500px;
-          margin: 0 auto 2rem;
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-        label {
-          font-weight: 600;
-          margin-bottom: 0.3rem;
-          user-select: none;
-          color: var(--text);
-        }
-        input[type="file"], input[type="text"], input[type="email"], textarea {
-          padding: 0.5rem 0.8rem;
-          border-radius: 8px;
-          border: 1px solid var(--border-color);
-          font-size: 1rem;
-          background-color: var(--card-bg);
-          color: var(--text);
-          resize: vertical;
-          transition: border-color 0.3s;
-        }
-        input[type="file"]:focus, input[type="text"]:focus, input[type="email"]:focus, textarea:focus {
-          border-color: var(--primary);
-          outline: none;
-        }
-        textarea {
-          min-height: 100px;
-        }
-        input[type="submit"] {
-          width: fit-content;
-          align-self: center;
-          padding: 0.6rem 2rem;
-          background-color: var(--btn-bg);
-          color: var(--btn-text);
-          border: none;
-          border-radius: 30px;
-          cursor: pointer;
-          font-weight: 700;
-          box-shadow: 0 4px 10px var(--card-shadow);
-          transition: background-color 0.3s ease;
-          user-select: none;
-        }
-        input[type="submit"]:hover {
-          background-color: var(--btn-hover-bg);
-        }
-
-        /* Flash messages */
-        .flash {
-          max-width: 500px;
-          margin: 0 auto 1.5rem;
-          padding: 1rem;
-          background-color: #f44336;
-          color: white;
-          border-radius: 8px;
-          text-align: center;
-        }
-
-        /* Result download link */
-        .result-link {
-          display: flex;
-          justify-content: center;
-          margin-bottom: 2rem;
-        }
-        .result-link a {
-          font-weight: 700;
-          background-color: var(--primary);
-          color: var(--btn-text);
-          padding: 0.6rem 1.5rem;
-          border-radius: 25px;
-          text-decoration: none;
-          box-shadow: 0 4px 10px var(--card-shadow);
-          transition: background-color 0.3s ease;
-        }
-        .result-link a:hover {
-          background-color: var(--btn-hover-bg);
-        }
-
-        /* Scroll locking when menu open */
-        body.menu-open {
-          overflow: hidden;
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .container {
+                max-width: 90vw;
+            }
         }
     </style>
+    {% block head_extra %}{% endblock %}
 </head>
 <body>
-    <nav role="navigation" aria-label="Primary Navigation">
-        <div class="navbar-brand" tabindex="0">PAPERPREP</div>
-        <input type="checkbox" id="nav-checkbox" aria-label="Toggle menu" />
-        <label for="nav-checkbox" class="menu-toggle" tabindex="0" aria-controls="nav-links" aria-expanded="false" aria-haspopup="true">
-            <span></span>
-            <span></span>
-            <span></span>
-        </label>
-        <div class="nav-links" id="nav-links" role="menu" aria-labelledby="nav-checkbox">
-            <a href="{{ url_for('about') }}" role="menuitem" tabindex="0">About</a>
-            <a href="{{ url_for('privacy') }}" role="menuitem" tabindex="0">Privacy</a>
-            <a href="{{ url_for('contact') }}" role="menuitem" tabindex="0">Contact</a>
-            <a href="{{ url_for('terms') }}" role="menuitem" tabindex="0">Terms &amp; Conditions</a>
-            <a href="{{ url_for('home') }}" role="menuitem" tabindex="0">Home</a>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand font-weight-bold" href="{{ url_for('home') }}">PAPERPREP</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarMenu" 
+                aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon" style="filter: invert(1);"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarMenu">
+            <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+                <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Privacy</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>
+                <li class="nav-item"><a class="nav-link" href="#">Terms and Conditions</a></li>
+            </ul>
+            <button id="theme-toggle" class="btn btn-toggle" aria-label="Toggle light and dark mode">Dark Mode</button>
         </div>
-        <button class="theme-toggle-btn" id="theme-toggle" aria-label="Toggle dark/light theme">Dark Theme</button>
     </nav>
-    <main>
+
+    <main class="container">
         {% with messages = get_flashed_messages() %}
           {% if messages %}
             {% for message in messages %}
-            <div class="flash" role="alert">{{ message }}</div>
+              <div class="alert alert-info mt-3" role="alert">{{ message }}</div>
             {% endfor %}
           {% endif %}
         {% endwith %}
         {% block content %}{% endblock %}
     </main>
-    <footer role="contentinfo">
+
+    <footer class="text-center text-muted pb-3">
         &copy; 2024 PAPERPREP - All rights reserved.
     </footer>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        // Theme toggle
-        const btn = document.getElementById('theme-toggle');
-        const htmlEl = document.documentElement;
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const htmlElem = document.documentElement;
 
-        // Load saved theme or default light
-        let currentTheme = localStorage.getItem('theme') || 'light';
-        htmlEl.setAttribute('data-theme', currentTheme);
-        btn.textContent = currentTheme === 'light' ? 'Dark Theme' : 'Light Theme';
+        // Initialize theme from localStorage or default (light)
+        if(localStorage.getItem('darkMode') === 'true'){
+            htmlElem.classList.add('dark-theme');
+            themeToggleBtn.textContent = 'Light Mode';
+        }
 
-        btn.addEventListener('click', () => {
-            if (htmlEl.getAttribute('data-theme') === 'light') {
-                htmlEl.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-                btn.textContent = 'Light Theme';
-            } else {
-                htmlEl.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme', 'light');
-                btn.textContent = 'Dark Theme';
-            }
+        themeToggleBtn.addEventListener('click', () => {
+            htmlElem.classList.toggle('dark-theme');
+            const isDark = htmlElem.classList.contains('dark-theme');
+            themeToggleBtn.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+            localStorage.setItem('darkMode', isDark);
         });
 
-        // Accessibility: close nav menu on link click
-        const navCheckbox = document.getElementById('nav-checkbox');
-        const navLinks = document.querySelectorAll('.nav-links a');
-        navLinks.forEach(link => {
-            link.addEventListener('click', () => {
-                if (navCheckbox.checked) {
-                    navCheckbox.checked = false;
+        // Basic animation for upload input field
+        const fileInput = document.querySelector('input[type="file"]');
+        if(fileInput){
+            fileInput.addEventListener('change', () => {
+                if(fileInput.files.length > 0){
+                    const animArea = document.getElementById('animation-area');
+                    if(animArea){
+                        animArea.innerHTML = '<div class="lds-ring"><div></div><div></div><div></div><div></div></div> Uploading...';
+                    }
                 }
             });
-        });
+        }
     </script>
+    {% block scripts %}{% endblock %}
 </body>
 </html>
-'''
+"""
 
-# Home page with links to tool pages
-home_html = '''
-{% extends 'base.html' %}
-{% block content %}
-    <h1>Welcome to PAPERPREP</h1>
-    <p class="lead">Your all-in-one document and image conversion toolkit with a futuristic UI and seamless experience.</p>
-    <section class="tools-grid" aria-label="Conversion Tools">
-
-        <article class="tool-card">
-            <div class="tool-name">PDF to Word</div>
-            <a class="btn" href="{{ url_for('pdf_to_word') }}">Open</a>
-        </article>
-
-        <article class="tool-card">
-            <div class="tool-name">JPG to Word</div>
-            <a class="btn" href="{{ url_for('jpg_to_word') }}">Open</a>
-        </article>
-
-        <article class="tool-card">
-            <div class="tool-name">PPT to PDF</div>
-            <a class="btn" href="{{ url_for('ppt_to_pdf') }}">Open</a>
-        </article>
-
-        <article class="tool-card">
-            <div class="tool-name">PDF to PPT</div>
-            <a class="btn" href="{{ url_for('pdf_to_ppt') }}">Open</a>
-        </article>
-
-        <article class="tool-card">
-            <div class="tool-name">Images to PDF</div>
-            <a class="btn" href="{{ url_for('images_to_pdf') }}">Open</a>
-        </article>
-
-        <article class="tool-card">
-            <div class="tool-name">Merge PDF</div>
-            <a class="btn" href="{{ url_for('merge_pdf') }}">Open</a>
-        </article>
-
-        <article class="tool-card">
-            <div class="tool-name">Image Compressor</div>
-            <a class="btn" href="{{ url_for('image_compressor') }}">Open</a>
-        </article>
-
-        <article class="tool-card">
-            <div class="tool-name">PDF Compressor</div>
-            <a class="btn" href="{{ url_for('pdf_compressor') }}">Open</a>
-        </article>
-    </section>
-{% endblock %}
-'''
-
-generic_tool_html = '''
-{% extends 'base.html' %}
-{% block content %}
-    <h1>{{ title }}</h1>
-    <p class="lead">{{ description }}</p>
-
-    {% if result_fileurl %}
-        <div class="result-link">
-            <a href="{{ result_fileurl }}" download="{{ result_filename }}">Download {{ title }} Result</a>
-        </div>
-    {% endif %}
-
-    <form method="post" enctype="multipart/form-data">
-        {% for field in fields %}
-            <label for="{{ field.id }}">{{ field.label }}</label>
-            <input
-              type="{{ field.type }}"
-              name="{{ field.name }}"{% if field.multiple %} multiple{% endif %}
-              id="{{ field.id }}"{% if field.accept %} accept="{{ field.accept }}"{% endif %}
-              required="{{ 'required' if field.required else '' }}"
-            />
-        {% endfor %}
-        <input type="submit" value="Convert" />
-    </form>
-{% endblock %}
-'''
-
-# About, Privacy, Contact, Terms templates - reuse from before but with minor adjustments
-about_html = '''
-{% extends 'base.html' %}
-{% block content %}
-    <h1>About PAPERPREP</h1>
-    <p class="lead">
-        PAPERPREP is your futuristic document and image conversion hub, designed to simplify your workflow.
-        With a clean, sleek UI and powerful tools, we help you transform your files seamlessly on any device.
-    </p>
-{% endblock %}
-'''
-
-privacy_html = '''
-{% extends 'base.html' %}
-{% block content %}
-    <h1>Privacy Policy</h1>
-    <p>
-      We value your privacy. PAPERPREP does not store any files you upload or any personal data. All file processing is done securely and temporarily.
-    </p>
-    <p>
-      By using PAPERPREP, you agree to our processing guidelines and terms.
-    </p>
-{% endblock %}
-'''
-
-contact_html = '''
-{% extends 'base.html' %}
-{% block content %}
-    <h1>Contact Us</h1>
-    <p class="lead">Have questions or feedback? Reach out to us!</p>
-    <form id="contact-form" onsubmit="event.preventDefault(); alert('Thank you for contacting us! We will get back to you soon.'); this.reset();">
-        <label for="name">Name</label>
-        <input type="text" id="name" name="name" placeholder="Your full name" required />
-        
-        <label for="email">Email</label>
-        <input type="email" id="email" name="email" placeholder="your.email@example.com" required />
-        
-        <label for="message">Message</label>
-        <textarea id="message" name="message" placeholder="Write your message here..." required></textarea>
-        
-        <input type="submit" value="Send Message" />
-    </form>
-{% endblock %}
-'''
-
-terms_html = '''
-{% extends 'base.html' %}
-{% block content %}
-    <h1>Terms &amp; Conditions</h1>
-    <p>
-      By using PAPERPREP, you agree to use the platform responsibly.
-      We provide conversion tools as-is without warranties.
-      You are responsible for your files and usage.
-    </p>
-    <p>
-      PAPERPREP reserves the right to modify these terms at any time.
-    </p>
-{% endblock %}
-'''
-
-# Register the templates
-from jinja2 import DictLoader
-app.jinja_loader = DictLoader({
-    'base.html': base_html,
-    'home.html': home_html,
-    'generic_tool.html': generic_tool_html,
-    'about.html': about_html,
-    'privacy.html': privacy_html,
-    'contact.html': contact_html,
-    'terms.html': terms_html,
-})
-
+# Home page displays list of tools with icons and links
 @app.route('/')
 def home():
-    return render_template_string(home_html, title="Home")
+    content = """
+    <h1 class="text-center">Welcome to PAPERPREP</h1>
+    <p class="lead text-center">Choose from the powerful document and image conversion tools below</p>
+    <div class="tool-list">
+        {% for tool in tools %}
+        <a href="{{ url_for(tool.route) }}" aria-label="Open {{ tool.name }}" style="text-decoration:none; color: inherit;">
+            <div class="card-tool d-flex align-items-center">
+                <i class="card-icon {{ tool.icon }}" aria-hidden="true"></i>
+                <div class="ml-3" style="font-size:1.3rem; font-weight:600;">{{ tool.name }}</div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    """
+    return render_template_string(base_template, title="Home", tools=tools, dark_mode=False, content=content, 
+                                  **{'block content': content})
 
-@app.route('/about')
-def about():
-    return render_template_string(about_html, title="About")
+def tool_page_template(tool):
+    # Template for tool pages with file upload and dummy conversion button and animations
+    return """
+    <h2 class="text-center mb-4">{{ tool.name }}</h2>
+    <form action="{{ url_for(tool.route) }}" method='post' enctype='multipart/form-data'>
+        <label for="file-upload" class="custom-file-upload" aria-label="Upload file for {{ tool.name }}">
+            <i class="fas fa-upload"></i> Select File
+        </label>
+        <input id="file-upload" type="file" name="file" required aria-required="true" accept="*/*"/>
+        <button type="submit" class="btn btn-primary btn-block mt-3" aria-label="Convert file for {{ tool.name }}">Convert</button>
+        <div id="animation-area" class="animation-area" aria-live="polite" aria-atomic="true"></div>
+    </form>
+    {% if success %}
+        <div class="alert alert-success mt-3" role="alert" aria-live="polite" aria-atomic="true">
+            Conversion successful! Download link would appear here.
+        </div>
+    {% endif %}
+    <p class="text-muted mt-4" style="font-size: 0.9rem;">
+        Note: This demo app does not perform actual file conversions. You can implement your conversion logic in <code>app.py</code>.
+    </p>
+    """
 
-@app.route('/privacy')
-def privacy():
-    return render_template_string(privacy_html, title="Privacy Policy")
-
-@app.route('/contact')
-def contact():
-    return render_template_string(contact_html, title="Contact")
-
-@app.route('/terms')
-def terms():
-    return render_template_string(terms_html, title="Terms & Conditions")
-
-
-# Tool: PDF to Word
-@app.route('/pdf-to-word', methods=['GET', 'POST'])
-def pdf_to_word():
-    title = "PDF to Word"
-    description = "Convert your PDF documents to editable Word files (.docx)."
-    result_fileurl = None
-    result_filename = None
-
-    fields = [
-        {"id": "pdf_file", "name": "pdf_file", "label": "Upload PDF file", "type": "file", "accept": ".pdf", "multiple": False, "required": True}
-    ]
-
-    if request.method == 'POST':
-        if 'pdf_file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['pdf_file']
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename, ALLOWED_PDF):
-            filename = secure_filename(file.filename)
-            input_path = os.path.join(TEMP_DIR, filename)
-            file.save(input_path)
-            
-            # Output file
-            output_filename = os.path.splitext(filename)[0] + '.docx'
-            output_path = os.path.join(TEMP_DIR, output_filename)
-            
-            try:
-                cv = Converter(input_path)
-                cv.convert(output_path, start=0, end=None)
-                cv.close()
-                return send_file(output_path, as_attachment=True, download_name=output_filename)
-            except Exception as e:
-                flash(f'Conversion failed: {e}')
+# Correct dynamic route generator fixing late binding by using default argument
+def create_tool_view(tool):
+    def view_func():
+        if request.method == 'POST':
+            file = request.files.get('file')
+            if not file or file.filename == '':
+                flash('No file selected for conversion', 'error')
                 return redirect(request.url)
-        else:
-            flash('Invalid file type. Please upload a PDF file.')
-            return redirect(request.url)
-    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
+            # Dummy success - implement actual logic here
+            success = True
+            return render_template_string(
+                base_template,
+                title=tool['name'],
+                tools=tools,
+                dark_mode=False,
+                success=success,
+                tool=tool,
+                content=tool_page_template(tool),
+                **{'block content': tool_page_template(tool)}
+            )
+        return render_template_string(
+            base_template,
+            title=tool['name'],
+            tools=tools,
+            dark_mode=False,
+            success=False,
+            tool=tool,
+            content=tool_page_template(tool),
+            **{'block content': tool_page_template(tool)}
+        )
+    view_func.__name__ = tool['route']
+    view_func.methods = ['GET', 'POST']
+    return view_func
 
-
-# Tool: JPG to Word (simple create docx with embedded image)
-@app.route('/jpg-to-word', methods=['GET', 'POST'])
-def jpg_to_word():
-    title = "JPG to Word"
-    description = "Convert JPG or other image files into a Word document with the image embedded."
-    result_fileurl = None
-    result_filename = None
-
-    fields = [
-        {"id": "image_file", "name": "image_file", "label": "Upload Image file", "type": "file", "accept": "image/*", "multiple": False, "required": True}
-    ]
-
-    if request.method == 'POST':
-        if 'image_file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['image_file']
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename, ALLOWED_IMAGE_EXTENSIONS):
-            filename = secure_filename(file.filename)
-            input_path = os.path.join(TEMP_DIR, filename)
-            file.save(input_path)
-            
-            output_filename = os.path.splitext(filename)[0] + '.docx'
-            output_path = os.path.join(TEMP_DIR, output_filename)
-            
-            try:
-                doc = Document()
-                doc.add_paragraph("Image embedded below:")
-                doc.add_picture(input_path, width=docx.shared.Inches(5))
-                doc.save(output_path)
-                return send_file(output_path, as_attachment=True, download_name=output_filename)
-            except Exception as e:
-                flash(f'Conversion failed: {e}')
-                return redirect(request.url)
-        else:
-            flash('Invalid file type. Please upload an image file.')
-            return redirect(request.url)
-    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
-
-
-# Tool: PPT to PDF (for simplicity, just reject, as no easy pure python conversion without libreoffice or external tools)
-@app.route('/ppt-to-pdf', methods=['GET', 'POST'])
-def ppt_to_pdf():
-    title = "PPT to PDF"
-    description = "Convert your PowerPoint files (.ppt, .pptx) to PDF. (NOTE: Requires external tool to fully support)"
-    result_fileurl = None
-    result_filename = None
-
-    fields = [
-        {"id": "ppt_file", "name": "ppt_file", "label": "Upload PPT/PPTX file", "type": "file", "accept": ".ppt,.pptx", "multiple": False, "required": True}
-    ]
-
-    if request.method == 'POST':
-        flash('PPT to PDF conversion requires external tools (LibreOffice). This feature is coming soon.')
-        return redirect(request.url)
-
-    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
-
-
-# Tool: PDF to PPT (placeholder, no direct conversion implemented)
-@app.route('/pdf-to-ppt', methods=['GET', 'POST'])
-def pdf_to_ppt():
-    title = "PDF to PPT"
-    description = "Convert PDF to PowerPoint (PPT) files. (Feature coming soon)"
-    result_fileurl = None
-    result_filename = None
-
-    fields = [
-        {"id": "pdf_file", "name": "pdf_file", "label": "Upload PDF file", "type": "file", "accept": ".pdf", "multiple": False, "required": True}
-    ]
-
-    if request.method == 'POST':
-        flash('PDF to PPT conversion feature will be added soon!')
-        return redirect(request.url)
-
-    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
-
-
-# Tool: Multiple images to one PDF
-@app.route('/images-to-pdf', methods=['GET', 'POST'])
-def images_to_pdf():
-    title = "Images to PDF"
-    description = "Combine multiple image files into a single PDF document."
-    result_fileurl = None
-    result_filename = None
-
-    fields = [
-        {"id": "images", "name": "images", "label": "Upload Image files", "type": "file", "accept": "image/*", "multiple": True, "required": True}
-    ]
-
-    if request.method == 'POST':
-        files = request.files.getlist('images')
-        if not files or len(files) == 0:
-            flash('No files selected')
-            return redirect(request.url)
-        image_files = []
-        try:
-            for file in files:
-                if file and allowed_file(file.filename, ALLOWED_IMAGE_EXTENSIONS):
-                    filename = secure_filename(file.filename)
-                    path = os.path.join(TEMP_DIR, filename)
-                    file.save(path)
-                    image_files.append(path)
-                else:
-                    flash('Invalid file in selection. Please upload images only.')
-                    return redirect(request.url)
-            if not image_files:
-                flash('No valid image files found.')
-                return redirect(request.url)
-            
-            images = [Image.open(img).convert('RGB') for img in image_files]
-            output_path = os.path.join(TEMP_DIR, "combined_images.pdf")
-            images[0].save(output_path, save_all=True, append_images=images[1:])
-            return send_file(output_path, as_attachment=True, download_name="combined_images.pdf")
-        except Exception as e:
-            flash(f'Error during conversion: {e}')
-            return redirect(request.url)
-
-    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
-
-
-# Tool: Merge PDF
-@app.route('/merge-pdf', methods=['GET', 'POST'])
-def merge_pdf():
-    title = "Merge PDF"
-    description = "Merge multiple PDF files into one unified PDF document."
-    result_fileurl = None
-    result_filename = None
-
-    fields = [
-        {"id": "pdfs", "name": "pdfs", "label": "Upload PDF files", "type": "file", "accept": ".pdf", "multiple": True, "required": True}
-    ]
-
-    if request.method == 'POST':
-        files = request.files.getlist('pdfs')
-        if not files or len(files) == 0:
-            flash('No files selected')
-            return redirect(request.url)
-        pdf_paths = []
-        try:
-            for file in files:
-                if file and allowed_file(file.filename, ALLOWED_PDF):
-                    filename = secure_filename(file.filename)
-                    path = os.path.join(TEMP_DIR, filename)
-                    file.save(path)
-                    pdf_paths.append(path)
-                else:
-                    flash('Invalid file in selection. Please upload PDFs only.')
-                    return redirect(request.url)
-            if not pdf_paths:
-                flash('No valid PDF files found.')
-                return redirect(request.url)
-            
-            merger = PdfMerger()
-            for pdf in pdf_paths:
-                merger.append(pdf)
-            output_path = os.path.join(TEMP_DIR, "merged.pdf")
-            merger.write(output_path)
-            merger.close()
-            return send_file(output_path, as_attachment=True, download_name="merged.pdf")
-        except Exception as e:
-            flash(f'Error during merge: {e}')
-            return redirect(request.url)
-
-    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
-
-
-# Tool: Image compressor (lower quality JPEG)
-@app.route('/image-compressor', methods=['GET', 'POST'])
-def image_compressor():
-    title = "Image Compressor"
-    description = "Compress images by lowering quality without significant loss."
-    result_fileurl = None
-    result_filename = None
-
-    fields = [
-        {"id": "image_file", "name": "image_file", "label": "Upload image file", "type": "file", "accept": "image/*", "multiple": False, "required": True}
-    ]
-
-    if request.method == 'POST':
-        if 'image_file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['image_file']
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename, ALLOWED_IMAGE_EXTENSIONS):
-            filename = secure_filename(file.filename)
-            input_path = os.path.join(TEMP_DIR, filename)
-            file.save(input_path)
-            output_filename = f"compressed_{filename}"
-            output_path = os.path.join(TEMP_DIR, output_filename)
-            try:
-                img = Image.open(input_path)
-                img.save(output_path, optimize=True, quality=30)
-                return send_file(output_path, as_attachment=True, download_name=output_filename)
-            except Exception as e:
-                flash(f'Compression failed: {e}')
-                return redirect(request.url)
-        else:
-            flash('Invalid file type. Please upload an image file.')
-            return redirect(request.url)
-
-    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
-
-
-# Tool: PDF Compressor (basic, recreate PDF with PyPDF2 - limited compression capability)
-@app.route('/pdf-compressor', methods=['GET', 'POST'])
-def pdf_compressor():
-    title = "PDF Compressor"
-    description = "Basic PDF compression by rewriting the PDF file. (Advanced compression may not be available)"
-    result_fileurl = None
-    result_filename = None
-
-    fields = [
-        {"id": "pdf_file", "name": "pdf_file", "label": "Upload PDF file", "type": "file", "accept": ".pdf", "multiple": False, "required": True}
-    ]
-
-    if request.method == 'POST':
-        if 'pdf_file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['pdf_file']
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename, ALLOWED_PDF):
-            filename = secure_filename(file.filename)
-            input_path = os.path.join(TEMP_DIR, filename)
-            file.save(input_path)
-            output_filename = f"compressed_{filename}"
-            output_path = os.path.join(TEMP_DIR, output_filename)
-            try:
-                reader = PdfReader(input_path)
-                from PyPDF2 import PdfWriter
-                writer = PdfWriter()
-                for page in reader.pages:
-                    writer.add_page(page)
-                with open(output_path, 'wb') as fout:
-                    writer.write(fout)
-                return send_file(output_path, as_attachment=True, download_name=output_filename)
-            except Exception as e:
-                flash(f'Compression failed: {e}')
-                return redirect(request.url)
-        else:
-            flash('Invalid file type. Please upload a PDF file.')
-            return redirect(request.url)
-
-    return render_template_string(generic_tool_html, title=title, description=description, fields=fields, result_fileurl=result_fileurl, result_filename=result_filename)
-
-
-# Serve favicon.ico from static folder
-@app.route('/favicon.ico')
-def favicon():
-    return send_file('static/favicon.ico')
+for tool in tools:
+    route_path = '/' + tool['route']
+    app.add_url_rule(route_path, view_func=create_tool_view(tool), methods=['GET', 'POST'])
 
 
 if __name__ == '__main__':
-    # Run on all interfaces port 5000
     app.run(host='0.0.0.0', port=5000, debug=True)
-
