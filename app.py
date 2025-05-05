@@ -8,6 +8,7 @@ from PIL import Image
 from pdf2docx import Converter
 from docx import Document
 from io import BytesIO
+from docx.shared import Inches
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # for flashing messages
