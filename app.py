@@ -337,7 +337,6 @@ BASE_HTML = '''<!DOCTYPE html>
     themeToggleBtn.textContent = darkMode ? 'Light Theme' : 'Dark Theme';
   });
 
-  // Upload animation
   document.addEventListener('DOMContentLoaded', () => {
     const forms = document.querySelectorAll('.upload-form');
     forms.forEach(form => {
@@ -350,17 +349,20 @@ BASE_HTML = '''<!DOCTYPE html>
 
         const formData = new FormData(form);
 
+        let response;
+
         fetch(form.action, {
           method: 'POST',
           body: formData
         }).then(res => {
+          response = res;
           if (!res.ok) throw new Error('Upload failed');
           return res.blob();
         }).then(blob => {
           const url = window.URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          let disposition = res.headers.get('Content-Disposition');
+          let disposition = response.headers.get('Content-Disposition');
           let filename = 'output';
           if (disposition && disposition.indexOf('filename=') !== -1) {
             const match = disposition.match(/filename="?([^"]+)"?/);
@@ -513,11 +515,9 @@ def make_route(tool):
             files = request.files.getlist('file')
             if not files or all(f.filename == '' for f in files):
                 return jsonify({'error': 'No file selected'}), 400
-
             for f in files:
                 if not allowed_file(f.filename, tool['accepted']):
                     return jsonify({'error': f'Unsupported file type: {f.filename}'}), 400
-
             temp_dirs = []
             input_paths = []
             try:
@@ -525,7 +525,6 @@ def make_route(tool):
                     p, d, fname = save_upload(f)
                     input_paths.append(p)
                     temp_dirs.append(d)
-
                 out_filename = "output"
                 if tool['endpoint'] == 'pdf_to_word':
                     out_filename += ".docx"
@@ -546,9 +545,7 @@ def make_route(tool):
                     out_filename += ".pdf"
                 else:
                     out_filename += ".out"
-
                 out_path = os.path.join(tempfile.mkdtemp(), out_filename)
-
                 if tool['endpoint'] == 'pdf_to_word':
                     pdf_to_word_convert(input_paths[0], out_path)
                 elif tool['endpoint'] == 'jpg_to_word':
@@ -567,7 +564,6 @@ def make_route(tool):
                     pdf_compress(input_paths[0], out_path)
                 else:
                     return jsonify({'error': 'Conversion not implemented.'}), 400
-
                 return send_file(out_path, as_attachment=True, download_name=out_filename)
             finally:
                 for d in temp_dirs:
@@ -575,6 +571,9 @@ def make_route(tool):
         return tool_page_html(tool)
     tool_func.__name__ = tool['endpoint']
     return tool_func
+
+def allowed_file(filename, extensions):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in extensions
 
 for tool in TOOLS:
     app.add_url_rule(f'/{tool["endpoint"]}', view_func=make_route(tool), methods=['GET', 'POST'])
@@ -622,6 +621,11 @@ def terms():
         "do not guarantee results. By using the service, you accept our terms."
     )
     return render_page('Terms and Conditions', static_page_html('Terms and Conditions', content))
+
+def render_page(page_title, content):
+    from flask import render_template_string
+    return render_template_string(BASE_HTML, page_title=page_title, content=content,
+                                  nav_items=NAV_ITEMS, url_for=url_for)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
