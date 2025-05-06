@@ -98,7 +98,14 @@ BASE_HTML = '''<!DOCTYPE html>
 <title>PAPERPREP - All in One File Converter </title>
 <meta name="description" content="PAPERPREP is a fast, futuristic, and mobile-responsive document conversion tool. Easily convert PDF, Word, JPG, PPT, and more with smooth animations, dark/light mode toggle, and a sleek interface—perfect for students and professionals.">
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<meta>
+<span jscontroller="msmzHf" class="V9tjod" jsaction="rcuQ6b:npT2md;PYDNKe:bLV6Bd;mLt3mc"><a jsname="UWckNb" class="zReHs" href="https://www.paperprep.space/" data-ved="2ahUKEwjaoe6wpo6NAxXacvUHHZLhN80QFnoECFQQAQ" ping="/url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=https://www.paperprep.space/&amp;ved=2ahUKEwjaoe6wpo6NAxXacvUHHZLhN80QFnoECFQQAQ"><h3 class="LC20lb MBeuO Z3xoIb">PAPERPREP -all one in file converter</h3><br><div class="notranslate ESMNde HGLrXd ojE3Fb"><div class="q0vns"><span class="H9lube fJOpI"><div class="eqA2re NjwKYd Vwoesf" aria-hidden="true"><span class="Jj3Uob XNo5Ab z1asCe" style="height:18px;line-height:18px;width:18px"><svg focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"></path></svg></span></div></span><div class="CA5RN"><div><span class="VuuXrf">paperprep.space</span></div><div class="byrV5b"><cite class="tjvcx GvPZzd dTxz9 cHaqb" role="text">https://www.paperprep.space</cite></div></div></div><div class="iZWG2b"><div class="AvolPe b7GjXe RiJqbb" data-hveid="CFQQBw"></div></div></div><span jscontroller="IX53Tb" jsaction="rcuQ6b:npT2md" style="display:none"></span></a></span>
+
+
+
+<div class="VwiC3b yXK7lf p4wth r025kc hJNv6b Hdw6tb" style="-webkit-line-clamp:2">PAPERPREP is a fast, futuristic, and mobile-responsive document conversion tool. Easily convert PDF, Word, JPG, PPT, and more with smooth animations, dark/light mode toggle, and a sleek interface—perfect for students and professionals</div>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"/>
+</meta>
 <style>
   body {
     margin: 0; padding: 0;
