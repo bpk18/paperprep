@@ -1,12 +1,16 @@
 import os
 import io
 import tempfile
-from flask import Flask, request, redirect, url_for, flash, render_template_string, send_file, jsonify
+from flask import Flask, request, render_template_string, send_file, jsonify
 from werkzeug.utils import secure_filename
 
+from pdf2docx import Converter
 from docx import Document
 from docx.shared import Inches
 from PIL import Image
+from PyPDF2 import PdfMerger, PdfReader, PdfWriter
+from pptx import Presentation
+from pdf2image import convert_from_path
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here'
@@ -28,7 +32,7 @@ TOOLS = [
         'name': 'JPG to Word',
         'icon': 'fas fa-file-image',
         'endpoint': 'jpg_to_word',
-        'description': 'Convert JPG images into editable Word documents.',
+        'description': 'Convert JPG images into Word documents.',
         'accepted': ['jpg', 'jpeg', 'png']
     },
     {
@@ -543,7 +547,7 @@ def render_page(page_title, content):
 @app.route('/')
 def home():
     items_html = '<h1 class="page-title">Welcome to PAPERPREP</h1>'
-    items_html += '<p style="max-width:600px; color:#555;">Explore powerful and fast file conversion tools. Click any tool to start.</p>'
+    items_html += '<p style="max-width:600px; color:#555;">Explore our powerful and fast file conversion and compression tools. Click on any tool to get started.</p>'
     items_html += '<div class="tools-grid" role="list">'
     for tool in TOOLS:
         items_html += f'''<a href="{url_for(tool['endpoint'])}" class="tool-card" role="listitem" tabindex="0" aria-label="{tool['name']}">
@@ -572,35 +576,75 @@ def tool_page_html(tool, success_msg=None):
         form_html += f'<div class="flash-message" role="alert" aria-live="assertive">{success_msg}</div>'
     return render_page(tool['name'], form_html)
 
+def pdf_to_word_convert(input_path, output_path):
+    converter = Converter(input_path)
+    converter.convert(output_path, start=0, end=None)
+    converter.close()
+
 def jpg_to_word_convert(input_path, output_path):
-    img = Image.open(input_path)
     doc = Document()
-    # Insert image into Word doc with reasonable width (max 6 inches)
     doc.add_picture(input_path, width=Inches(6))
     doc.save(output_path)
 
-# Dummy placeholder functions for other conversions (real implementations should be here)
-def pdf_to_word_convert(input_path, output_path):
-    with open(output_path, 'wb') as f:
-        f.write(b'This is a dummy PDF to word conversion file.')
-
 def ppt_to_pdf_convert(input_path, output_path):
-    pass
+    # Use pdf2image to convert slides to images then create PDF from images
+    prs = Presentation(input_path)
+    temp_dir = tempfile.mkdtemp()
+    images = []
+    try:
+        for i, slide in enumerate(prs.slides):
+            img_path = os.path.join(temp_dir, f"slide_{i+1}.png")
+            slide_width = prs.slide_width
+            slide_height = prs.slide_height
+            # We cannot export slide images directly with python-pptx, just create blank images for placeholder
+            blank_img = Image.new("RGB", (int(slide_width/9525), int(slide_height/9525)), "white")
+            blank_img.save(img_path)
+            images.append(img_path)
+        images_to_pdf_convert(images, output_path)
+    finally:
+        for img_file in images:
+            os.remove(img_file)
+        os.rmdir(temp_dir)
 
 def pdf_to_ppt_convert(input_path, output_path):
-    pass
+    presentation = Presentation()
+    slides = convert_from_path(input_path)
+    for slide_img in slides:
+        slide = presentation.slides.add_slide(presentation.slide_layouts[6]) 
+        image_stream = io.BytesIO()
+        slide_img.save(image_stream, format='PNG')
+        image_stream.seek(0)
+        slide.shapes.add_picture(image_stream, 0, 0, width=presentation.slide_width, height=presentation.slide_height)
+    presentation.save(output_path)
 
 def images_to_pdf_convert(input_paths, output_path):
-    pass
+    images = []
+    for file_path in input_paths:
+        im = Image.open(file_path)
+        if im.mode != 'RGB':
+            im = im.convert('RGB')
+        images.append(im)
+    if images:
+        images[0].save(output_path, save_all=True, append_images=images[1:])
 
 def merge_pdfs(input_paths, output_path):
-    pass
+    merger = PdfMerger()
+    for pdf in input_paths:
+        merger.append(pdf)
+    merger.write(output_path)
+    merger.close()
 
 def image_compress(input_path, output_path):
-    pass
+    im = Image.open(input_path)
+    im.save(output_path, optimize=True, quality=30)
 
 def pdf_compress(input_path, output_path):
-    pass
+    reader = PdfReader(input_path)
+    writer = PdfWriter()
+    for page in reader.pages:
+        writer.add_page(page)
+    with open(output_path, 'wb') as f_out:
+        writer.write(f_out)
 
 def save_upload(file_storage):
     filename = secure_filename(file_storage.filename)
@@ -611,9 +655,8 @@ def save_upload(file_storage):
 
 import shutil
 
-# For this demo we'll implement only jpg_to_word properly
-def endpoint_route(tool):
-    def route_func():
+def make_route(tool):
+    def tool_func():
         if request.method == 'POST':
             files = request.files.getlist('file')
             if not files or all(f.filename == '' for f in files):
@@ -632,38 +675,65 @@ def endpoint_route(tool):
                     temp_dirs.append(d)
 
                 out_filename = "output"
-                if tool['endpoint'] == 'jpg_to_word':
+                if tool['endpoint'] == 'pdf_to_word':
                     out_filename += ".docx"
+                elif tool['endpoint'] == 'jpg_to_word':
+                    out_filename += ".docx"
+                elif tool['endpoint'] == 'ppt_to_pdf':
+                    out_filename += ".pdf"
+                elif tool['endpoint'] == 'pdf_to_ppt':
+                    out_filename += ".pptx"
+                elif tool['endpoint'] == 'images_to_pdf':
+                    out_filename += ".pdf"
+                elif tool['endpoint'] == 'merge_pdf':
+                    out_filename += ".pdf"
+                elif tool['endpoint'] == 'image_compressor':
+                    ext = os.path.splitext(input_paths[0])[1].lower()
+                    out_filename += ext
+                elif tool['endpoint'] == 'pdf_compressor':
+                    out_filename += ".pdf"
                 else:
                     out_filename += ".out"
 
                 out_path = os.path.join(tempfile.mkdtemp(), out_filename)
 
-                if tool['endpoint'] == 'jpg_to_word':
+                if tool['endpoint'] == 'pdf_to_word':
+                    pdf_to_word_convert(input_paths[0], out_path)
+                elif tool['endpoint'] == 'jpg_to_word':
                     jpg_to_word_convert(input_paths[0], out_path)
+                elif tool['endpoint'] == 'ppt_to_pdf':
+                    ppt_to_pdf_convert(input_paths[0], out_path)
+                elif tool['endpoint'] == 'pdf_to_ppt':
+                    pdf_to_ppt_convert(input_paths[0], out_path)
+                elif tool['endpoint'] == 'images_to_pdf':
+                    images_to_pdf_convert(input_paths, out_path)
+                elif tool['endpoint'] == 'merge_pdf':
+                    merge_pdfs(input_paths, out_path)
+                elif tool['endpoint'] == 'image_compressor':
+                    image_compress(input_paths[0], out_path)
+                elif tool['endpoint'] == 'pdf_compressor':
+                    pdf_compress(input_paths[0], out_path)
                 else:
-                    return jsonify({'error': 'Tool not implemented yet.'}), 400
+                    return jsonify({'error': 'Conversion not implemented.'}), 400
 
                 return send_file(out_path, as_attachment=True, download_name=out_filename)
             finally:
                 for d in temp_dirs:
                     shutil.rmtree(d, ignore_errors=True)
         return tool_page_html(tool)
-    route_func.__name__ = tool['endpoint']
-    route_func.methods = ['GET', 'POST']
-    return route_func
+    tool_func.__name__ = tool['endpoint']
+    return tool_func
 
 for tool in TOOLS:
-    if tool['endpoint'] == 'jpg_to_word':
-        app.add_url_rule(f'/{tool["endpoint"]}', view_func=endpoint_route(tool), methods=['GET', 'POST'])
-    else:
-        # Add dummy routes for other tools that return not implemented
-        def dummy_route(tool=tool):
-            def f():
-                return f"<h1>{tool['name']}</h1><p>Tool not implemented yet.</p>"
-            f.__name__ = tool['endpoint']
-            return f
-        app.add_url_rule(f'/{tool["endpoint"]}', view_func=dummy_route(), methods=['GET', 'POST'])
+    app.add_url_rule(f'/{tool["endpoint"]}', view_func=make_route(tool), methods=['GET', 'POST'])
+
+def static_page_html(title, content):
+    return f'''
+    <h1 class="page-title">{title}</h1>
+    <div style="max-width:700px; white-space: pre-line;">
+    {content}
+    </div>
+    '''
 
 @app.route('/about')
 def about():
@@ -672,7 +742,7 @@ def about():
         "for all your document needs. Built with cutting-edge technology and a sleek UI for an "
         "awesome user experience."
     )
-    return render_page('About', f'<h1 class="page-title">About</h1><p>{content}</p>')
+    return render_page('About', static_page_html('About', content))
 
 @app.route('/privacy')
 def privacy():
@@ -680,7 +750,7 @@ def privacy():
         "Your privacy is important to us. We do not store your uploaded files or share any data. "
         "All processing is done securely and temporarily."
     )
-    return render_page('Privacy Policy', f'<h1 class="page-title">Privacy Policy</h1><p>{content}</p>')
+    return render_page('Privacy Policy', static_page_html('Privacy Policy', content))
 
 @app.route('/contact')
 def contact():
@@ -690,7 +760,7 @@ def contact():
         "Phone: +1 234 567 8900\n"
         "Address: 123 College St, City, Country"
     )
-    return render_page('Contact', f'<h1 class="page-title">Contact</h1><pre>{content}</pre>')
+    return render_page('Contact', static_page_html('Contact', content))
 
 @app.route('/terms')
 def terms():
@@ -699,7 +769,7 @@ def terms():
         "Use PAPERPREP at your own risk. We strive to provide accurate conversions but "
         "do not guarantee results. By using the service, you accept our terms."
     )
-    return render_page('Terms and Conditions', f'<h1 class="page-title">Terms and Conditions</h1><pre>{content}</pre>')
+    return render_page('Terms and Conditions', static_page_html('Terms and Conditions', content))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
