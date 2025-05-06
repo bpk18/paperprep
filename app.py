@@ -429,6 +429,15 @@ BASE_HTML = '''<!DOCTYPE html>
     });
   });
 </script>
+<script type="application/ld+json">
+ {
+    "@context" : "https://schema.org" ,
+    "@type" : "WebSite" ,
+    "name" : "PaperPrep - all in one file converter"
+    "url" : "https://www.paperprep.space/"
+ }   
+</script>
+
 </body>
 </html>
 '''
