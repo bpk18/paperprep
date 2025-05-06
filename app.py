@@ -79,7 +79,11 @@ TOOLS = [
     },
 ]
 
-NAV_ITEMS = [
+# Removing About, Privacy, Contact, Terms from nav bar
+NAV_ITEMS = []  # Empty nav for top bar
+
+# Links for footer
+FOOTER_LINKS = [
     {'name': 'About', 'endpoint': 'about'},
     {'name': 'Privacy', 'endpoint': 'privacy'},
     {'name': 'Contact', 'endpoint': 'contact'},
@@ -95,12 +99,10 @@ BASE_HTML = '''<!DOCTYPE html>
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"/>
 <style>
-  /* Reset and base */
-  *, *::before, *::after {box-sizing: border-box;}
   body {
     margin: 0; padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+                  Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     background-color: #f4f8fb;
     color: #222;
     min-height: 100vh;
@@ -186,6 +188,7 @@ BASE_HTML = '''<!DOCTYPE html>
     margin: 2rem auto 4rem;
     padding: 0 1rem;
     flex-grow: 1;
+    min-height: calc(600px);
   }
   h1.page-title {
     font-size: 2.8rem;
@@ -317,6 +320,29 @@ BASE_HTML = '''<!DOCTYPE html>
     color: #a3d5a3;
     border-color: #3d6b3d;
   }
+  footer {
+    background: #f8fafa;
+    border-top: 1px solid #ddd;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    margin-top: auto;
+    font-size: 0.9rem;
+    color: #555;
+  }
+  body.dark-theme footer {
+    background: #1a1a1a;
+    color: #bbb;
+    border-top-color: #444;
+  }
+  footer a {
+    color: #2962ff;
+    margin: 0 0.6rem;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  footer a:hover {
+    text-decoration: underline;
+  }
 </style>
 </head>
 <body>
@@ -332,6 +358,12 @@ BASE_HTML = '''<!DOCTYPE html>
 <main class="container">
   {{ content | safe }}
 </main>
+<footer>
+  <a href="{{ url_for('about') }}">About</a> |
+  <a href="{{ url_for('privacy') }}">Privacy</a> |
+  <a href="{{ url_for('contact') }}">Contact</a> |
+  <a href="{{ url_for('terms') }}">Terms &amp; Conditions</a>
+</footer>
 <script>
   const themeToggleBtn = document.getElementById('theme-toggle');
   const body = document.body;
@@ -411,18 +443,18 @@ def render_page(page_title, content):
 
 @app.route('/')
 def home():
-    items_html = '''<h1 class="page-title">Welcome to PAPERPREP</h1>'''
-    items_html += '''<p>Explore our powerful and fast file conversion and compression tools. Click on any tool to get started.</p>'''
-    items_html += '''<div class="tools-grid">'''
+    items_html = '<h1 class="page-title">Welcome to PAPERPREP</h1>'
+    items_html += '<p>Explore our powerful and fast file conversion and compression tools. Click on any tool to get started.</p>'
+    items_html += '<div class="tools-grid">'
     for tool in TOOLS:
         items_html += f'''
-            <a href="{url_for(tool['endpoint'])}" class="tool-card" aria-label="{tool['name']}">
-                <i class="{tool['icon']} tool-icon"></i>
-                <div class="tool-name">{tool['name']}</div>
-                <div class="tool-desc">{tool['description']}</div>
-            </a>
+           <a href="{url_for(tool['endpoint'])}" class="tool-card" aria-label="{tool['name']}">
+               <i class="{tool['icon']} tool-icon"></i>
+               <div class="tool-name">{tool['name']}</div>
+               <div class="tool-desc">{tool['description']}</div>
+           </a>
         '''
-    items_html += '''</div>'''
+    items_html += '</div>'
     return render_page('Home', items_html)
 
 def tool_page_html(tool, success_msg=None):
@@ -528,6 +560,7 @@ def make_route(tool):
             for f in files:
                 if not allowed_file(f.filename, tool['accepted']):
                     return jsonify({'error': f'Unsupported file type: {f.filename}'}), 400
+
             temp_dirs = []
             input_paths = []
             try:
@@ -535,6 +568,7 @@ def make_route(tool):
                     p, d, fname = save_upload(f)
                     input_paths.append(p)
                     temp_dirs.append(d)
+
                 out_filename = "output"
                 if tool['endpoint'] == 'pdf_to_word':
                     out_filename += ".docx"
@@ -555,7 +589,9 @@ def make_route(tool):
                     out_filename += ".pdf"
                 else:
                     out_filename += ".out"
+
                 out_path = os.path.join(tempfile.mkdtemp(), out_filename)
+
                 if tool['endpoint'] == 'pdf_to_word':
                     pdf_to_word_convert(input_paths[0], out_path)
                 elif tool['endpoint'] == 'jpg_to_word':
@@ -574,6 +610,7 @@ def make_route(tool):
                     pdf_compress(input_paths[0], out_path)
                 else:
                     return jsonify({'error': 'Conversion not implemented.'}), 400
+
                 return send_file(out_path, as_attachment=True, download_name=out_filename)
             finally:
                 for d in temp_dirs:
@@ -590,10 +627,10 @@ for tool in TOOLS:
 
 def static_page_html(title, content):
     return f'''
-   <h1 class="page-title">{title}</h1>
-   <div style="max-width:700px; white-space: pre-line;">
-   {content}
-   </div>
+    <h1 class="page-title">{title}</h1>
+    <div style="max-width:700px; white-space: pre-line;">
+    {content}
+    </div>
     '''
 
 @app.route('/about')
