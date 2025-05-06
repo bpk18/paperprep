@@ -89,37 +89,301 @@ NAV_ITEMS = [
 BASE_HTML = '''<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>PAPERPREP - {{ page_title }}</title>
-  <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"/>
-  <style>
-    /* (styling same as previous code omitted for brevity) */
-    /* ... (copy the CSS styles from previous code here) ... */
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PAPERPREP - {{ page_title }}</title>
+<link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"/>
+<style>
+  body {
+    margin: 0; padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+                  Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    background-color: #f4f8fb;
+    color: #222;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  body.dark-theme {
+    background-color: #121212;
+    color: #e4e6eb;
+  }
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background-color: #ffffffee;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    backdrop-filter: saturate(180%) blur(10px);
+  }
+  body.dark-theme nav {
+    background-color: #20232aee;
+    box-shadow: 0 2px 8px rgba(255,255,255,0.1);
+  }
+  nav .brand {
+    font-weight: 900;
+    font-size: 1.8rem;
+    color: #2962ff;
+    cursor: default;
+  }
+  nav .brand i {
+    margin-right: 0.5rem;
+  }
+  nav ul {
+    list-style: none;
+    display: flex;
+    gap: 1.4rem;
+    margin: 0;
+    padding: 0;
+  }
+  nav ul li a {
+    color: inherit;
+    font-weight: 600;
+    font-size: 1rem;
+    text-decoration: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+  }
+  nav ul li a:hover {
+    background-color: #2962ff;
+    color: #fff;
+  }
+  #theme-toggle {
+    border: 2px solid #2962ff;
+    background: none;
+    padding: 0.4rem 1rem;
+    font-weight: 600;
+    border-radius: 20px;
+    cursor: pointer;
+    color: #2962ff;
+    transition: all 0.3s ease;
+  }
+  #theme-toggle:hover {
+    background-color: #2962ff;
+    color: white;
+  }
+  body.dark-theme #theme-toggle {
+    border-color: #82b1ff;
+    color: #82b1ff;
+  }
+  body.dark-theme #theme-toggle:hover {
+    background-color: #82b1ff;
+    color: #121212;
+  }
+  main.container {
+    max-width: 1000px;
+    margin: 2rem auto 4rem;
+    padding: 0 1rem;
+    flex-grow: 1;
+  }
+  h1.page-title {
+    font-size: 2.8rem;
+    margin-bottom: 1rem;
+    font-weight: 900;
+    color: #2962ff;
+  }
+  body.dark-theme h1.page-title {
+    color: #82b1ff;
+  }
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+    gap: 1.6rem;
+  }
+  .tool-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+    padding: 1.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    user-select: none;
+    color: #222;
+    text-decoration: none;
+  }
+  body.dark-theme .tool-card {
+    background: #121212;
+    color: #e4e6eb;
+    box-shadow: 0 12px 24px rgba(255,255,255,0.1);
+  }
+  .tool-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 24px 48px rgba(0,0,0,0.12);
+    color: #2962ff;
+  }
+  body.dark-theme .tool-card:hover {
+    color: #82b1ff;
+  }
+  .tool-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+  }
+  form.upload-form {
+    max-width: 400px;
+    margin-top: 3rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 12px 24px rgba(0,0,0,0.06);
+    padding: 2rem 2.4rem;
+  }
+  body.dark-theme form.upload-form {
+    background: #121212;
+    box-shadow: 0 12px 24px rgba(255,255,255,0.1);
+  }
+  label {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.8rem;
+  }
+  input[type="file"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 2px solid #2962ff;
+    font-size: 1rem;
+    cursor: pointer;
+    background: none;
+    color: inherit;
+    transition: border-color 0.3s ease;
+  }
+  input[type="file"]:hover,
+  input[type="file"]:focus {
+    border-color: #0039cb;
+    outline: none;
+  }
+  button.submit-btn {
+    margin-top: 1.6rem;
+    width: 100%;
+    padding: 14px 0;
+    font-weight: 900;
+    font-size: 1.3rem;
+    border-radius: 30px;
+    border: none;
+    background-color: #2962ff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+  }
+  button.submit-btn:hover,
+  button.submit-btn:focus {
+    background-color: #0039cb;
+  }
+  button.submit-btn.uploading {
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(41, 98, 255, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(41, 98, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(41, 98, 255, 0); }
+  }
+  .flash-message {
+    margin-top: 1.5rem;
+    font-weight: 700;
+    font-size: 1rem;
+    padding: 1rem;
+    border-radius: 15px;
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+    text-align: center;
+    user-select: none;
+  }
+  body.dark-theme .flash-message {
+    background-color: #223322;
+    color: #a3d5a3;
+    border-color: #3d6b3d;
+  }
+</style>
 </head>
 <body>
-<nav id="navbar" class="">
+<nav>
   <div class="brand" aria-label="PAPERPREP Logo" tabindex="0"><i class="fas fa-file-alt"></i> PAPERPREP</div>
-  <button aria-label="Menu toggle" class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-controls="nav-menu">
-    <i class="fas fa-bars"></i>
-  </button>
-  <div class="nav-links" id="nav-menu" role="menu">
+  <ul class="nav-links">
     {% for item in nav_items %}
-      <a href="{{ url_for(item.endpoint) }}" role="menuitem" tabindex="0">{{ item.name }}</a>
+      <li><a href="{{ url_for(item.endpoint) }}">{{ item.name }}</a></li>
     {% endfor %}
-  </div>
-  <button class="theme-toggle-btn" id="theme-toggle-btn" aria-pressed="false" aria-label="Toggle dark theme">Dark Theme</button>
+  </ul>
+  <button id="theme-toggle" aria-label="Toggle Dark Theme">Dark Theme</button>
 </nav>
-
 <main class="container">
   {{ content | safe }}
 </main>
-
 <script>
-  /* (JS code same as previous code omitted for brevity) */
-  /* ... (copy the JS scripts from previous code here) ... */
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const body = document.body;
+
+  if (localStorage.getItem('dark-theme') === 'true') {
+    body.classList.add('dark-theme');
+    themeToggleBtn.textContent = 'Light Theme';
+  }
+
+  themeToggleBtn.addEventListener('click', () => {
+    const darkMode = body.classList.toggle('dark-theme');
+    localStorage.setItem('dark-theme', darkMode);
+    themeToggleBtn.textContent = darkMode ? 'Light Theme' : 'Dark Theme';
+  });
+
+  // Upload animation
+  document.addEventListener('DOMContentLoaded', () => {
+    const forms = document.querySelectorAll('.upload-form');
+    forms.forEach(form => {
+      form.addEventListener('submit', e => {
+        e.preventDefault();
+        const btn = form.querySelector('button[type=submit]');
+        btn.disabled = true;
+        btn.classList.add('uploading');
+        btn.textContent = 'Uploading...';
+
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+          method: 'POST',
+          body: formData
+        }).then(res => {
+          if (!res.ok) throw new Error('Upload failed');
+          return res.blob();
+        }).then(blob => {
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          let disposition = res.headers.get('Content-Disposition');
+          let filename = 'output';
+          if (disposition && disposition.indexOf('filename=') !== -1) {
+            const match = disposition.match(/filename="?([^"]+)"?/);
+            if (match) filename = match[1];
+          }
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+          btn.textContent = 'Success ✓';
+          btn.classList.remove('uploading');
+          btn.disabled = false;
+          setTimeout(() => { btn.textContent = 'Upload'; }, 2000);
+        }).catch(err => {
+          alert('Error during upload: ' + err.message);
+          btn.textContent = 'Upload';
+          btn.classList.remove('uploading');
+          btn.disabled = false;
+        });
+      });
+    });
+  });
 </script>
 </body>
 </html>
@@ -129,42 +393,43 @@ def allowed_file(filename, extensions):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in extensions
 
 def render_page(page_title, content):
+    from flask import render_template_string
     return render_template_string(BASE_HTML, page_title=page_title, content=content,
-                                  nav_items=NAV_ITEMS, dark_theme=False, url_for=url_for)
+                                  nav_items=NAV_ITEMS, url_for=url_for)
 
 @app.route('/')
 def home():
     items_html = '<h1 class="page-title">Welcome to PAPERPREP</h1>'
-    items_html += '<p style="max-width:600px; color:#555;">Explore our powerful and fast file conversion and compression tools. Click on any tool to get started.</p>'
-    items_html += '<div class="tools-grid" role="list">'
+    items_html += '<p>Explore our powerful and fast file conversion and compression tools. Click on any tool to get started.</p>'
+    items_html += '<div class="tools-grid">'
     for tool in TOOLS:
-        items_html += f'''<a href="{url_for(tool['endpoint'])}" class="tool-card" role="listitem" tabindex="0" aria-label="{tool['name']}">
-            <i class="{tool['icon']} tool-icon" aria-hidden="true"></i>
-            <div class="tool-name">{tool['name']}</div>
-            <div class="tool-desc">{tool['description']}</div>
-        </a>'''
+        items_html += f'''
+            <a href="{url_for(tool['endpoint'])}" class="tool-card" aria-label="{tool['name']}">
+                <i class="{tool['icon']} tool-icon"></i>
+                <div class="tool-name">{tool['name']}</div>
+                <div class="tool-desc">{tool['description']}</div>
+            </a>
+        '''
     items_html += '</div>'
     return render_page('Home', items_html)
 
 def tool_page_html(tool, success_msg=None):
     accepted_ext_list = ", ".join(tool['accepted'])
     multiple = 'multiple' if tool['endpoint'] in ['images_to_pdf', 'merge_pdf'] else ''
-    multiple_bool = tool['endpoint'] in ['images_to_pdf', 'merge_pdf']
     form_html = f'''
     <h1 class="page-title">{tool['name']}</h1>
     <p>{tool['description']}</p>
     <p><b>Accepted file types:</b> {accepted_ext_list}</p>
     <form class="upload-form" method="POST" enctype="multipart/form-data" aria-label="Upload file form" action="{url_for(tool['endpoint'])}">
-      <label for="file" style="font-weight:600; margin-bottom:0.5rem; display:block;">Choose file{'s' if multiple_bool else ''}</label>
+      <label for="file" style="font-weight:600; margin-bottom:0.5rem; display:block;">Choose file{'s' if multiple else ''}</label>
       <input class="file-input" type="file" name="file" id="file" accept="{','.join(['.'+e for e in tool['accepted']])}" {multiple} required aria-required="true"/>
-      <button type="submit" class="submit-btn" aria-live="polite">Upload</button>
+      <button type="submit" class="submit-btn">Upload</button>
     </form>
     '''
     if success_msg:
-        form_html += f'<div class="flash-message" role="alert" aria-live="assertive">{success_msg}</div>'
+        form_html += f'<div class="flash-message" role="alert">{success_msg}</div>'
     return render_page(tool['name'], form_html)
 
-# Conversion functions definitions (same as before, full implementation)
 def pdf_to_word_convert(input_path, output_path):
     converter = Converter(input_path)
     converter.convert(output_path, start=0, end=None)
@@ -184,7 +449,6 @@ def ppt_to_pdf_convert(input_path, output_path):
             img_path = os.path.join(temp_dir, f"slide_{i+1}.png")
             slide_width = prs.slide_width
             slide_height = prs.slide_height
-            # We can simulate slide conversion by blank white image since direct slide to image not supported
             blank_img = Image.new("RGB", (int(slide_width/9525), int(slide_height/9525)), "white")
             blank_img.save(img_path)
             images.append(img_path)
