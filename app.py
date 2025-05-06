@@ -95,10 +95,12 @@ BASE_HTML = '''<!DOCTYPE html>
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"/>
 <style>
+  /* Reset and base */
+  *, *::before, *::after {box-sizing: border-box;}
   body {
     margin: 0; padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-                  Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     background-color: #f4f8fb;
     color: #222;
     min-height: 100vh;
@@ -114,7 +116,7 @@ BASE_HTML = '''<!DOCTYPE html>
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 2rem;
+    padding: 1rem 1.5rem;
     background-color: #ffffffee;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     position: sticky;
@@ -131,6 +133,8 @@ BASE_HTML = '''<!DOCTYPE html>
     font-size: 1.8rem;
     color: #2962ff;
     cursor: default;
+    display: flex;
+    align-items: center;
   }
   nav .brand i {
     margin-right: 0.5rem;
@@ -138,7 +142,7 @@ BASE_HTML = '''<!DOCTYPE html>
   nav ul {
     list-style: none;
     display: flex;
-    gap: 1.4rem;
+    gap: 1.2rem;
     margin: 0;
     padding: 0;
   }
@@ -196,6 +200,12 @@ BASE_HTML = '''<!DOCTYPE html>
     display: grid;
     grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
     gap: 1.6rem;
+  }
+  @media(max-width: 768px) {
+    .tools-grid {
+      grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+      gap:1rem;
+    }
   }
   .tool-card {
     background: white;
@@ -401,9 +411,9 @@ def render_page(page_title, content):
 
 @app.route('/')
 def home():
-    items_html = '<h1 class="page-title">Welcome to PAPERPREP</h1>'
-    items_html += '<p>Explore our powerful and fast file conversion and compression tools. Click on any tool to get started.</p>'
-    items_html += '<div class="tools-grid">'
+    items_html = '''<h1 class="page-title">Welcome to PAPERPREP</h1>'''
+    items_html += '''<p>Explore our powerful and fast file conversion and compression tools. Click on any tool to get started.</p>'''
+    items_html += '''<div class="tools-grid">'''
     for tool in TOOLS:
         items_html += f'''
             <a href="{url_for(tool['endpoint'])}" class="tool-card" aria-label="{tool['name']}">
@@ -412,7 +422,7 @@ def home():
                 <div class="tool-desc">{tool['description']}</div>
             </a>
         '''
-    items_html += '</div>'
+    items_html += '''</div>'''
     return render_page('Home', items_html)
 
 def tool_page_html(tool, success_msg=None):
@@ -580,10 +590,10 @@ for tool in TOOLS:
 
 def static_page_html(title, content):
     return f'''
-    <h1 class="page-title">{title}</h1>
-    <div style="max-width:700px; white-space: pre-line;">
-    {content}
-    </div>
+   <h1 class="page-title">{title}</h1>
+   <div style="max-width:700px; white-space: pre-line;">
+   {content}
+   </div>
     '''
 
 @app.route('/about')
@@ -621,11 +631,6 @@ def terms():
         "do not guarantee results. By using the service, you accept our terms."
     )
     return render_page('Terms and Conditions', static_page_html('Terms and Conditions', content))
-
-def render_page(page_title, content):
-    from flask import render_template_string
-    return render_template_string(BASE_HTML, page_title=page_title, content=content,
-                                  nav_items=NAV_ITEMS, url_for=url_for)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
