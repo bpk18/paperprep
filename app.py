@@ -501,10 +501,8 @@ def ppt_to_pdf_convert(input_path, output_path):
     try:
         for i, slide in enumerate(prs.slides):
             img_path = os.path.join(temp_dir, f"slide_{i+1}.png")
-            slide_width = prs.slide_width
-            slide_height = prs.slide_height
-            blank_img = Image.new("RGB", (int(slide_width/9525), int(slide_height/9525)), "white")
-            blank_img.save(img_path)
+            slide.shapes._spTree.remove(slide.shapes[0]._element)  # Remove the first shape if needed
+            prs.save(img_path)  # Save the slide as an image
             images.append(img_path)
         images_to_pdf_convert(images, output_path)
     finally:
@@ -516,12 +514,13 @@ def pdf_to_ppt_convert(input_path, output_path):
     presentation = Presentation()
     slides = convert_from_path(input_path)
     for slide_img in slides:
-        slide = presentation.slides.add_slide(presentation.slide_layouts[6])
+        slide = presentation.slides.add_slide(presentation.slide_layouts[5])  # Use a blank layout
         image_stream = io.BytesIO()
         slide_img.save(image_stream, format='PNG')
         image_stream.seek(0)
         slide.shapes.add_picture(image_stream, 0, 0, width=presentation.slide_width, height=presentation.slide_height)
     presentation.save(output_path)
+
 
 def images_to_pdf_convert(input_paths, output_path):
     images = []
