@@ -6,5 +6,5 @@ Pillow
 PyPDF2
 python-pptx
 pdf2image
-
+comtypes
 
