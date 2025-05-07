@@ -499,18 +499,19 @@ def ppt_to_pdf_convert(input_path, output_path):
     try:
         output_dir = os.path.dirname(output_path)
         command = [
-            "libreoffice",
+            r"C:\Program Files\LibreOffice\program\soffice.exe",  # Full path for Windows
             "--headless",
             "--convert-to", "pdf",
             "--outdir", output_dir,
             input_path
         ]
         subprocess.run(command, check=True)
-        
-        # Rename the converted file to desired output_path
+
         base_name = os.path.splitext(os.path.basename(input_path))[0]
         converted_file = os.path.join(output_dir, base_name + ".pdf")
         os.rename(converted_file, output_path)
+    except subprocess.CalledProcessError as e:
+        print("Error during PPT to PDF conversion:", e)
         
     except subprocess.CalledProcessError as e:
         print("Error during PPT to PDF conversion:", e)
