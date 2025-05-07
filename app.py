@@ -1,5 +1,4 @@
 import os
-import comtypes.client
 import io
 import tempfile
 from flask import Flask, request, render_template_string, send_file, jsonify, url_for
@@ -496,19 +495,21 @@ def jpg_to_word_convert(input_path, output_path):
     doc.save(output_path)
 
 def ppt_to_pdf_convert(input_path, output_path):
-    # Initialize PowerPoint application
-    powerpoint = comtypes.client.CreateObject("PowerPoint.Application")
-    powerpoint.Visible = 1
-
+    prs = Presentation(input_path)
+    temp_dir = tempfile.mkdtemp()
+    images = []
     try:
-        presentation = powerpoint.Presentations.Open(input_path, WithWindow=False)
-        presentation.SaveAs(output_path, 32)  # 32 = PDF format
-        presentation.Close()
-    except Exception as e:
-        print("Error converting PPT to PDF:", e)
+        for i, slide in enumerate(prs.slides):
+            img_path = os.path.join(temp_dir, f"slide_{i+1}.png")
+            slide.shapes._spTree.remove(slide.shapes[0]._element)  # Remove the first shape if needed
+            prs.save(img_path)  # Save the slide as an image
+            images.append(img_path)
+        images_to_pdf_convert(images, output_path)
     finally:
-        powerpoint.Quit()
-        
+        for img_file in images:
+            os.remove(img_file)
+        os.rmdir(temp_dir)
+
 def pdf_to_ppt_convert(input_path, output_path):
     presentation = Presentation()
     slides = convert_from_path(input_path)
