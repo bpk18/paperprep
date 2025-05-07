@@ -1,5 +1,5 @@
 import os
-import subprocess
+import comtypes.client
 import io
 import tempfile
 from flask import Flask, request, render_template_string, send_file, jsonify, url_for
@@ -496,25 +496,18 @@ def jpg_to_word_convert(input_path, output_path):
     doc.save(output_path)
 
 def ppt_to_pdf_convert(input_path, output_path):
-    try:
-        output_dir = os.path.dirname(output_path)
-        command = [
-            r"C:\Program Files\LibreOffice\program\soffice.exe",  # Full path for Windows
-            "--headless",
-            "--convert-to", "pdf",
-            "--outdir", output_dir,
-            input_path
-        ]
-        subprocess.run(command, check=True)
+    # Initialize PowerPoint application
+    powerpoint = comtypes.client.CreateObject("PowerPoint.Application")
+    powerpoint.Visible = 1
 
-        base_name = os.path.splitext(os.path.basename(input_path))[0]
-        converted_file = os.path.join(output_dir, base_name + ".pdf")
-        os.rename(converted_file, output_path)
-    except subprocess.CalledProcessError as e:
-        print("Error during PPT to PDF conversion:", e)
-        
-    except subprocess.CalledProcessError as e:
-        print("Error during PPT to PDF conversion:", e)
+    try:
+        presentation = powerpoint.Presentations.Open(input_path, WithWindow=False)
+        presentation.SaveAs(output_path, 32)  # 32 = PDF format
+        presentation.Close()
+    except Exception as e:
+        print("Error converting PPT to PDF:", e)
+    finally:
+        powerpoint.Quit()
         
 def pdf_to_ppt_convert(input_path, output_path):
     presentation = Presentation()
