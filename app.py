@@ -1,4 +1,5 @@
 import os
+import subprocess
 import io
 import tempfile
 from flask import Flask, request, render_template_string, send_file, jsonify, url_for
@@ -495,20 +496,24 @@ def jpg_to_word_convert(input_path, output_path):
     doc.save(output_path)
 
 def ppt_to_pdf_convert(input_path, output_path):
-    presentation = Presentation(input_path)
-    temp_dir = tempfile.mkdtemp()
-    images = []
     try:
-        for i, slide in enumerate(presentation.slides):
-            img_path = os.path.join(temp_dir, f"slide_{i + 1}.png")
-            slide.shapes._spTree.remove(slide.shapes[0]._element)  # Optional: Remove the first shape if needed
-            presentation.save(img_path)  # Save the slide as an image
-            images.append(img_path)
-        images_to_pdf_convert(images, output_path)
-    finally:
-        for img_file in images:
-            os.remove(img_file)
-        os.rmdir(temp_dir)
+        output_dir = os.path.dirname(output_path)
+        command = [
+            "libreoffice",
+            "--headless",
+            "--convert-to", "pdf",
+            "--outdir", output_dir,
+            input_path
+        ]
+        subprocess.run(command, check=True)
+        
+        # Rename the converted file to desired output_path
+        base_name = os.path.splitext(os.path.basename(input_path))[0]
+        converted_file = os.path.join(output_dir, base_name + ".pdf")
+        os.rename(converted_file, output_path)
+        
+    except subprocess.CalledProcessError as e:
+        print("Error during PPT to PDF conversion:", e)
         
 def pdf_to_ppt_convert(input_path, output_path):
     presentation = Presentation()
