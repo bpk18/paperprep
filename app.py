@@ -364,7 +364,7 @@ BASE_HTML = '''<!DOCTYPE html>
   <a href="{{ url_for('privacy') }}">Privacy</a> |
   <a href="{{ url_for('contact') }}">Contact</a> |
   <a href="{{ url_for('terms') }}">Terms &amp; Conditions</a>
-/footer>
+</footer>
 
 <script>
   const themeToggleBtn = document.getElementById('theme-toggle');
