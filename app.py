@@ -76,18 +76,18 @@ TOOLS = [
         'endpoint': 'pdf_compressor',
         'description': 'Reduce PDF file sizes efficiently.',
         'accepted': ['pdf']
-    },
+    }
 ]
 
 # Removing About, Privacy, Contact, Terms from nav bar
 NAV_ITEMS = []  # Empty nav for top bar
 
-# Links for footer
+# Footer links for About, Privacy, Contact, Terms
 FOOTER_LINKS = [
     {'name': 'About', 'endpoint': 'about'},
     {'name': 'Privacy', 'endpoint': 'privacy'},
     {'name': 'Contact', 'endpoint': 'contact'},
-    {'name': 'Terms & Conditions', 'endpoint': 'terms'},
+    {'name': 'Terms & Conditions', 'endpoint': 'terms'}
 ]
 
 BASE_HTML = '''<!DOCTYPE html>
@@ -100,10 +100,11 @@ BASE_HTML = '''<!DOCTYPE html>
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"/>
 <style>
+  *, *::before, *::after {box-sizing: border-box;}
   body {
     margin: 0; padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-                  Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
     background-color: #f4f8fb;
     color: #222;
     min-height: 100vh;
@@ -189,7 +190,7 @@ BASE_HTML = '''<!DOCTYPE html>
     margin: 2rem auto 4rem;
     padding: 0 1rem;
     flex-grow: 1;
-    min-height: calc(600px);
+    min-height: 600px;
   }
   h1.page-title {
     font-size: 2.8rem;
@@ -202,25 +203,25 @@ BASE_HTML = '''<!DOCTYPE html>
   }
   .tools-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
-    gap: 1.6rem;
+    grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+    gap: 1.5rem;
   }
   @media(max-width: 768px) {
     .tools-grid {
-      grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+      grid-template-columns: repeat(auto-fill,minmax(140px,1fr));
       gap:1rem;
     }
   }
   .tool-card {
     background: white;
     border-radius: 15px;
-    box-shadow: 0 12px 24px rgba(0,0,0,0.06);
-    padding: 1.6rem;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    padding: 1.4rem;
     display: flex;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
     text-align: center;
     user-select: none;
     color: #222;
@@ -229,18 +230,18 @@ BASE_HTML = '''<!DOCTYPE html>
   body.dark-theme .tool-card {
     background: #121212;
     color: #e4e6eb;
-    box-shadow: 0 12px 24px rgba(255,255,255,0.1);
+    box-shadow: 0 8px 16px rgba(255,255,255,0.1);
   }
   .tool-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 24px 48px rgba(0,0,0,0.12);
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
     color: #2962ff;
   }
   body.dark-theme .tool-card:hover {
     color: #82b1ff;
   }
   .tool-icon {
-    font-size: 4rem;
+    font-size: 3.5rem;
     margin-bottom: 1rem;
   }
   form.upload-form {
@@ -248,12 +249,12 @@ BASE_HTML = '''<!DOCTYPE html>
     margin-top: 3rem;
     background: white;
     border-radius: 15px;
-    box-shadow: 0 12px 24px rgba(0,0,0,0.06);
-    padding: 2rem 2.4rem;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    padding: 2rem 2.5rem;
   }
   body.dark-theme form.upload-form {
     background: #121212;
-    box-shadow: 0 12px 24px rgba(255,255,255,0.1);
+    box-shadow: 0 8px 24px rgba(255,255,255,0.1);
   }
   label {
     font-weight: 700;
@@ -267,7 +268,7 @@ BASE_HTML = '''<!DOCTYPE html>
     border: 2px solid #2962ff;
     font-size: 1rem;
     cursor: pointer;
-    background: none;
+    background: transparent;
     color: inherit;
     transition: border-color 0.3s ease;
   }
@@ -324,9 +325,8 @@ BASE_HTML = '''<!DOCTYPE html>
   footer {
     background: #f8fafa;
     border-top: 1px solid #ddd;
-    padding: 1.5rem 1rem;
+    padding: 1rem 1.5rem;
     text-align: center;
-    margin-top: auto;
     font-size: 0.9rem;
     color: #555;
   }
@@ -351,7 +351,7 @@ BASE_HTML = '''<!DOCTYPE html>
   <div class="brand" aria-label="PAPERPREP Logo" tabindex="0"><i class="fas fa-file-alt"></i> PAPERPREP</div>
   <ul class="nav-links">
     {% for item in nav_items %}
-      <li><a href="{{ url_for(item.endpoint) }}">{{ item.name }}</a></li>
+        <li><a href="{{ url_for(item.endpoint) }}">{{ item.name }}</a></li>
     {% endfor %}
   </ul>
   <button id="theme-toggle" aria-label="Toggle Dark Theme">Dark Theme</button>
@@ -364,7 +364,8 @@ BASE_HTML = '''<!DOCTYPE html>
   <a href="{{ url_for('privacy') }}">Privacy</a> |
   <a href="{{ url_for('contact') }}">Contact</a> |
   <a href="{{ url_for('terms') }}">Terms &amp; Conditions</a>
-</footer>
+/footer>
+
 <script>
   const themeToggleBtn = document.getElementById('theme-toggle');
   const body = document.body;
@@ -430,15 +431,6 @@ BASE_HTML = '''<!DOCTYPE html>
     });
   });
 </script>
-<script type="application/ld+json">
- {
-    "@context" : "https://schema.org" ,
-    "@type" : "WebSite" ,
-    "name" : "PaperPrep - all in one file converter"
-    "url" : "https://www.paperprep.space/"
- }   
-</script>
-
 </body>
 </html>
 '''
@@ -449,7 +441,7 @@ def allowed_file(filename, extensions):
 def render_page(page_title, content):
     from flask import render_template_string
     return render_template_string(BASE_HTML, page_title=page_title, content=content,
-                                  nav_items=NAV_ITEMS, url_for=url_for)
+                                  nav_items=NAV_ITEMS, footer_links=FOOTER_LINKS, url_for=url_for)
 
 @app.route('/')
 def home():
@@ -458,11 +450,11 @@ def home():
     items_html += '<div class="tools-grid">'
     for tool in TOOLS:
         items_html += f'''
-           <a href="{url_for(tool['endpoint'])}" class="tool-card" aria-label="{tool['name']}">
-               <i class="{tool['icon']} tool-icon"></i>
-               <div class="tool-name">{tool['name']}</div>
-               <div class="tool-desc">{tool['description']}</div>
-           </a>
+          <a href="{url_for(tool['endpoint'])}" class="tool-card" aria-label="{tool['name']}">
+              <i class="{tool['icon']} tool-icon"></i>
+              <div class="tool-name">{tool['name']}</div>
+              <div class="tool-desc">{tool['description']}</div>
+          </a>
         '''
     items_html += '</div>'
     return render_page('Home', items_html)
@@ -471,15 +463,15 @@ def tool_page_html(tool, success_msg=None):
     accepted_ext_list = ", ".join(tool['accepted'])
     multiple = 'multiple' if tool['endpoint'] in ['images_to_pdf', 'merge_pdf'] else ''
     form_html = f'''
-    <h1 class="page-title">{tool['name']}</h1>
-    <p>{tool['description']}</p>
-    <p><b>Accepted file types:</b> {accepted_ext_list}</p>
-    <form class="upload-form" method="POST" enctype="multipart/form-data" aria-label="Upload file form" action="{url_for(tool['endpoint'])}">
-      <label for="file" style="font-weight:600; margin-bottom:0.5rem; display:block;">Choose file{'s' if multiple else ''}</label>
-      <input class="file-input" type="file" name="file" id="file" accept="{','.join(['.'+e for e in tool['accepted']])}" {multiple} required aria-required="true"/>
-      <button type="submit" class="submit-btn">Upload</button>
-    </form>
-    '''
+   <h1 class="page-title">{tool['name']}</h1>
+   <p>{tool['description']}</p>
+   <p><b>Accepted file types:</b> {accepted_ext_list}</p>
+   <form class="upload-form" method="POST" enctype="multipart/form-data" aria-label="Upload file form" action="{url_for(tool['endpoint'])}">
+     <label for="file" style="font-weight:600; margin-bottom:0.5rem; display:block;">Choose file{'s' if multiple else ''}</label>
+     <input class="file-input" type="file" name="file" id="file" accept="{','.join(['.'+e for e in tool['accepted']])}" {multiple} required aria-required="true"/>
+     <button type="submit" class="submit-btn">Upload</button>
+   </form>
+   '''
     if success_msg:
         form_html += f'<div class="flash-message" role="alert">{success_msg}</div>'
     return render_page(tool['name'], form_html)
@@ -503,7 +495,8 @@ def ppt_to_pdf_convert(input_path, output_path):
             img_path = os.path.join(temp_dir, f"slide_{i+1}.png")
             slide_width = prs.slide_width
             slide_height = prs.slide_height
-            blank_img = Image.new("RGB", (int(slide_width/9525), int(slide_height/9525)), "white")
+            # Create a white image placeholder for slide
+            blank_img = Image.new("RGB", (int(slide_width / 9525), int(slide_height / 9525)), "white")
             blank_img.save(img_path)
             images.append(img_path)
         images_to_pdf_convert(images, output_path)
@@ -512,7 +505,6 @@ def ppt_to_pdf_convert(input_path, output_path):
             os.remove(img_file)
         os.rmdir(temp_dir)
 
-        
 def pdf_to_ppt_convert(input_path, output_path):
     presentation = Presentation()
     slides = convert_from_path(input_path)
@@ -523,7 +515,6 @@ def pdf_to_ppt_convert(input_path, output_path):
         image_stream.seek(0)
         slide.shapes.add_picture(image_stream, 0, 0, width=presentation.slide_width, height=presentation.slide_height)
     presentation.save(output_path)
-
 
 def images_to_pdf_convert(input_paths, output_path):
     images = []
@@ -572,7 +563,6 @@ def make_route(tool):
             for f in files:
                 if not allowed_file(f.filename, tool['accepted']):
                     return jsonify({'error': f'Unsupported file type: {f.filename}'}), 400
-
             temp_dirs = []
             input_paths = []
             try:
@@ -580,7 +570,6 @@ def make_route(tool):
                     p, d, fname = save_upload(f)
                     input_paths.append(p)
                     temp_dirs.append(d)
-
                 out_filename = "output"
                 if tool['endpoint'] == 'pdf_to_word':
                     out_filename += ".docx"
@@ -601,9 +590,7 @@ def make_route(tool):
                     out_filename += ".pdf"
                 else:
                     out_filename += ".out"
-
                 out_path = os.path.join(tempfile.mkdtemp(), out_filename)
-
                 if tool['endpoint'] == 'pdf_to_word':
                     pdf_to_word_convert(input_paths[0], out_path)
                 elif tool['endpoint'] == 'jpg_to_word':
@@ -622,7 +609,6 @@ def make_route(tool):
                     pdf_compress(input_paths[0], out_path)
                 else:
                     return jsonify({'error': 'Conversion not implemented.'}), 400
-
                 return send_file(out_path, as_attachment=True, download_name=out_filename)
             finally:
                 for d in temp_dirs:
@@ -681,9 +667,18 @@ def terms():
     )
     return render_page('Terms and Conditions', static_page_html('Terms and Conditions', content))
 
+def render_page(page_title, content):
+    from flask import render_template_string
+    return render_template_string(BASE_HTML, page_title=page_title, content=content,
+                                  nav_items=NAV_ITEMS, footer_links=FOOTER_LINKS, url_for=url_for)
+
+
 @app.route('/seo-tags')
+
 def seo_tags():
+
     # Render the seo.html template with SEO meta tags
+
     return render_template_string(open('templates/seo.html').read())
 
 if __name__ == '__main__':
