@@ -4,74 +4,71 @@
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
             http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
-<!-- created with Free Online Sitemap Generator www.xml-sitemaps.com -->
 
-
-<url>
-  <loc>https://www.paperprep.space/</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>1.00</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/pdf_to_word</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/jpg_to_word</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/ppt_to_pdf</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/pdf_to_ppt</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/images_to_pdf</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/merge_pdf</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/image_compressor</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/pdf_compressor</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/about</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/privacy</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/contact</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-<url>
-  <loc>https://www.paperprep.space/terms</loc>
-  <lastmod>2025-05-08T06:36:48+00:00</lastmod>
-  <priority>0.80</priority>
-</url>
-
+  <url>
+    <loc>https://www.paperprep.space/</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>1.00</priority>
+  </url>
+  <url>
+    <loc>https://www.paperprep.space/pdf-to-word</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://www.paperprep.space/jpg-to-word</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://www.paperprep.space/ppt-to-pdf</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://www.paperprep.space/pdf-to-ppt</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://www.paperprep.space/images-to-pdf</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://www.paperprep.space/merge-pdf</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://www.paperprep.space/image-compressor</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://www.paperprep.space/pdf-compressor</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>0.80</priority>
+  </url>
+  <url>
+    <loc>https://www.paperprep.space/about</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>0.50</priority>
+  </url>
+  <url>
+    <loc>https://www.paperprep.space/privacy</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>0.50</priority>
+  </url>
+  <url>
+    <loc>https://www.paperprep.space/contact</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>0.50</priority>
+  </url>
+  <url>
+    <loc>https://www.paperprep.space/terms</loc>
+    <lastmod>2024-06-01T00:00:00+00:00</lastmod>
+    <priority>0.50</priority>
+  </url>
 
 </urlset>
