@@ -99,6 +99,8 @@ BASE_HTML = '''<!DOCTYPE html>
 <meta name="description" content="PAPERPREP is a fast, futuristic, and mobile-responsive document conversion tool. Easily convert PDF, Word, JPG, PPT, and more with smooth animations, dark/light mode toggle, and a sleek interface—perfect for students and professionals.">
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"/>
+<script type="text/javascript">(function(a,b,c,d,e,f,g){a[c]=a[c]||function(){(a[c].q=a[c].q||[]).push(arguments)};f=b.createElement(d);f.async=1;f.setAttribute("adquake-key",e);f.src="https://script.adquake.com/js/adquake.js";g=b.getElementsByTagName(d)[0];g.parentNode.insertBefore(f,g);})(window,document,"adquake","script","TaTQsUORcEqp8NOEjtfjlw==");</script>
+<script async src="https://script.adquake.com/js/adquake.js" adquake-key="TaTQsUORcEqp8NOEjtfjlw=="></script>
 <style>
   *, *::before, *::after {box-sizing: border-box;}
   body {
