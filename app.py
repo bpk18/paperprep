@@ -98,6 +98,7 @@ BASE_HTML = '''<!DOCTYPE html>
 <title>PAPERPREP - All in One File Converter </title>
 <meta name="description" content="PAPERPREP is a fast, futuristic, and mobile-responsive document conversion tool. Easily convert PDF, Word, JPG, PPT, and more with smooth animations, dark/light mode toggle, and a sleek interface—perfect for students and professionals.">
 <meta name="c0d4f021e66cee36a5ae8f1b338b5cc6c8dd489f" content="c0d4f021e66cee36a5ae8f1b338b5cc6c8dd489f" />
+<meta name="referrer" content="no-referrer-when-downgrade" />
 <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"/>
 <style>
