@@ -1,0 +1,339 @@
+
+{% extends "base.html" %}
+{% set allow_multiple = (tool_route == 'images-to-pdf') %}
+{% set show_resizer = (tool_route == 'image-resizer') %}
+{% set show_compressor = (tool_route == 'pdf-compressor') %}
+{% block title %}{{ tool_name }} - PaperPrep{% endblock %}
+{% block content %}
+<section class="bg-white rounded-3xl shadow-2xl shadow-blue-500/10 overflow-hidden border border-gray-100">
+    <div class="grid md:grid-cols-2 gap-0">
+        <div class="p-10 space-y-6 border-r border-gray-100 bg-[color:var(--surface-contrast)]">
+            <p class="text-xs uppercase tracking-[0.4em] text-blue-500 font-semibold">Live Converter</p>
+            <h2 class="text-3xl font-extrabold text-slate-900">{{ tool_name }}</h2>
+            <p class="text-gray-600">
+                Drop in your document and PaperPrep’s accelerated pipeline converts it entirely in-memory.
+                Real-time progress keeps you informed while your file is optimized for publication-ready output.
+            </p>
+
+            <div class="flex gap-4">
+                <div class="flex-1 bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/30 rounded-2xl p-4">
+                    <p class="text-xs text-blue-500 uppercase tracking-wide">Avg. round trip</p>
+                    <p class="text-2xl font-bold" id="avgTime">120 ms</p>
+                </div>
+                <div class="flex-1 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/30 rounded-2xl p-4">
+                    <p class="text-xs text-emerald-500 uppercase tracking-wide">Queue size</p>
+                    <p class="text-2xl font-bold">0 docs</p>
+                </div>
+            </div>
+
+            <div>
+                <p class="text-xs uppercase text-gray-500 mb-2">Progress</p>
+                <div class="h-3 bg-gray-200 rounded-full overflow-hidden">
+                    <div id="progressBar" class="h-full bg-gradient-to-r from-blue-500 via-cyan-400 to-emerald-400 w-0 transition-all duration-300 ease-out"></div>
+                </div>
+                <div class="flex justify-between text-xs text-gray-500 mt-2">
+                    <span id="progressLabel">Waiting for file…</span>
+                    <span id="statusBadge" class="text-blue-500 font-semibold">Idle</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-10 bg-white text-slate-900 border-l border-gray-100">
+            <form id="uploadForm" action="{{ url_for('process') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+                <input type="hidden" name="tool" value="{{ tool_route }}">
+                <label class="text-sm font-semibold uppercase tracking-wide text-slate-600">
+                    {{ 'Upload images' if allow_multiple else 'Upload file' }}
+                </label>
+                <div id="dropZone" class="border-2 border-dashed border-white/30 rounded-2xl p-8 text-center cursor-pointer hover:border-white/60 transition">
+                    <p class="text-lg font-semibold mb-2">
+                        {{ 'Drag & Drop or click to stack images' if allow_multiple else 'Drag & Drop or click to browse' }}
+                    </p>
+                    <p id="fileName" class="text-sm text-slate-500">
+                        {{ 'No files selected' if allow_multiple else 'No file selected' }}
+                    </p>
+                    <input id="fileInput"
+                           type="file"
+                           name="file"
+                           class="hidden"
+                           {% if allow_multiple %}multiple{% endif %}
+                           data-allow-multiple="{{ 'true' if allow_multiple else 'false' }}"
+                           {% if allow_multiple %}accept="image/*"{% endif %}
+                           required>
+                </div>
+                {% if allow_multiple %}
+                <p class="text-xs text-slate-500" id="multiHint">Select up to 20 images per batch; we preserve order automatically.</p>
+                {% endif %}
+
+                {% if show_resizer %}
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs uppercase tracking-wide text-slate-500">Target dimensions</label>
+                        <div class="grid grid-cols-6 gap-3 mt-2">
+                            <div class="col-span-2">
+                                <input type="number" min="1" name="target_width" placeholder="Width"
+                                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-400">
+                            </div>
+                            <div class="col-span-2">
+                                <input type="number" min="1" name="target_height" placeholder="Height"
+                                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-400">
+                            </div>
+                            <div class="col-span-2">
+                                <select name="dimension_unit"
+                                        class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 focus:outline-none focus:border-blue-400">
+                                    <option value="px">Pixels</option>
+                                    <option value="in">Inches</option>
+                                    <option value="cm">Centimeters</option>
+                                    <option value="mm">Millimeters</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs uppercase tracking-wide text-slate-500">Resize mode</label>
+                        <select name="resize_mode"
+                                class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 focus:outline-none focus:border-blue-400">
+                            <option value="fit">Fit inside box (keep aspect)</option>
+                            <option value="fill">Fill box (crop overflow)</option>
+                            <option value="stretch">Stretch to exact size</option>
+                        </select>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if show_compressor %}
+                <div class="space-y-3">
+                    <div>
+                        <label class="text-xs uppercase tracking-wide text-slate-500">Target size</label>
+                        <div class="flex gap-3 mt-2">
+                            <input type="number" step="0.1" min="0.1" name="target_size_mb" placeholder="Size in MB"
+                                   class="flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-400">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-xs uppercase tracking-wide text-slate-500">Compression preset</label>
+                        <select name="compression_level"
+                                class="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 focus:outline-none focus:border-blue-400">
+                            <option value="balanced">Balanced (recommended)</option>
+                            <option value="low">Low compression (larger file)</option>
+                            <option value="high">High compression (smaller file)</option>
+                            <option value="archival">Archival (best quality)</option>
+                            <option value="tiny">Tiny file (max compression)</option>
+                        </select>
+                    </div>
+                </div>
+                {% endif %}
+
+                <button type="submit" class="w-full py-3 rounded-2xl bg-slate-900 text-white font-semibold text-lg hover:bg-slate-800 transition">
+                    Convert instantly
+                </button>
+                <p class="text-xs text-slate-500">We never store files on disk. Processing happens in volatile memory for speed & privacy.</p>
+            </form>
+
+            <div id="resultPanel" class="mt-8 hidden">
+                <p class="text-sm uppercase tracking-wide text-emerald-500">Result</p>
+                <p id="resultMessage" class="text-xl font-bold text-slate-900"></p>
+                <p id="resultMeta" class="text-sm text-slate-500 mt-2"></p>
+                <a id="downloadBtn"
+                   class="inline-flex items-center gap-2 mt-4 px-4 py-2 rounded-full bg-emerald-500 text-white font-semibold text-sm tracking-wide shadow-lg shadow-emerald-500/40 hover:bg-emerald-400 transition hidden">
+                    Download file
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/>
+                    </svg>
+                </a>
+                <div id="previewWrapper" class="mt-6 hidden">
+                    <div class="flex items-center justify-between text-xs uppercase tracking-wide text-slate-500 mb-2">
+                        <span>Quick preview</span>
+                        <button id="copyPreview"
+                                class="px-3 py-1 text-[11px] bg-slate-900/5 text-slate-600 rounded-full border border-slate-200 hover:bg-slate-900/10">
+                            Copy text
+                        </button>
+                    </div>
+                    <textarea id="previewBox"
+                              class="w-full h-48 bg-slate-50 border border-slate-200 rounded-2xl p-4 text-sm text-slate-800 resize-none"
+                              readonly></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<a href="/" class="text-blue-500 mt-6 inline-flex items-center gap-2 hover:gap-3 transition">
+    ← Back to all tools
+</a>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const fileName = document.getElementById('fileName');
+        const progressBar = document.getElementById('progressBar');
+        const progressLabel = document.getElementById('progressLabel');
+        const statusBadge = document.getElementById('statusBadge');
+        const resultPanel = document.getElementById('resultPanel');
+        const resultMessage = document.getElementById('resultMessage');
+        const resultMeta = document.getElementById('resultMeta');
+        const avgTime = document.getElementById('avgTime');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const previewWrapper = document.getElementById('previewWrapper');
+        const previewBox = document.getElementById('previewBox');
+        const copyPreview = document.getElementById('copyPreview');
+        const allowMultiple = fileInput.dataset.allowMultiple === 'true';
+        const MAX_FILES = allowMultiple ? 20 : 1;
+        let downloadUrl = null;
+
+        const setProgress = (value, label, status, colorClass) => {
+            progressBar.style.width = `${value}%`;
+            progressLabel.textContent = label;
+            statusBadge.textContent = status;
+            statusBadge.className = colorClass || 'text-blue-500 font-semibold';
+        };
+
+        const animateProgress = async (segments) => {
+            for (const segment of segments) {
+                const [target, label, status, color, duration] = segment;
+                const current = parseFloat(progressBar.style.width) || 0;
+                const delta = target - current;
+                const steps = Math.max(5, Math.abs(delta));
+                for (let i = 1; i <= steps; i++) {
+                    const progress = current + (delta * i) / steps;
+                    progressBar.style.width = `${progress}%`;
+                    progressLabel.textContent = label;
+                    statusBadge.textContent = status;
+                    statusBadge.className = color;
+                    await new Promise(resolve => setTimeout(resolve, duration / steps));
+                }
+            }
+        };
+
+        const updateFileNameDisplay = () => {
+            if (!fileInput.files.length) {
+                fileName.textContent = allowMultiple ? 'No files selected' : 'No file selected';
+                return;
+            }
+            if (allowMultiple && fileInput.files.length > MAX_FILES) {
+                fileName.textContent = `Using first ${MAX_FILES} of ${fileInput.files.length} files`;
+            } else if (allowMultiple && fileInput.files.length > 1) {
+                fileName.textContent = `${fileInput.files.length} files ready`;
+            } else {
+                fileName.textContent = fileInput.files[0].name;
+            }
+        };
+
+        dropZone.addEventListener('click', () => fileInput.click());
+        dropZone.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            dropZone.classList.add('border-white');
+        });
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('border-white'));
+        dropZone.addEventListener('drop', (event) => {
+            event.preventDefault();
+            dropZone.classList.remove('border-white');
+            if (event.dataTransfer.files.length) {
+                fileInput.files = event.dataTransfer.files;
+                updateFileNameDisplay();
+            }
+        });
+
+        fileInput.addEventListener('change', () => {
+            updateFileNameDisplay();
+        });
+
+        const resetDownload = () => {
+            if (downloadUrl) {
+                URL.revokeObjectURL(downloadUrl);
+                downloadUrl = null;
+            }
+            downloadBtn.classList.add('hidden');
+            downloadBtn.removeAttribute('href');
+            downloadBtn.removeAttribute('download');
+        };
+
+        const resetPreview = () => {
+            previewWrapper.classList.add('hidden');
+            previewBox.value = '';
+        };
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (!fileInput.files.length) return;
+            if (allowMultiple && fileInput.files.length > MAX_FILES) {
+                alert(`Only the first ${MAX_FILES} images will be processed in one batch.`);
+            }
+
+            setProgress(3, 'Initializing…', 'Starting', 'text-blue-300 font-semibold');
+            resultPanel.classList.add('hidden');
+            resetDownload();
+            resetPreview();
+
+            const formData = new FormData(form);
+            const segments = [
+                [20, 'Scanning file…', 'Analyzing', 'text-cyan-300 font-semibold', 150],
+                [55, 'Optimizing layout…', 'Converting', 'text-emerald-300 font-semibold', 200],
+                [85, 'Finalizing export…', 'Finishing', 'text-purple-300 font-semibold', 160],
+            ];
+
+            try {
+                const requestPromise = fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {'X-Requested-With': 'XMLHttpRequest'}
+                });
+                await animateProgress(segments);
+
+                const response = await requestPromise;
+                if (!response.ok) {
+                    const message = await response.text();
+                    throw new Error(message || 'Server error');
+                }
+                const data = await response.json();
+
+                setProgress(100, 'Complete', 'Ready', 'text-emerald-400 font-semibold');
+                avgTime.textContent = `${data.processing_time_ms} ms`;
+
+                if (data.status === 'success') {
+                    resultMessage.textContent = data.message;
+                    resultMeta.textContent = `Size: ~${data.size_kb} KB • Tool: ${data.tool}`;
+                    if (data.download && data.download.base64) {
+                        const byteString = atob(data.download.base64);
+                        const byteArray = new Uint8Array(byteString.length);
+                        for (let i = 0; i < byteString.length; i++) {
+                            byteArray[i] = byteString.charCodeAt(i);
+                        }
+                        const blob = new Blob([byteArray], {type: data.download.mimetype || 'application/octet-stream'});
+                        downloadUrl = URL.createObjectURL(blob);
+                        downloadBtn.href = downloadUrl;
+                        downloadBtn.download = data.download.filename || 'converted-file';
+                        downloadBtn.classList.remove('hidden');
+                    }
+                    if (data.preview_text) {
+                        previewBox.value = data.preview_text;
+                        previewWrapper.classList.remove('hidden');
+                    }
+                } else {
+                    resultMessage.textContent = data.message || 'Something went wrong.';
+                    resultMeta.textContent = '';
+                }
+                resultPanel.classList.remove('hidden');
+            } catch (error) {
+                setProgress(100, 'Failed', 'Error', 'text-red-400 font-semibold');
+                resultMessage.textContent = 'Upload failed. Please try again.';
+                resultMeta.textContent = error.message;
+                resultPanel.classList.remove('hidden');
+            }
+        });
+
+        copyPreview.addEventListener('click', async () => {
+            if (!previewBox.value) return;
+            try {
+                await navigator.clipboard.writeText(previewBox.value);
+                copyPreview.textContent = 'Copied!';
+                setTimeout(() => (copyPreview.textContent = 'Copy text'), 2000);
+            } catch (err) {
+                copyPreview.textContent = 'Copy failed';
+                setTimeout(() => (copyPreview.textContent = 'Copy text'), 2000);
+            }
+        });
+    });
+</script>
+{% endblock %}

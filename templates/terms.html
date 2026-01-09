@@ -1,0 +1,18 @@
+
+{% extends "base.html" %}
+{% block title %}Terms - PaperPrep{% endblock %}
+{% block content %}
+<section class="space-y-6 bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
+	<h2 class="text-2xl font-semibold">Terms & Conditions</h2>
+
+	<p class="text-gray-600">By using PaperPrep you agree to use the service for lawful purposes only. The tools are provided "as-is" for convenience; we do not guarantee results and are not responsible for downstream consequences of using converted files.</p>
+
+	<h3 class="text-lg font-semibold mt-4">Intellectual Property</h3>
+	<p class="text-gray-600">You retain ownership of files you upload. PaperPrep does not claim ownership of user content.</p>
+
+	<h3 class="text-lg font-semibold mt-4">No warranties</h3>
+	<p class="text-gray-600">The service is provided without warranties of any kind. We disclaim liability to the fullest extent permitted by law.</p>
+
+	<p class="text-sm text-muted">We may update these terms occasionally; changes are effective when posted. If you have questions about these terms, contact us via the <a href="{{ url_for('contact') }}" class="text-blue-500">Contact</a> page.</p>
+</section>
+{% endblock %}
