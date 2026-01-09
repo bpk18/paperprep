@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}PaperPrep{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Favicon (place `favicon.ico` into the project's `static/` folder) -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    <script>
+        tailwind = {};
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'Segoe UI', 'system-ui', 'sans-serif'] }
+                }
+            }
+        };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --surface: #ffffff;
+            --surface-alt: #f5f7fb;
+            --surface-contrast: #ffffff;
+            --text-primary: #0f172a;
+            --text-muted: #475569;
+            --border-soft: #e2e8f0;
+            --accent: #2563eb;
+        }
+        html[data-theme="glow"] {
+            --surface: #fdfbf5;
+            --surface-alt: #ffffff;
+            --surface-contrast: #ffffff;
+            --text-primary: #0d1b2a;
+            --text-muted: #3f4c5f;
+            --border-soft: #e5e7eb;
+            --accent: #0ea5e9;
+        }
+            /* Dark theme: high contrast and readable text */
+            html[data-theme="dark"] {
+                --surface: #0b1220;
+                --surface-alt: #0f1724;
+                --surface-contrast: #0b1220;
+                --text-primary: #e6eef8;
+                --text-muted: #9fb0c8;
+                --border-soft: #1f2937;
+                --accent: #60a5fa;
+            }
+        body {
+            transition: background-color 0.3s ease, color 0.3s ease;
+            font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--surface);
+            color: var(--text-primary);
+        }
+        nav,
+        .card-shell {
+            background: var(--surface-contrast);
+            color: var(--text-primary);
+        }
+        select,
+        input,
+        textarea {
+            background: var(--surface-contrast);
+            color: var(--text-primary);
+            border-color: var(--border-soft);
+        }
+        select:focus,
+        input:focus,
+        textarea:focus {
+            outline: 2px solid var(--accent);
+            outline-offset: 1px;
+        }
+        .glass-nav {
+            border-bottom: 1px solid var(--border-soft);
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+        }
+        /* input, select, textarea contrast for dark theme */
+        html[data-theme="dark"] select,
+        html[data-theme="dark"] input,
+        html[data-theme="dark"] textarea {
+            background: #0b1220;
+            color: var(--text-primary);
+            border-color: var(--border-soft);
+        }
+        /* Make common Tailwind utility classes readable in dark theme */
+        html[data-theme="dark"] .bg-white {
+            background-color: var(--surface-contrast) !important;
+        }
+        html[data-theme="dark"] .bg-blue-50,
+        html[data-theme="dark"] .bg-emerald-50,
+        html[data-theme="dark"] .bg-purple-50 {
+            background-color: rgba(255,255,255,0.03) !important;
+        }
+        html[data-theme="dark"] .text-gray-600,
+        html[data-theme="dark"] .text-gray-500,
+        html[data-theme="dark"] .text-slate-900 {
+            color: var(--text-muted) !important;
+        }
+        html[data-theme="dark"] .text-blue-500,
+        html[data-theme="dark"] .text-blue-600 {
+            color: var(--accent) !important;
+        }
+        html[data-theme="dark"] .border-gray-100,
+        html[data-theme="dark"] .border-blue-100,
+        html[data-theme="dark"] .border-emerald-100,
+        html[data-theme="dark"] .border-purple-100 {
+            border-color: var(--border-soft) !important;
+        }
+        html[data-theme="dark"] .shadow-blue-500\/10 {
+            box-shadow: 0 10px 30px rgba(96,165,250,0.04) !important;
+        }
+        /* Mobile dropdown styles for nav links */
+        .mobile-dropdown{ display:none; }
+        .mobile-dropdown.show{ display:flex !important; flex-direction:column; gap:0.5rem; position:absolute; right:1rem; left:1rem; top:100%; margin-top:0.5rem; border-radius:0.75rem; padding:0.6rem; border:1px solid var(--border-soft); background:var(--surface-contrast); box-shadow:0 10px 30px rgba(2,6,23,0.45); z-index:40; }
+        @media (min-width:640px){
+            .mobile-dropdown{ display:flex !important; position:static; box-shadow:none; padding:0; border-radius:0; border:none; gap:1rem; align-items:center; }
+            .mobile-dropdown.show{ display:flex !important; }
+        }
+        /* Make mobile dropdown items stack and have comfortable hit areas */
+        .mobile-dropdown a,
+        .mobile-dropdown button{
+            display:block;
+            padding:0.55rem 0.75rem;
+            color:var(--text-primary);
+            border-radius:0.5rem;
+            text-align:left;
+        }
+        .mobile-dropdown a:hover,
+        .mobile-dropdown button:hover{
+            background: rgba(255,255,255,0.03);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+<nav class="glass-nav sticky top-0 z-20">
+    <div class="max-w-6xl mx-auto flex items-center justify-between p-4">
+        <a href="/" class="text-2xl font-extrabold tracking-tight">PaperPrep</a>
+
+        <div class="flex items-center gap-4">
+            <!-- Mobile menu button -->
+            <button id="mobileMenuBtn" class="sm:hidden p-2 rounded-md border" aria-controls="navLinks" aria-expanded="false" title="Open menu" style="border-color:var(--border-soft); color:var(--text-primary);">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+
+            <!-- Nav links: hidden on mobile, horizontal on small+; mobile dropdown behaviour via CSS -->
+            <div id="navLinks" class="hidden sm:flex sm:items-center sm:gap-4 text-sm uppercase tracking-wide mobile-dropdown">
+                <a href="/about" class="hover:text-blue-500 transition">About</a>
+                <a href="/privacy" class="hover:text-blue-500 transition">Privacy</a>
+                <a href="/contact" class="hover:text-blue-500 transition">Contact</a>
+                <a href="/terms" class="hover:text-blue-500 transition">Terms</a>
+                <button id="themeToggle" class="px-3 py-1 rounded-full border text-sm font-semibold transition inline-flex items-center" style="border-color:var(--border-soft); color:var(--text-primary);" aria-pressed="false" aria-label="Toggle theme">
+                    <span id="themeIcon" class="inline-flex w-5 h-5" aria-hidden="true">
+                        <!-- default icon (will be replaced by JS on load) -->
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-5 h-5">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.36-6.36l-1.42 1.42M7.05 16.95l-1.42 1.42m12.02 0l-1.42-1.42M7.05 7.05L5.63 5.63"/>
+                        </svg>
+                    </span>
+                    <span id="themeLabel" class="ml-2">Theme</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<main class="p-6 max-w-5xl mx-auto">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mb-4 p-4 rounded {{ 'bg-green-200 text-green-800' if category == 'success' else 'bg-red-200 text-red-800' }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggle = document.getElementById("themeToggle");
+        const html = document.documentElement;
+        const saved = localStorage.getItem("theme") || "dark";
+        html.setAttribute("data-theme", saved);
+
+        const themeNames = { dark: 'Dark', default: 'Light', glow: 'Glow' };
+        function svgFor(theme) {
+            if (theme === 'dark') {
+                // moon
+                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>`;
+            } else if (theme === 'glow') {
+                // sparkle/glow icon
+                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>`;
+            } else {
+                // sun (default/light)
+                return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2v2m0 16v2m10-10h-2M4 12H2m15.36-6.36l-1.42 1.42M7.05 16.95l-1.42 1.42m12.02 0l-1.42-1.42M7.05 7.05L5.63 5.63"/></svg>`;
+            }
+        }
+
+        function updateToggleLabel(theme) {
+            if (!toggle) return;
+            const iconEl = toggle.querySelector('#themeIcon');
+            const labelEl = toggle.querySelector('#themeLabel');
+            if (iconEl) iconEl.innerHTML = svgFor(theme);
+            if (labelEl) labelEl.textContent = `Theme: ${themeNames[theme] || theme}`;
+            toggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+        }
+
+        updateToggleLabel(saved);
+
+        if (toggle) {
+            toggle.addEventListener("click", () => {
+                const current = html.getAttribute("data-theme") || "dark";
+                const next = current === "dark" ? "default" : "dark";
+                html.setAttribute("data-theme", next);
+                localStorage.setItem("theme", next);
+                updateToggleLabel(next);
+            });
+        }
+
+        // Mobile menu toggle
+        const mobileBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        if (mobileBtn && navLinks) {
+            mobileBtn.addEventListener('click', () => {
+                const isOpen = navLinks.classList.contains('show');
+                if (!isOpen) {
+                    navLinks.classList.add('show');
+                    mobileBtn.setAttribute('aria-expanded', 'true');
+                } else {
+                    navLinks.classList.remove('show');
+                    mobileBtn.setAttribute('aria-expanded', 'false');
+                }
+            });
+
+            // Close dropdown when tapping outside (mobile)
+            document.addEventListener('click', (e) => {
+                if (!navLinks.contains(e.target) && !mobileBtn.contains(e.target)) {
+                    if (navLinks.classList.contains('show')) {
+                        navLinks.classList.remove('show');
+                        mobileBtn.setAttribute('aria-expanded', 'false');
+                    }
+                }
+            });
+
+            // Close dropdown when a navigation link is clicked (mobile)
+            navLinks.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    if (navLinks.classList.contains('show')) {
+                        navLinks.classList.remove('show');
+                        mobileBtn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            });
+        }
+    });
+</script>
+</body>
+</html>
